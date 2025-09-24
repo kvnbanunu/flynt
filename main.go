@@ -32,7 +32,7 @@ func main() {
 
 	// init handlers
 	userHandler := handlers.NewUserHandler(db)
-	// TODO healthHandler := handlers.NewHealthHandler(db)
+	healthHandler := handlers.NewHealthHandler(db)
 
 	// init server router
 	mux := http.NewServeMux()
@@ -40,6 +40,7 @@ func main() {
 	// routes
 	mux.Handle("/api/users", userHandler)
 	mux.Handle("/api/users/", userHandler)
+	mux.Handle("/health", healthHandler)
 
 	// root handler
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +67,7 @@ func main() {
 
 	// start server in goroutine
 	go func() {
-		log.Printf("Server starting on %s", server.Addr)
+		log.Printf("Server starting on port%s", server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server failed to start: %v", err)
 		}
