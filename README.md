@@ -22,3 +22,7 @@ Brandon Rada | Backend QA | [https://github.com/BrandonRada]
 
 - Go 1.25.1
 - Next 15.5.3
+
+## Requirements
+
+go-sqlite3 requires CGO_ENABLED=1 in your environment
