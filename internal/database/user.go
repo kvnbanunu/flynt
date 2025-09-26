@@ -22,7 +22,7 @@ type UpdateUserRequest struct {
 // query function to create new user in db
 func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	query := `
-	INSERT INTO users (name, email)
+	INSERT INTO user (name, email)
 	VALUES (?, ?)
 	RETURNING id, name, email, created_at, updated_at
 	`
@@ -46,7 +46,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 func (db *DB) GetUserByID(id int) (*User, error) {
 	query := `
 	SELECT id, name, email, created_at, updated_at
-	FROM users
+	FROM user
 	WHERE id = ?
 	`
 
@@ -72,7 +72,7 @@ func (db *DB) GetUserByID(id int) (*User, error) {
 func (db *DB) GetAllUsers() ([]User, error) {
 	query := `
 	SELECT id, name, email, created_at, updated_at
-	FROM users
+	FROM user
 	ORDER BY created_at DESC
 	`
 
@@ -136,7 +136,7 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 	args = append(args, id)
 
 	query := fmt.Sprintf(`
-		UPDATE users
+		UPDATE user
 		SET %s
 		WHERE id = ?
 		RETURNING id, name, email, created_at, updated_at
@@ -164,7 +164,7 @@ func (db *DB) DeleteUser(id int) error {
 		return err
 	}
 
-	query := `DELETE FROM users WHERE id = ?`
+	query := `DELETE FROM user WHERE id = ?`
 	result, err := db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("Failed to delete user: %w", err)
@@ -186,7 +186,7 @@ func (db *DB) DeleteUser(id int) error {
 func (db *DB) GetUserByEmail(email string) (*User, error) {
 	query := `
 	SELECT id, name, email, created_at, updated_at
-	FROM users
+	FROM user
 	WHERE email = ?
 	`
 

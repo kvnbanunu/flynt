@@ -20,7 +20,7 @@ declare namespace Models {
     title: string;
     userID: number;
     streakCount: number | 0;
-    bonfyre?: number | null;
+    bonfyreID?: number | null;
     created_at?: string | null;
     updated_at?: string | null;
   }

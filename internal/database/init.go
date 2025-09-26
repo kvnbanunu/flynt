@@ -37,7 +37,7 @@ func InitDB(path string) (*DB, error) {
 // Creates all tables on init
 func (db *DB) createTables() error {
 	query := `
-	CREATE TABLE IF NOT EXISTS users (
+	CREATE TABLE IF NOT EXISTS user (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		email TEXT UNIQUE NOT NULL,
@@ -48,7 +48,7 @@ func (db *DB) createTables() error {
 	);
 
 	CREATE TRIGGER IF NOT EXISTS update_users_updated_at
-		AFTER UPDATE ON users
+		AFTER UPDATE ON user
 	BEGIN
 		UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 	END;

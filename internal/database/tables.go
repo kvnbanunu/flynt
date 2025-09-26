@@ -6,7 +6,7 @@ type User struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Image     string    `json:"img_url"`
+	ImgURL    string    `json:"img_url"`
 	Bio       string    `json:"bio"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -14,22 +14,22 @@ type User struct {
 
 type Fyre struct {
 	ID          int       `json:"id"`
-	Name        string    `json:"name"`
+	Title       string    `json:"title"`
 	UserID      int       `json:"user_id"`
 	StreakCount int       `json:"streak_count"`
+	BonfyreID   int       `json:"bonfyre_id"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type Goal struct {
-	FyreID int `json:"fyre_id"`
-	Name   int `json:"name"`
+	FyreID      int    `json:"fyre_id"`
+	Description string `json:"description"`
+	Name        int    `json:"name"`
 }
 
 type Bonfyre struct {
 	ID      int `json:"id"`
-	FyreID1 int `json:"fyre_id_1"`
-	FyreID2 int `json:"fyre_id_2"`
 }
 
 type Friend struct {
