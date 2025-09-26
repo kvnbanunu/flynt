@@ -4,18 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-type User struct {
-	ID        int       `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
 
 // DB holds the database connection
 type DB struct {
@@ -50,6 +41,8 @@ func (db *DB) createTables() error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		email TEXT UNIQUE NOT NULL,
+		img_url TEXT,
+		bio TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
