@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  backend:
+    build: ./
+    container_name: flynt-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+    networks:
+      - app-network
+  frontend:
+    build: ./client
+    container_name: flynt-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
