@@ -66,8 +66,8 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validation
-	if req.Name == "" || req.Email == "" {
-		h.writeError(w, http.StatusBadRequest, "Name and email are required")
+	if req.Name == "" || req.Email == "" || req.Password == "" {
+		h.writeError(w, http.StatusBadRequest, "Name, email, and password are required")
 		return
 	}
 
