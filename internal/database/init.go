@@ -48,11 +48,51 @@ func (db *DB) createTables() error {
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 
-	CREATE TRIGGER IF NOT EXISTS update_users_updated_at
+	CREATE TRIGGER IF NOT EXISTS update_user_updated_at
 		AFTER UPDATE ON user
 	BEGIN
-		UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+		UPDATE user SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 	END;
+
+	CREATE TABLE IF NOT EXISTS fyre (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL,
+		streak_count INTEGER DEFAULT 0,
+		user_id INTEGER NOT NULL REFERENCES user(id),
+		bonfyre_id INTEGER REFERENCES bonfyre(id),
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
+	
+	CREATE TRIGGER IF NOT EXISTS update_fyre_updated_at
+		AFTER UPDATE ON fyre
+	BEGIN
+		UPDATE fyre SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+	END;
+
+	CREATE TABLE IF NOT EXISTS goal_type (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS goal (
+		fyre_id  INTEGER NOT NULL REFERENCES fyre(id),
+		description TEXT NOT NULL,
+		goal_type_id INTEGER NOT NULL REFERENCES goal_type(id),
+		data TEXT,
+		PRIMARY KEY (fyre_id, description)
+	);
+
+	CREATE TABLE IF NOT EXISTS bonfyre (
+		id INTEGER PRIMARY KEY AUTOINCREMENT
+	);
+
+	CREATE TABLE IF NOT EXISTS friend (
+		user_id_1 INTEGER NOT NULL,
+		user_id_2 INTEGER NOT NULL,
+		PRIMARY KEY (user_id_1, user_id_2)
+	);
 	`
 
 	if _, err := db.Exec(query); err != nil {
