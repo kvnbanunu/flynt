@@ -40,6 +40,7 @@ func (db *DB) createTables() error {
 	CREATE TABLE IF NOT EXISTS user (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
+		password TEXT NOT NULL,
 		email TEXT UNIQUE NOT NULL,
 		img_url TEXT,
 		bio TEXT,

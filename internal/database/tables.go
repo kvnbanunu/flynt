@@ -5,6 +5,7 @@ import "time"
 type User struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
+	Password  string    `json:"password"`
 	Email     string    `json:"email"`
 	ImgURL    string    `json:"img_url"`
 	Bio       string    `json:"bio"`
@@ -25,11 +26,17 @@ type Fyre struct {
 type Goal struct {
 	FyreID      int    `json:"fyre_id"`
 	Description string `json:"description"`
-	Name        int    `json:"name"`
+	GType       int    `json:"goal_type"`
+	Data        string `json:"data"`
+}
+
+type GoalType struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 type Bonfyre struct {
-	ID      int `json:"id"`
+	ID int `json:"id"`
 }
 
 type Friend struct {
