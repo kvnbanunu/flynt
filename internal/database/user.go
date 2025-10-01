@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"flynt/internal/utils"
 	"fmt"
 	"strings"
 	"time"
@@ -9,26 +10,33 @@ import (
 
 // request payload for creating user
 type CreateUserRequest struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 // request payload for updating user
 type UpdateUserRequest struct {
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Password string `json:"password,omitempty"`
+	Email    string `json:"email,omitempty"`
 }
 
 // query function to create new user in db
 func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	query := `
-	INSERT INTO user (name, email)
-	VALUES (?, ?)
+	INSERT INTO user (name, password, email)
+	VALUES (?, ?, ?)
 	RETURNING id, name, email, created_at, updated_at
 	`
 
+	hashed, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to hash password: %w", err)
+	}
+
 	var user User
-	err := db.QueryRow(query, req.Name, req.Email).Scan(
+	err = db.QueryRow(query, req.Name, hashed, req.Email).Scan(
 		&user.ID,
 		&user.Name,
 		&user.Email,
@@ -120,6 +128,15 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		setParts = append(setParts, "name = ?")
 		args = append(args, req.Name)
 	}
+	if req.Password != "" {
+		hashed, err := utils.HashPassword(req.Password)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to hash password: %w", err)
+		}
+		setParts = append(setParts, "password = ?")
+		args = append(args, hashed)
+	}
+
 	if req.Email != "" {
 		setParts = append(setParts, "email = ?")
 		args = append(args, req.Email)
