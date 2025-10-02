@@ -32,6 +32,7 @@ func main() {
 
 	// init handlers
 	userHandler := handlers.NewUserHandler(db)
+	accountHandler := handlers.NewAccountHandler(db)
 	fyreHandler := handlers.NewFyreHandler(db)
 	healthHandler := handlers.NewHealthHandler(db)
 
@@ -41,6 +42,7 @@ func main() {
 	// routes
 	mux.Handle("/api/user", userHandler)
 	mux.Handle("/api/user/", userHandler)
+	mux.Handle("/api/account/", accountHandler)
 	mux.Handle("/api/fyre/", fyreHandler)
 	mux.Handle("/api/fyre/user/", fyreHandler)
 	mux.Handle("/health", healthHandler)
