@@ -1,5 +1,4 @@
 import { Get } from "@/lib/api";
-import { ApiError, ApiResponse, Result } from "@/types/api";
 import React from "react";
 
 export const ExampleComponent: React.FC<{
