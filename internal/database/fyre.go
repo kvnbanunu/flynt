@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -21,6 +22,11 @@ type UpdateFyreRequest struct{
 }
 
 func (db *DB) CreateFyre(req CreateFyreRequest) (*Fyre, error) {
+	err := db.Get(nil, `SELECT * FROM fyre WHERE title = ? AND user_id = ?`, req.Title, req.UserID)
+	if err == nil {
+		return nil, fmt.Errorf("Fyre already exists: %w", err)
+	}
+
 	fields := []string{"title", "user_id"}
 	placeholders := []string{"?", "?"}
 	args := []any{req.Title, req.UserID}
@@ -44,7 +50,7 @@ func (db *DB) CreateFyre(req CreateFyreRequest) (*Fyre, error) {
 	`, strings.Join(fields, ", "), strings.Join(placeholders, ", "))
 
 	var fyre Fyre
-	err := db.Get(&fyre, query, args...)
+	err = db.Get(&fyre, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create fyre: %w", err)
 	}
@@ -55,8 +61,11 @@ func (db *DB) GetFyreByID(id int) (*Fyre, error) {
 	query := `SELECT * FROM fyre WHERE id = ?`
 
 	var fyre Fyre
-	err := db.Select(&fyre, query, id)
+	err := db.Get(&fyre, query, id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("Fyre not found: %w", err)
+		}
 		return nil, fmt.Errorf("Failed to get fyre: %w", err)
 	}
 	return &fyre, nil

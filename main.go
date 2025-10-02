@@ -32,14 +32,17 @@ func main() {
 
 	// init handlers
 	userHandler := handlers.NewUserHandler(db)
+	fyreHandler := handlers.NewFyreHandler(db)
 	healthHandler := handlers.NewHealthHandler(db)
 
 	// init server router
 	mux := http.NewServeMux()
 
 	// routes
-	mux.Handle("/api/users", userHandler)
-	mux.Handle("/api/users/", userHandler)
+	mux.Handle("/api/user", userHandler)
+	mux.Handle("/api/user/", userHandler)
+	mux.Handle("/api/fyre/", fyreHandler)
+	mux.Handle("/api/fyre/user/", fyreHandler)
 	mux.Handle("/health", healthHandler)
 
 	// root handler

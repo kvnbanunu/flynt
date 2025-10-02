@@ -19,7 +19,7 @@ func (db *DB) InsertDummyData() error {
 	VALUES
 	('Brandon Rada', 'brandon@gmail.com', '%s'),
 	('Evin Gonzales', 'evin@gmail.com', '%s'),
-	('Lucas Laviolette', 'lucas@gmai.com', '%s'),
+	('Lucas Laviolette', 'lucas@gmail.com', '%s'),
 	('Kevin', 'kevin@gmail.com', '%s');
 	`, hashed, hashed, hashed, hashed)
 
