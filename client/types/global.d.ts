@@ -9,8 +9,8 @@ declare namespace Models {
     id: number;
     name: string;
     email: string;
-    imgURL?: string;
-    bio?: string;
+    imgURL?: string | null;
+    bio?: string | null;
     created_at?: string | null;
     updated_at?: string | null;
   }
@@ -19,7 +19,7 @@ declare namespace Models {
     id: number;
     title: string;
     userID: number;
-    streakCount: number | 0;
+    streakCount: number;
     bonfyreID?: number | null;
     created_at?: string | null;
     updated_at?: string | null;
