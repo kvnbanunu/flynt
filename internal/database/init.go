@@ -1,21 +1,21 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 // DB holds the database connection
 type DB struct {
-	*sql.DB
+	*sqlx.DB
 }
 
 // initialize db and return connection
 func InitDB(path string) (*DB, error) {
-	db, err := sql.Open("sqlite3", path)
+	db, err := sqlx.Open("sqlite3", path)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open database: %w", err)
 	}
@@ -60,6 +60,7 @@ func (db *DB) createTables() error {
 		streak_count INTEGER DEFAULT 0,
 		user_id INTEGER NOT NULL REFERENCES user(id),
 		bonfyre_id INTEGER REFERENCES bonfyre(id),
+		active_days TEXT DEFAULT '10000000',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);

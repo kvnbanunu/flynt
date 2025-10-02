@@ -1,11 +1,11 @@
 package database
 
 import (
-	"database/sql"
-	"flynt/internal/utils"
 	"fmt"
 	"strings"
 	"time"
+
+	"flynt/internal/utils"
 )
 
 // request payload for creating user
@@ -20,6 +20,8 @@ type UpdateUserRequest struct {
 	Name     string `json:"name,omitempty"`
 	Password string `json:"password,omitempty"`
 	Email    string `json:"email,omitempty"`
+	ImgURL   string `json:"img_url"`
+	Bio      string `json:"bio"`
 }
 
 // query function to create new user in db
@@ -36,13 +38,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	}
 
 	var user User
-	err = db.QueryRow(query, req.Name, hashed, req.Email).Scan(
-		&user.ID,
-		&user.Name,
-		&user.Email,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
+	err = db.Get(&user, query, req.Name, hashed, req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create user: %w", err)
 	}
@@ -53,23 +49,14 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 // query function to get user from db
 func (db *DB) GetUserByID(id int) (*User, error) {
 	query := `
-	SELECT id, name, email, created_at, updated_at
+	SELECT id, name, email, img_url, bio, created_at, updated_at
 	FROM user
 	WHERE id = ?
 	`
 
 	var user User
-	err := db.QueryRow(query, id).Scan(
-		&user.ID,
-		&user.Name,
-		&user.Email,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
+	err := db.Get(&user, query, id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("User with id %d not found", id)
-		}
 		return nil, fmt.Errorf("Failed to get user: %w", err)
 	}
 
@@ -79,36 +66,17 @@ func (db *DB) GetUserByID(id int) (*User, error) {
 // fetch all users from db
 func (db *DB) GetAllUsers() ([]User, error) {
 	query := `
-	SELECT id, name, email, created_at, updated_at
+	SELECT id, name, email, img_url, bio, created_at, updated_at
 	FROM user
 	ORDER BY created_at DESC
 	`
 
-	rows, err := db.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to query users: %w", err)
-	}
-	defer rows.Close() // need to close or else read stalls
-
 	var users []User
-	for rows.Next() {
-		var user User
-		err := rows.Scan(
-			&user.ID,
-			&user.Name,
-			&user.Email,
-			&user.CreatedAt,
-			&user.UpdatedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("Failed to scan user: %w", err)
-		}
-		users = append(users, user)
+	err := db.Select(&users, query)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get users: %w", err)
 	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("Error iterating users: %w", err)
-	}
+	// Select will not error if no rows were found, the array will just be empty
 
 	return users, nil
 }
@@ -128,6 +96,7 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		setParts = append(setParts, "name = ?")
 		args = append(args, req.Name)
 	}
+
 	if req.Password != "" {
 		hashed, err := utils.HashPassword(req.Password)
 		if err != nil {
@@ -140,6 +109,16 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 	if req.Email != "" {
 		setParts = append(setParts, "email = ?")
 		args = append(args, req.Email)
+	}
+
+	if req.ImgURL != "" {
+		setParts = append(setParts, "img_url = ?")
+		args = append(args, req.ImgURL)
+	}
+
+	if req.Bio != "" {
+		setParts = append(setParts, "bio = ?")
+		args = append(args, req.Bio)
 	}
 
 	if len(setParts) == 0 { // no parts changed
@@ -156,17 +135,11 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		UPDATE user
 		SET %s
 		WHERE id = ?
-		RETURNING id, name, email, created_at, updated_at
+		RETURNING id, name, email, img_url, bio, created_at, updated_at
 	`, strings.Join(setParts, ", "))
 
 	var user User
-	err = db.QueryRow(query, args...).Scan(
-		&user.ID,
-		&user.Name,
-		&user.Email,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
+	err = db.Get(&user, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to update user: %w", err)
 	}
@@ -202,23 +175,14 @@ func (db *DB) DeleteUser(id int) error {
 // query function to fetch user matching email
 func (db *DB) GetUserByEmail(email string) (*User, error) {
 	query := `
-	SELECT id, name, email, created_at, updated_at
+	SELECT id, name, email, img_url, bio, created_at, updated_at
 	FROM user
 	WHERE email = ?
 	`
 
 	var user User
-	err := db.QueryRow(query, email).Scan(
-		&user.ID,
-		&user.Name,
-		&user.Email,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
+	err := db.Get(&user, query, email)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("User with email %s not found", email)
-		}
 		return nil, fmt.Errorf("Failed to get user: %w", err)
 	}
 
