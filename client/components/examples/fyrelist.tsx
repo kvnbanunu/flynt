@@ -2,8 +2,9 @@
 import { Get } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import { FyreCard } from "./fyrecard";
+import { CS_ENV } from "@/lib/utils";
 
-export const FyreList: React.FC<{ user: Models.User }> = async (props) => {
+export const FyreList: React.FC<{ user: Models.User }> = (props) => {
   const { user } = props;
   const [fyres, setFyres] = useState<Models.Fyre[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -11,10 +12,11 @@ export const FyreList: React.FC<{ user: Models.User }> = async (props) => {
 
   useEffect(() => {
     const fetchFyres = async () => {
-      const res = await Get<Models.Fyre[]>(`/api/fyre/${user.id}`);
+      const res = await Get<Models.Fyre[]>(
+        `${CS_ENV.api_url}/api/fyre/user/${user.id}`,
+      );
       if (res.success) {
-        const fyres: Models.Fyre[] = res.data.data;
-        setFyres(fyres);
+        setFyres(res.data.data)
       } else {
         setError(res.error.message);
       }
@@ -32,12 +34,12 @@ export const FyreList: React.FC<{ user: Models.User }> = async (props) => {
   }
 
   return (
-    <div>
-      <h1>Hello {user.name}</h1>
-      <div>Your Fires</div>
+    <div className="p-2 border-2">
+      <h1 className="text-xl">Hello {user.name}</h1>
+      <div className="mt-1">Your Fyres:</div>
       <ul>
         {fyres.map((fyre) => (
-          <li>
+          <li key={fyre.id}>
             <FyreCard fyre={fyre} />
           </li>
         ))}

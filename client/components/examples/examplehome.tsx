@@ -3,6 +3,7 @@ import { Post } from "@/lib/api";
 import React, { useState } from "react";
 import SigninForm from "./signin";
 import { FyreList } from "./fyrelist";
+import { CS_ENV } from "@/lib/utils";
 
 interface LoginData {
   email: string;
@@ -17,10 +18,8 @@ export const ExampleHome: React.FC = () => {
 
   const onLogin = async (email: string, password: string) => {
     setLoading(true);
-    const res = await Post<LoginData, Models.User>(`/api/account/login`, {
-      email,
-      password,
-    });
+    const loginData: LoginData = {email: email, password: password}
+    const res = await Post<Models.User>(`${CS_ENV.api_url}/api/account/login`, loginData);
 
     if (res.success) {
       const user: Models.User = res.data.data;

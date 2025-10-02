@@ -99,20 +99,20 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 
 
 	if req.StreakCount > -1 {
-		fields = append(fields, "title = ?")
-		args = append(args, req.Title)
+		fields = append(fields, "streak_count = ?")
+		args = append(args, req.StreakCount)
 	}
 
 
 	if req.BonfyreID > -1 {
-		fields = append(fields, "title = ?")
-		args = append(args, req.Title)
+		fields = append(fields, "bonfyre_id = ?")
+		args = append(args, req.BonfyreID)
 	}
 
 
 	if req.ActiveDays != "" {
-		fields = append(fields, "title = ?")
-		args = append(args, req.Title)
+		fields = append(fields, "active_days = ?")
+		args = append(args, req.ActiveDays)
 	}
 
 	if len(fields) == 0 { // no change

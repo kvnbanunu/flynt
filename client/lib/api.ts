@@ -1,13 +1,12 @@
 import HttpStatusCode from "@/types/status";
-import { ENV } from "./utils";
 import { ApiError, ApiResponse, Result } from "@/types/api";
 
 // Generic GET call
 export async function Get<T>(
-  endpoint: string,
+  url: string,
 ): Promise<Result<ApiResponse<T>, ApiError>> {
   try {
-    const res = await fetch(`${ENV.api_url}${endpoint}`);
+    const res = await fetch(url);
 
     if (!res.ok) {
       const errData: ApiError = await res.json();
@@ -20,7 +19,7 @@ export async function Get<T>(
     return {
       success: false,
       error: {
-        statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+        status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
         message: error.message,
       },
     };
@@ -29,11 +28,11 @@ export async function Get<T>(
 
 // Generic PUT/update call
 export async function Put<T>(
-  endpoint: string,
+  url: string,
   content: T,
 ): Promise<Result<ApiResponse<T>, ApiError>> {
   try {
-    const res = await fetch(`${ENV.api_url}${endpoint}`, {
+    const res = await fetch(url, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +51,7 @@ export async function Put<T>(
     return {
       success: false,
       error: {
-        statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+        status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
         message: error.message,
       },
     };
@@ -60,12 +59,12 @@ export async function Put<T>(
 }
 
 // Generic Post call
-export async function Post<T, R>(
-  endpoint: string,
-  content: T,
-): Promise<Result<ApiResponse<R>, ApiError>> {
+export async function Post<T>(
+  url: string,
+  content: any,
+): Promise<Result<ApiResponse<T>, ApiError>> {
   try {
-    const res = await fetch(`${ENV.api_url}${endpoint}`, {
+    const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -78,13 +77,13 @@ export async function Post<T, R>(
       return { success: false, error: errData };
     }
 
-    const data: ApiResponse<R> = await res.json();
+    const data: ApiResponse<T> = await res.json();
     return { success: true, data };
   } catch (error: any) {
     return {
       success: false,
       error: {
-        statusCode: HttpStatusCode.INTERNAL_SERVER_ERROR,
+        status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
         message: error.message,
       },
     };

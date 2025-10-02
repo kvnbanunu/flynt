@@ -7,7 +7,7 @@ export interface ApiResponse<T> {
 }
 
 export interface ApiError {
-  statusCode: number;
+  status_code: string;
   message: string;
 }
 

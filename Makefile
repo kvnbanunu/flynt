@@ -4,7 +4,7 @@ run-server:
 run-client:
 	cd client/ && npm run dev
 
-insert-dummy:
+insert-dummy: clean
 	go run scripts/dummy/main.go
 
 docker-deploy:

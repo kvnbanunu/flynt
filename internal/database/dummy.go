@@ -50,6 +50,7 @@ func (db *DB) insertDummyFyres() error {
 	VALUES
 	('Win a game of Clash Royale', 100, 1, '10000000'),
 	('Drink water', 0, 2, '10000000'),
+	('Gacha', 99, 2, '10000000'),
 	('Open Pokemon TCG pack', 9, 3, '00000001'),
 	('Go for a run', 2, 4, '00101010');
 	`

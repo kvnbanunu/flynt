@@ -22,8 +22,8 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.TrimPrefix(r.URL.Path, "/api/account")
 
-	switch { // add more later
-	case path == "/login":
+	switch  path { // add more later
+	case "/login":
 		h.login(w, r)
 	default:
 		h.writeError(w, http.StatusNotFound, "Endpoint not found")

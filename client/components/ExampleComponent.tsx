@@ -1,11 +1,12 @@
 import { Get } from "@/lib/api";
+import { SS_ENV } from "@/lib/utils";
 import React from "react";
 
 export const ExampleComponent: React.FC<{
   title: string;
 }> = async (props) => {
   const { title } = props;
-  const res = await Get<Models.User[]>("/api/users");
+  const res = await Get<Models.User[]>(`${SS_ENV.api_url}/api/user`);
   if (res.success) {
     const users: Models.User[] = res.data.data;
 

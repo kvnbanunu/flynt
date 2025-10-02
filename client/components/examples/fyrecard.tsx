@@ -1,35 +1,39 @@
 "use client";
-import { Post } from "@/lib/api";
-import React, { ChangeEvent, useState } from "react";
+import { Put } from "@/lib/api";
+import React, { useState } from "react";
+import { CS_ENV } from "@/lib/utils";
 
-export const FyreCard: React.FC<{ fyre: Models.Fyre }> = async (props) => {
+export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(props.fyre);
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [streakCount, setStreakCount] = useState<number>(
-    props.fyre.streakCount,
+    props.fyre.streak_count,
   );
 
-  const handleCheckboxChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    setIsChecked(event.target.checked);
+  const handleCheckboxChange = async () => {
+    // We need to add another field to fyre to see if it has already been checked off today
+    const checked = isChecked ? false : true
+    setIsChecked(checked);
 
     let copy: Models.Fyre = currentFyre;
 
-    copy.streakCount = isChecked ? streakCount + 1 : streakCount - 1;
+    copy.streak_count = checked ? streakCount + 1 : streakCount - 1;
 
-    const res = await Post<Models.Fyre, Models.Fyre>(
-      `/api/fyre/${currentFyre.id}`,
+    const res = await Put<Models.Fyre>(
+      `${CS_ENV.api_url}/api/fyre/${currentFyre.id}`,
       copy,
     );
     if (res.success) {
       setCurrentFyre(res.data.data);
-      setStreakCount(res.data.data.streakCount);
+      setStreakCount(res.data.data.streak_count);
     }
   };
 
   return (
-    <div className="mx-8 my-2 p-4">
+    <div className="my-2 p-2 border-2">
       <label>
         <input
+          className="mr-1"
           type="checkbox"
           checked={isChecked}
           onChange={handleCheckboxChange}

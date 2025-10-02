@@ -12,7 +12,9 @@ type AccountLoginRequest struct {
 
 // check if login details match in database
 func (db *DB) ValidateLogin(req AccountLoginRequest) (*User, error) {
-	existingUser, err := db.GetUserByEmail(req.Email)
+	query := `SELECT * FROM user WHERE email = ?`
+	var existingUser User
+	err := db.Get(&existingUser, query, req.Email)
 	if err != nil { // user does not exist, but do not expose info
 		return nil, fmt.Errorf("Failed to login")
 	}
@@ -26,5 +28,5 @@ func (db *DB) ValidateLogin(req AccountLoginRequest) (*User, error) {
 		return nil, fmt.Errorf("Failed to login")
 	}
 	
-	return existingUser, nil
+	return &existingUser, nil
 }
