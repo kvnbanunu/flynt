@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -57,6 +58,29 @@ func (db *DB) GetUserByID(id int) (*User, error) {
 	var user User
 	err := db.Get(&user, query, id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("User not found: %w", err)
+		}
+		return nil, fmt.Errorf("Failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
+
+// query function to fetch user matching email
+func (db *DB) GetUserByEmail(email string) (*User, error) {
+	query := `
+	SELECT id, name, email, img_url, bio, created_at, updated_at
+	FROM user
+	WHERE email = ?
+	`
+
+	var user User
+	err := db.Get(&user, query, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("User not found: %w", err)
+		}
 		return nil, fmt.Errorf("Failed to get user: %w", err)
 	}
 
@@ -170,21 +194,4 @@ func (db *DB) DeleteUser(id int) error {
 	}
 
 	return nil
-}
-
-// query function to fetch user matching email
-func (db *DB) GetUserByEmail(email string) (*User, error) {
-	query := `
-	SELECT id, name, email, img_url, bio, created_at, updated_at
-	FROM user
-	WHERE email = ?
-	`
-
-	var user User
-	err := db.Get(&user, query, email)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to get user: %w", err)
-	}
-
-	return &user, nil
 }
