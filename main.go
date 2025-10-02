@@ -52,7 +52,7 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 
 		// placeholder, will change later
-		msg := `{"message":"API Server is running","version":"1.0.0","endpoints":["/health",/api/users"]}`
+		msg := `{"message":"API Server is running","version":"1.0.0","endpoints":["/health","/api/users"]}`
 		w.Write([]byte(msg))
 	})
 
@@ -78,7 +78,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Server is shutting down...")
+	log.Println("\nServer is shutting down...")
 
 	// timeout context
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
