@@ -6,7 +6,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const ENV = {
+export const SS_ENV = {
   env: process.env.ENVIRONMENT,
   api_url: process.env.API_URL,
 };
+
+export const CS_ENV = {
+  env: process.env.NEXT_PUBLIC_ENVIRONMENT,
+  api_url: process.env.NEXT_PUBLIC_API_URL,
+}

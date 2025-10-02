@@ -22,7 +22,7 @@ func NewUserHandler(db *database.DB) *UserHandler {
 func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/users")
+	path := strings.TrimPrefix(r.URL.Path, "/api/user")
 
 	switch {
 	case path == "" || path == "/":
@@ -57,7 +57,7 @@ func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handles	POST /api/users
+// handles	POST /api/user
 func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	var req database.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -66,8 +66,8 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validation
-	if req.Name == "" || req.Email == "" {
-		h.writeError(w, http.StatusBadRequest, "Name and email are required")
+	if req.Name == "" || req.Email == "" || req.Password == "" {
+		h.writeError(w, http.StatusBadRequest, "Name, email, and password are required")
 		return
 	}
 
@@ -85,7 +85,7 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	h.writeSuccess(w, http.StatusCreated, "User created successfully", user)
 }
 
-// handles	GET /api/users
+// handles	GET /api/user
 func (h *UserHandler) getAllUsers(w http.ResponseWriter, _ *http.Request) {
 	users, err := h.db.GetAllUsers()
 	if err != nil {
@@ -97,7 +97,7 @@ func (h *UserHandler) getAllUsers(w http.ResponseWriter, _ *http.Request) {
 	h.writeSuccess(w, http.StatusOK, "Users retrieved successfully", users)
 }
 
-// handles	GET /api/users/{id}
+// handles	GET /api/user/{id}
 func (h *UserHandler) getUserByID(w http.ResponseWriter, _ *http.Request, id int) {
 	user, err := h.db.GetUserByID(id)
 	if err != nil {
@@ -113,7 +113,7 @@ func (h *UserHandler) getUserByID(w http.ResponseWriter, _ *http.Request, id int
 	h.writeSuccess(w, http.StatusOK, "User retrieved successfully", user)
 }
 
-// handles	PUT /api/users/{id}
+// handles	PUT /api/user/{id}
 func (h *UserHandler) updateUser(w http.ResponseWriter, r *http.Request, id int) {
 	var req database.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

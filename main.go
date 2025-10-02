@@ -32,14 +32,19 @@ func main() {
 
 	// init handlers
 	userHandler := handlers.NewUserHandler(db)
+	accountHandler := handlers.NewAccountHandler(db)
+	fyreHandler := handlers.NewFyreHandler(db)
 	healthHandler := handlers.NewHealthHandler(db)
 
 	// init server router
 	mux := http.NewServeMux()
 
 	// routes
-	mux.Handle("/api/users", userHandler)
-	mux.Handle("/api/users/", userHandler)
+	mux.Handle("/api/user", userHandler)
+	mux.Handle("/api/user/", userHandler)
+	mux.Handle("/api/account/", accountHandler)
+	mux.Handle("/api/fyre/", fyreHandler)
+	mux.Handle("/api/fyre/user/", fyreHandler)
 	mux.Handle("/health", healthHandler)
 
 	// root handler
@@ -52,7 +57,7 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 
 		// placeholder, will change later
-		msg := `{"message":"API Server is running","version":"1.0.0","endpoints":["/health",/api/users"]}`
+		msg := `{"message":"API Server is running","version":"1.0.0","endpoints":["/health","/api/users"]}`
 		w.Write([]byte(msg))
 	})
 
@@ -78,7 +83,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Server is shutting down...")
+	log.Println("\nServer is shutting down...")
 
 	// timeout context
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -110,7 +115,11 @@ func loggingMiddleware(next http.Handler) http.Handler {
 // cors, will need to change once we set prod domain
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		if os.Getenv("ENV") == "production" {
+			w.Header().Set("Access-Control-Allow-Origin", os.Getenv("CLIENT_URL"))
+		} else {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 

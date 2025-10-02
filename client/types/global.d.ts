@@ -9,8 +9,8 @@ declare namespace Models {
     id: number;
     name: string;
     email: string;
-    imgURL?: string;
-    bio?: string;
+    img_url?: string | null;
+    bio?: string | null;
     created_at?: string | null;
     updated_at?: string | null;
   }
@@ -18,15 +18,15 @@ declare namespace Models {
   export interface Fyre {
     id: number;
     title: string;
-    userID: number;
-    streakCount: number | 0;
-    bonfyreID?: number | null;
+    user_id: number;
+    streak_count: number;
+    bonfyre_id?: number | null;
     created_at?: string | null;
     updated_at?: string | null;
   }
 
   export interface Goal {
-    fyreID: number;
+    fyre_id: number;
     description: string;
     milestone: number;
   }
@@ -36,7 +36,7 @@ declare namespace Models {
   }
 
   export interface Friend {
-    userID1: number;
-    userID2: number;
+    user_id_1: number;
+    user_id_2: number;
   }
 }
