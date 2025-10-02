@@ -28,7 +28,7 @@ export const SigninForm: React.FC<SigninFormProps> = (props) => {
   return (
     <form className="p-2 border-2" onSubmit={handleSubmit}>
       <div className="my-1">
-      <label className="mx-2" htmlFor="emailInput">Email</label>
+        <label className="mx-2" htmlFor="emailInput">Email</label>
         <input
           type="text"
           id="emailInput"
@@ -46,7 +46,12 @@ export const SigninForm: React.FC<SigninFormProps> = (props) => {
         />
       </div>
       <div className="text-center my-1">
-        <button className="rounded-full p-2 text-center bg-green-300 w-full" type="submit">Submit</button>
+        <button
+          className="rounded-full p-2 text-center bg-green-300 w-full"
+          type="submit"
+        >
+          Submit
+        </button>
       </div>
     </form>
   );

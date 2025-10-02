@@ -16,4 +16,4 @@ docker-deploy:
 	echo "Deployment complete."
 
 clean:
-	rm *.db
+	rm -f *.db
