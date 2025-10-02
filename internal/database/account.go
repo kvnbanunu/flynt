@@ -27,6 +27,8 @@ func (db *DB) ValidateLogin(req AccountLoginRequest) (*User, error) {
 	if !match {
 		return nil, fmt.Errorf("Failed to login")
 	}
+
+	existingUser.Password = ""
 	
 	return &existingUser, nil
 }
