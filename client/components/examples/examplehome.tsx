@@ -22,7 +22,7 @@ export const ExampleHome: React.FC = () => {
     const res = await Post<Models.User>(`${CS_ENV.api_url}/api/account/login`, loginData);
 
     if (res.success) {
-      const user: Models.User = res.data.data;
+      const user: Models.User = res.data;
       setCurrentUser(user);
       setIsLoggedIn(true);
     } else {

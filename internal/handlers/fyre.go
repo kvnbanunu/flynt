@@ -138,6 +138,7 @@ func (h *FyreHandler) deleteFyre(w http.ResponseWriter, _ *http.Request, id int)
 		h.writeError(w, http.StatusInternalServerError, "Failed to delete Fyre")
 		return
 	}
+	h.writeSuccess(w, http.StatusOK, "Fyre successfully deleted", nil)
 }
 
 // handles GET /api/fyre/user/{id}

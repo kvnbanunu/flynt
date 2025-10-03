@@ -24,8 +24,8 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
       copy,
     );
     if (res.success) {
-      setCurrentFyre(res.data.data);
-      setStreakCount(res.data.data.streak_count);
+      setCurrentFyre(res.data);
+      setStreakCount(res.data.streak_count);
     }
   };
 
@@ -40,7 +40,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
         />
         {currentFyre.title}
       </label>
-      <div>Streak Count: {streakCount}</div>
+      <div>Streak: {streakCount} 🔥</div>
     </div>
   );
 };

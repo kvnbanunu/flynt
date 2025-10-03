@@ -8,7 +8,7 @@ export const ExampleComponent: React.FC<{
   const { title } = props;
   const res = await Get<Models.User[]>(`${SS_ENV.api_url}/api/user`);
   if (res.success) {
-    const users: Models.User[] = res.data.data;
+    const users: Models.User[] = res.data;
 
     return (
       <>
@@ -26,7 +26,7 @@ export const ExampleComponent: React.FC<{
       </>
     );
   } else {
-    console.error(`API Error: ${res.error.statusCode} - ${res.error.message}`);
-    return <div>{res.error.statusCode}</div>;
+    console.error(`API Error: ${res.error.status_code} - ${res.error.message}`);
+    return <div>{res.error.status_code}</div>;
   }
 };

@@ -1,9 +1,10 @@
 "use client"
-import { Get, Post } from "@/lib/api";
+import { Get } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import { FyreCard } from "./fyrecard";
 import { CS_ENV } from "@/lib/utils";
 import AddFyre from "./addfyre";
+import { RemoveFyre } from "./removefyre";
 
 export const FyreList: React.FC<{ user: Models.User }> = (props) => {
   const { user } = props;
@@ -17,7 +18,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
       `${CS_ENV.api_url}/api/fyre/user/${user.id}`,
     );
     if (res.success) {
-      setFyres(res.data.data)
+      setFyres(res.data)
     } else {
       setError(res.error.message);
     }
@@ -25,7 +26,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
     setUpdate(false);
   };
 
-  const onAddFyre = () => {
+  const onUpdate = () => {
     setUpdate(true)
   }
 
@@ -44,14 +45,17 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
       <h1 className="text-xl">Hello {user.name}</h1>
       <div className="mt-1">Your Fyres:</div>
       <ul>
-        {fyres.map((fyre) => (
+        {fyres && fyres.map((fyre) => (
           <li key={fyre.id}>
-            <FyreCard fyre={fyre} />
+            <div className="grid grid-cols-2 gap-2 items-center">
+              <FyreCard fyre={fyre} />
+              <RemoveFyre onSuccessHandler={onUpdate} fyre_id={fyre.id} />
+            </div>
           </li>
         ))}
       </ul>
       <div>
-        <AddFyre onSuccessHandler={onAddFyre} user_id={user.id} />
+        <AddFyre onSuccessHandler={onUpdate} user_id={user.id} />
       </div>
     </div>
   );
