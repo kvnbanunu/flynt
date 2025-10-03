@@ -43,6 +43,7 @@ func main() {
 	mux.Handle("/api/user", userHandler)
 	mux.Handle("/api/user/", userHandler)
 	mux.Handle("/api/account/", accountHandler)
+	mux.Handle("/api/fyre", fyreHandler)
 	mux.Handle("/api/fyre/", fyreHandler)
 	mux.Handle("/api/fyre/user/", fyreHandler)
 	mux.Handle("/health", healthHandler)

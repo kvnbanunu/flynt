@@ -4,7 +4,7 @@ import { ApiError, ApiResponse, Result } from "@/types/api";
 // Generic GET call
 export async function Get<T>(
   url: string,
-): Promise<Result<ApiResponse<T>, ApiError>> {
+): Promise<Result<T, ApiError>> {
   try {
     const res = await fetch(url);
 
@@ -13,8 +13,8 @@ export async function Get<T>(
       return { success: false, error: errData };
     }
 
-    const data: ApiResponse<T> = await res.json();
-    return { success: true, data };
+    const successData: ApiResponse<T> = await res.json();
+    return { success: true, data: successData.data };
   } catch (error: any) {
     return {
       success: false,
@@ -30,7 +30,7 @@ export async function Get<T>(
 export async function Put<T>(
   url: string,
   content: T,
-): Promise<Result<ApiResponse<T>, ApiError>> {
+): Promise<Result<T, ApiError>> {
   try {
     const res = await fetch(url, {
       method: "PUT",
@@ -45,8 +45,8 @@ export async function Put<T>(
       return { success: false, error: errData };
     }
 
-    const data: ApiResponse<T> = await res.json();
-    return { success: true, data };
+    const successData: ApiResponse<T> = await res.json();
+    return { success: true, data: successData.data };
   } catch (error: any) {
     return {
       success: false,
@@ -62,7 +62,7 @@ export async function Put<T>(
 export async function Post<T>(
   url: string,
   content: any,
-): Promise<Result<ApiResponse<T>, ApiError>> {
+): Promise<Result<T, ApiError>> {
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -77,8 +77,8 @@ export async function Post<T>(
       return { success: false, error: errData };
     }
 
-    const data: ApiResponse<T> = await res.json();
-    return { success: true, data };
+    const successData: ApiResponse<T> = await res.json();
+    return { success: true, data: successData.data };
   } catch (error: any) {
     return {
       success: false,
@@ -87,5 +87,29 @@ export async function Post<T>(
         message: error.message,
       },
     };
+  }
+}
+
+export async function Delete(
+  url: string,
+): Promise<Result<null, ApiError>> {
+  try {
+    const res = await fetch(url, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const errData: ApiError = await res.json();
+      return { success: false, error: errData };
+    }
+    return { success: true, data: null }
+  } catch (error: any) {
+    return {
+      success: false,
+      error: {
+        status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
+        message: error.message,
+      }
+    }
   }
 }

@@ -147,6 +147,7 @@ func (h *UserHandler) deleteUser(w http.ResponseWriter, _ *http.Request, id int)
 		h.writeError(w, http.StatusInternalServerError, "Failed to delete user")
 		return
 	}
+	h.writeSuccess(w, http.StatusOK, "User successfully deleted", nil)
 }
 
 // error response for UserHandlers
