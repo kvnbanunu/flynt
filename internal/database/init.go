@@ -92,6 +92,7 @@ func (db *DB) createTables() error {
 	CREATE TABLE IF NOT EXISTS friend (
 		user_id_1 INTEGER NOT NULL,
 		user_id_2 INTEGER NOT NULL,
+		status TEXT DEFAULT 'pending',
 		PRIMARY KEY (user_id_1, user_id_2)
 	);
 	`
