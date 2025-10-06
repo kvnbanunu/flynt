@@ -99,7 +99,7 @@ func (db *DB) insertDummyFriends() error {
 	(4, 3, 'friends'),
 	(4, 5, 'friends'),
 	(5, 3, 'blocked'),
-	(5, 2, 'accepted'),
+	(5, 2, 'sent'),
 	(5, 4, 'friends')
 	`
 	if _, err := db.Exec(query); err != nil {

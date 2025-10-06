@@ -48,8 +48,17 @@ func (db *DB) AcceptFriend(req UpdateFriendRequest) error {
 	OR (user_id_1 = ? AND user_id_2 = ?)
 	`
 
-	err := db.Get(nil, query, req.ID1, req.ID2, req.ID2, req.ID1)
+	result, err := db.Exec(query, req.ID1, req.ID2, req.ID2, req.ID1)
 	if err != nil {
+		return fmt.Errorf("Error accepting friend request: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Error parsing rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
 		return fmt.Errorf("Error accepting friend request: %w", err)
 	}
 
@@ -87,8 +96,17 @@ func (db *DB) DeleteFriend(req UpdateFriendRequest) error {
 	OR (user_id_1 = ? AND user_id_2 = ?)
 	`
 
-	err := db.Get(nil, query, req.ID1, req.ID2, req.ID2, req.ID1)
+	result, err := db.Exec(query, req.ID1, req.ID2, req.ID2, req.ID1)
 	if err != nil {
+		return fmt.Errorf("Error deleting friend: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Error parsing rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
 		return fmt.Errorf("Error deleting friend: %w", err)
 	}
 

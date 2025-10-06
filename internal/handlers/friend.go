@@ -110,7 +110,7 @@ func (h *FriendHandler) updateFriend(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handles DELET /api/friend
+// handles DELETE /api/friend
 func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 	var req FriendRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -124,7 +124,7 @@ func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 
 	update := database.UpdateFriendRequest{ID1: req.ID1, ID2: req.ID2}
 
-	err := h.db.AddFriend(update)
+	err := h.db.DeleteFriend(update)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, "Failed to remove friend")
 		return

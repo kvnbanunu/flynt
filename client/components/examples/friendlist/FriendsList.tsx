@@ -1,5 +1,5 @@
 "use client";
-import { Get, Post, Put } from "@/lib/api";
+import { DeleteBody, Get, Post, Put } from "@/lib/api";
 import { CS_ENV } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
 
@@ -7,6 +7,12 @@ interface FriendsListItem {
   id: number;
   name: string;
   status: string;
+}
+
+interface FriendRequest {
+  type: string;
+  user_id_1: number;
+  user_id_2: number;
 }
 
 export const FriendsList: React.FC<{ id: number }> = (props) => {
@@ -75,7 +81,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
               All Users
             </button>
           </h1>
-          <FriendsListList friends={friends} />
+          <FriendsListList friends={friends} id={id} handler={onUpdate} />
         </div>
       )}
 
@@ -97,17 +103,84 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
   );
 };
 
-const FriendsListList: React.FC<{ friends: FriendsListItem[] }> = (props) => {
-  const { friends } = props;
+const FriendsListList: React.FC<{
+  friends: FriendsListItem[];
+  id: number;
+  handler: () => void;
+}> = (props) => {
+  const { friends, id, handler } = props;
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRemove = async (friendID: number) => {
+    const req: FriendRequest = {
+      type: "deletefriend",
+      user_id_1: id,
+      user_id_2: friendID,
+    };
+    const res = await DeleteBody(`${CS_ENV.api_url}/api/friend`, req);
+    if (res.success) {
+      setError(null);
+      handler();
+    } else {
+      setError(res.error.message);
+    }
+  };
+
+  const handleAccept = async (friendID: number) => {
+    const req: FriendRequest = {
+      type: "acceptfriend",
+      user_id_1: id,
+      user_id_2: friendID,
+    };
+    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/api/friend`, req);
+    if (res.success) {
+      setError(null);
+      handler();
+    } else {
+      setError(res.error.message);
+    }
+  };
+
   return (
     <ul className="divide-y divide-gray-300">
+      {error && <div className="bg-red-300 rounded-sm">{error}</div>}
       {friends &&
-        friends.map((f, index) => (
-          <li className="flex gap-4 justify-between" key={index}>
-            <div>{f.name}</div>
-            <div className="w-20">{f.status}</div>
-          </li>
-        ))}
+        friends.map((f, index) => {
+          return (
+            <li className="flex gap-4 justify-between" key={index}>
+              <div className="w-32">{f.name}</div>
+              {f.status === "friends" && (
+                <div className="w-20 bg-green-300 text-sm font-semibold text-center rounded-lg px-1 py-1">
+                  {f.status}
+                </div>
+              )}
+              {f.status === "sent" && (
+                <div className="w-20 bg-blue-300 text-sm font-semibold text-center rounded-lg px-1 py-1">
+                  {f.status}
+                </div>
+              )}
+              {f.status === "pending" && (
+                <button
+                  className="w-20 bg-blue-300 text-sm font-semibold rounded-lg text-center px-1 py-1"
+                  onClick={() => handleAccept(f.id)}
+                >
+                  Accept
+                </button>
+              )}
+              {f.status === "blocked" && (
+                <div className="w-20 bg-gray-300 text-sm font-semibold rounded-lg text-center px-1 py-1">
+                  {f.status}
+                </div>
+              )}
+              <button
+                className="w-20 bg-red-300 text-sm font-semibold rounded-lg text-center px-1 py-1"
+                onClick={() => handleRemove(f.id)}
+              >
+                Remove
+              </button>
+            </li>
+          );
+        })}
     </ul>
   );
 };
@@ -120,22 +193,15 @@ const UsersList: React.FC<{
   const { users, id, handler } = props;
   const [error, setError] = useState<string | null>(null);
 
-  interface FriendRequest {
-    type: string;
-    user_id_1: number;
-    user_id_2: number;
-  }
-
   const handleAddFriend = async (friendID: number) => {
     const req: FriendRequest = {
       type: "addfriend",
       user_id_1: id,
       user_id_2: friendID,
     };
-    console.log(id);
-    console.log(friendID);
     const res = await Post(`${CS_ENV.api_url}/api/friend`, req);
     if (res.success) {
+      setError(null);
       handler();
     } else {
       setError(res.error.message);
@@ -149,6 +215,7 @@ const UsersList: React.FC<{
       user_id_2: friendID,
     });
     if (res.success) {
+      setError(null);
       handler();
     } else {
       setError(res.error.message);
@@ -157,21 +224,21 @@ const UsersList: React.FC<{
 
   return (
     <ul className="w-full mx-auto divide-y divide-gray-300">
-      {error && <div>{error}</div>}
+      {error && <div className="bg-red-300 rounded-sm">{error}</div>}
       {users &&
         users.map((user, index) => {
           if (user.id !== id && user.name !== "Admin User") {
             return (
               <li className="flex gap-4 justify-between" key={index}>
-                <div className="content-center">{user.name}</div>
+                <div className="w-32 content-center">{user.name}</div>
                 <button
-                  className="bg-green-300 rounded-xl py-1 px-2"
+                  className="w-24 bg-green-300 text-sm font-semibold rounded-lg py-1 px-1"
                   onClick={() => handleAddFriend(user.id)}
                 >
                   Add Friend
                 </button>
                 <button
-                  className="bg-red-300 rounded-xl py-1 px-2"
+                  className="w-16 bg-red-300 text-sm font-semibold rounded-lg py-1 px-1"
                   onClick={() => handleBlock(user.id)}
                 >
                   Block
