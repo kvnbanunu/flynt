@@ -27,7 +27,9 @@ func (db *DB) InsertDummyData() error {
 }
 
 func (db *DB) insertDummyUsers() error {
+	dummyUser := os.Getenv("DUMMY_USER")
 	dummypass := os.Getenv("DUMMY_PASSWORD")
+	adminID := os.Getenv("ADMIN_ID")
 	adminUser := os.Getenv("ADMIN_USER")
 	adminPass := os.Getenv("ADMIN_PASSWORD")
 
@@ -44,15 +46,25 @@ func (db *DB) insertDummyUsers() error {
 	query := fmt.Sprintf(`
 	INSERT INTO user (name, email, password)
 	VALUES
-	('Admin User', '%s', '%s'),
+	('Test User', '%s', '%s'),
 	('Brandon Rada', 'brandon@gmail.com', '%s'),
 	('Evin Gonzales', 'evin@gmail.com', '%s'),
 	('Lucas Laviolette', 'lucas@gmail.com', '%s'),
-	('Kevin Nguyen', 'kevin@gmail.com', '%s');
-	`, adminUser, adminPassHashed, hashed, hashed, hashed, hashed)
+	('Kevin Nguyen', 'kevin@gmail.com', '%s')
+	`, dummyUser, hashed, hashed, hashed, hashed, hashed)
 
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("Failed to insert dummy users: %w", err)
+	}
+
+	query = fmt.Sprintf(`
+	INSERT INTO user (id, name, email, password)
+	VALUES
+	(%s, 'Admin User', '%s', '%s')
+	`, adminID, adminUser, adminPassHashed)
+
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to insert admin user: %w", err)
 	}
 
 	return nil
