@@ -8,9 +8,9 @@ type UpdateFriendRequest struct {
 }
 
 type FriendsListItem struct {
-	ID     int          `json:"id"`
-	Name   string       `json:"name"`
-	Status FriendStatus `json:"status"`
+	ID     int          `db:"id" json:"id"`
+	Name   string       `db:"name" json:"name"`
+	Status FriendStatus `db:"status" json:"status"`
 }
 
 func (db *DB) AddFriend(req UpdateFriendRequest) error {
@@ -78,7 +78,7 @@ func (db *DB) DeleteFriend(req UpdateFriendRequest) error {
 
 func (db *DB) GetFriendsList(id int) ([]FriendsListItem, error) {
 	query := `
-	SELECT (u.id, u.name, f.status) FROM friend f
+	SELECT u.id, u.name, f.status FROM friend f
 	JOIN user u ON u.id = f.user_id_2
 	WHERE f.user_id_1 = ?
 	ORDER BY u.name ASC

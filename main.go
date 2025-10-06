@@ -34,6 +34,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(db)
 	accountHandler := handlers.NewAccountHandler(db)
 	fyreHandler := handlers.NewFyreHandler(db)
+	friendHandler := handlers.NewFriendHandler(db)
 	healthHandler := handlers.NewHealthHandler(db)
 
 	// init server router
@@ -46,6 +47,8 @@ func main() {
 	mux.Handle("/api/fyre", fyreHandler)
 	mux.Handle("/api/fyre/", fyreHandler)
 	mux.Handle("/api/fyre/user/", fyreHandler)
+	mux.Handle("/api/friend", friendHandler)
+	mux.Handle("/api/friend/", friendHandler)
 	mux.Handle("/health", healthHandler)
 
 	// root handler
