@@ -30,8 +30,8 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
   };
 
   return (
-    <div className="my-2 p-2 border-2">
-      <label>
+    <div className="my-2 p-2 border-2 rounded-sm">
+      <label className="text-lg">
         <input
           className="mr-1"
           type="checkbox"

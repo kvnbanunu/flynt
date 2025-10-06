@@ -48,7 +48,7 @@ func (db *DB) insertDummyUsers() error {
 	('Brandon Rada', 'brandon@gmail.com', '%s'),
 	('Evin Gonzales', 'evin@gmail.com', '%s'),
 	('Lucas Laviolette', 'lucas@gmail.com', '%s'),
-	('Kevin', 'kevin@gmail.com', '%s');
+	('Kevin Nguyen', 'kevin@gmail.com', '%s');
 	`, adminUser, adminPassHashed, hashed, hashed, hashed, hashed)
 
 	if _, err := db.Exec(query); err != nil {

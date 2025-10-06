@@ -61,10 +61,10 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
   }
 
   return (
-    <div className="border-2">
+    <div className="p-2 border-2 rounded-sm">
       <div>
         <button
-          className="rounded-full px-2 mx-2 align-middle text-center bg-red-300 aspect-square"
+          className="rounded-full px-2 mr-2 align-middle text-center bg-red-300 aspect-square"
           onClick={reset}
         >x</button>
         Add a new Fyre
@@ -72,26 +72,28 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
       {error && <div className="bg-red-100 w-full">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="my-1">
-          <label className="mx-2" htmlFor="titleInput">Title</label>
+          <label className="mr-2" htmlFor="titleInput">Title</label>
           <input
             type="text"
             id="titleInput"
             value={inputTitle}
             onChange={handleTitleChange}
+            className="border-2 rounded-xs w-full"
           />
         </div>
         <div className="my-1">
-          <label className="mx-2" htmlFor="streakInput">Streak Count</label>
+          <label className="mr-2" htmlFor="streakInput">Streak Count</label>
           <input
             type="number"
             id="streakInput"
             value={inputStreak}
             onChange={handleStreakChange}
+            className="border-2 rounded-xs w-full"
           />
         </div>
         <div className="text-center my-1">
           <button
-            className="rounded-full p-2 text-center bg-green-300 w-full"
+            className="rounded-xl p-2 text-center bg-green-300 w-full"
             type="submit"
           >
             Submit

@@ -47,7 +47,7 @@ export const SigninForm: React.FC<SigninFormProps> = (props) => {
       </div>
       <div className="text-center my-1">
         <button
-          className="rounded-full p-2 text-center bg-green-300 w-full"
+          className="rounded-xl p-2 text-center bg-green-300 w-full"
           type="submit"
         >
           Submit

@@ -43,7 +43,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
   }
 
   return (
-    <div className="p-2 border-2">
+    <div className="p-2 m-2 border-2 rounded-sm">
       <h1 className="text-xl">Hello {user.name}</h1>
       <div className="mt-1">Your Fyres:</div>
       <ul>

@@ -3,8 +3,8 @@ package database
 import "fmt"
 
 type UpdateFriendRequest struct {
-	ID1 int `json:"user_id_1"`
-	ID2 int `json:"user_id_2"`
+	ID1 int `db:"user_id_1" json:"user_id_1"`
+	ID2 int `db:"user_id_2" json:"user_id_2"`
 }
 
 type FriendsListItem struct {
@@ -17,16 +17,26 @@ func (db *DB) AddFriend(req UpdateFriendRequest) error {
 	query := `
 	INSERT INTO friend (user_id_1, user_id_2, status)
 	VALUES
-	(?, ?, 'accepted'),
+	(?, ?, 'sent'),
 	(?, ?, 'pending')
 	ON CONFLICT (user_id_1, user_id_2) DO UPDATE
-	SET status = EXCLUDED.status;
+	SET status = EXCLUDED.status
 	`
 
-	err := db.Get(nil, query, req.ID1, req.ID2, req.ID2, req.ID1)
+	result, err := db.Exec(query, req.ID1, req.ID2, req.ID2, req.ID1)
 	if err != nil {
 		return fmt.Errorf("Error creating friend request: %w", err)
 	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Error parsing rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("Error creating friend request: %w", err)
+	}
+
 	return nil
 }
 
@@ -54,8 +64,17 @@ func (db *DB) BlockFriend(req UpdateFriendRequest) error {
 	SET status = 'blocked'
 	`
 
-	err := db.Get(nil, query, req.ID1, req.ID2)
+	result, err := db.Exec(query, req.ID1, req.ID2)
 	if err != nil {
+		return fmt.Errorf("Error blocking friend: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Error parsing rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
 		return fmt.Errorf("Error blocking friend: %w", err)
 	}
 

@@ -2,17 +2,18 @@ package handlers
 
 import (
 	"encoding/json"
-	"flynt/internal/database"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"flynt/internal/database"
 )
 
 type FriendRequest struct {
 	Type string `json:"type"`
-	ID1 int `json:"user_id_1"`
-	ID2 int `json:"user_id_2"`
+	ID1  int    `json:"user_id_1"`
+	ID2  int    `json:"user_id_2"`
 }
 
 type FriendHandler struct {
@@ -22,7 +23,6 @@ type FriendHandler struct {
 func NewFriendHandler(db *database.DB) *FriendHandler {
 	return &FriendHandler{db: db}
 }
-
 
 func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -53,7 +53,7 @@ func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.getFriendsList(w, r, id)
-default:
+	default:
 		h.writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
 }
@@ -69,7 +69,7 @@ func (h *FriendHandler) addFriend(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
 		return
 	}
-	
+
 	update := database.UpdateFriendRequest{ID1: req.ID1, ID2: req.ID2}
 
 	err := h.db.AddFriend(update)
@@ -121,7 +121,7 @@ func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
 		return
 	}
-	
+
 	update := database.UpdateFriendRequest{ID1: req.ID1, ID2: req.ID2}
 
 	err := h.db.AddFriend(update)

@@ -1,5 +1,5 @@
 "use client";
-import { Get } from "@/lib/api";
+import { Get, Post, Put } from "@/lib/api";
 import { CS_ENV } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
 
@@ -12,12 +12,16 @@ interface FriendsListItem {
 export const FriendsList: React.FC<{ id: number }> = (props) => {
   const { id } = props;
   const [friends, setFriends] = useState<FriendsListItem[]>([]);
+  const [users, setUsers] = useState<Models.User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [update, setUpdate] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<string>("friendslist");
 
   const fetchFriends = async () => {
-    const res = await Get<FriendsListItem[]>(`${CS_ENV.api_url}/api/friend/${id}`);
+    const res = await Get<FriendsListItem[]>(
+      `${CS_ENV.api_url}/api/friend/${id}`,
+    );
     if (res.success) {
       setFriends(res.data);
     } else {
@@ -27,8 +31,29 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
     setUpdate(false);
   };
 
+  const fetchUsers = async () => {
+    const res = await Get<Models.User[]>(`${CS_ENV.api_url}/api/user`);
+    if (res.success) {
+      setUsers(res.data);
+    } else {
+      setError(res.error.message);
+    }
+  };
+
+  const handleTabSwitch = () => {
+    const tab = selectedTab === "friendslist" ? "addfriend" : "friendslist";
+    setSelectedTab(tab);
+  };
+
+  const onUpdate = () => {
+    setLoading(true);
+    setSelectedTab("friendslist");
+    setUpdate(true);
+  };
+
   useEffect(() => {
     fetchFriends();
+    fetchUsers();
   }, [update]);
 
   if (loading) {
@@ -36,15 +61,126 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
   }
 
   return (
-    <div>
-      <h1>Friends List</h1>
+    <div className="p-2 m-2 border-2 rounded-sm">
       {error && <div className="bg-red-300">Error: {error}</div>}
-      <ul>{friends && friends.map((f, index) => (
-        <li key={index}>
-          {f.id}  {f.name}  {f.status}
-        </li>
-      ))}</ul>
+
+      {selectedTab === "friendslist" && (
+        <div>
+          <h1 className="text-xl">
+            Friends List
+            <button
+              className="bg-blue-200 mx-1 border-1 rounded-lg px-2"
+              onClick={handleTabSwitch}
+            >
+              All Users
+            </button>
+          </h1>
+          <FriendsListList friends={friends} />
+        </div>
+      )}
+
+      {selectedTab === "addfriend" && (
+        <div>
+          <h1 className="text-xl">
+            <button
+              className="bg-blue-200 mr-1 border-1 rounded-lg px-2"
+              onClick={handleTabSwitch}
+            >
+              Friends List
+            </button>
+            All Users
+          </h1>
+          <UsersList users={users} id={id} handler={onUpdate} />
+        </div>
+      )}
     </div>
+  );
+};
+
+const FriendsListList: React.FC<{ friends: FriendsListItem[] }> = (props) => {
+  const { friends } = props;
+  return (
+    <ul className="divide-y divide-gray-300">
+      {friends &&
+        friends.map((f, index) => (
+          <li className="flex gap-4 justify-between" key={index}>
+            <div>{f.name}</div>
+            <div className="w-20">{f.status}</div>
+          </li>
+        ))}
+    </ul>
+  );
+};
+
+const UsersList: React.FC<{
+  users: Models.User[];
+  id: number;
+  handler: () => void;
+}> = (props) => {
+  const { users, id, handler } = props;
+  const [error, setError] = useState<string | null>(null);
+
+  interface FriendRequest {
+    type: string;
+    user_id_1: number;
+    user_id_2: number;
+  }
+
+  const handleAddFriend = async (friendID: number) => {
+    const req: FriendRequest = {
+      type: "addfriend",
+      user_id_1: id,
+      user_id_2: friendID,
+    };
+    console.log(id);
+    console.log(friendID);
+    const res = await Post(`${CS_ENV.api_url}/api/friend`, req);
+    if (res.success) {
+      handler();
+    } else {
+      setError(res.error.message);
+    }
+  };
+
+  const handleBlock = async (friendID: number) => {
+    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/api/friend`, {
+      type: "blockfriend",
+      user_id_1: id,
+      user_id_2: friendID,
+    });
+    if (res.success) {
+      handler();
+    } else {
+      setError(res.error.message);
+    }
+  };
+
+  return (
+    <ul className="w-full mx-auto divide-y divide-gray-300">
+      {error && <div>{error}</div>}
+      {users &&
+        users.map((user, index) => {
+          if (user.id !== id && user.name !== "Admin User") {
+            return (
+              <li className="flex gap-4 justify-between" key={index}>
+                <div className="content-center">{user.name}</div>
+                <button
+                  className="bg-green-300 rounded-xl py-1 px-2"
+                  onClick={() => handleAddFriend(user.id)}
+                >
+                  Add Friend
+                </button>
+                <button
+                  className="bg-red-300 rounded-xl py-1 px-2"
+                  onClick={() => handleBlock(user.id)}
+                >
+                  Block
+                </button>
+              </li>
+            );
+          }
+        })}
+    </ul>
   );
 };
 
