@@ -75,7 +75,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
           <h1 className="text-xl">
             Friends List
             <button
-              className="bg-blue-200 mx-1 border-1 rounded-lg px-2"
+              className="bg-blue-200 mx-1 border-1 rounded-lg px-2 cursor-pointer"
               onClick={handleTabSwitch}
             >
               All Users
@@ -89,7 +89,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
         <div>
           <h1 className="text-xl">
             <button
-              className="bg-blue-200 mr-1 border-1 rounded-lg px-2"
+              className="bg-blue-200 mr-1 border-1 rounded-lg px-2 cursor-pointer"
               onClick={handleTabSwitch}
             >
               Friends List
@@ -161,7 +161,7 @@ const FriendsListList: React.FC<{
               )}
               {f.status === "pending" && (
                 <button
-                  className="w-20 bg-blue-300 text-sm font-semibold rounded-lg text-center px-1 py-1"
+                  className="w-20 bg-blue-300 text-sm font-semibold rounded-lg text-center px-1 py-1 cursor-pointer"
                   onClick={() => handleAccept(f.id)}
                 >
                   Accept
@@ -173,7 +173,7 @@ const FriendsListList: React.FC<{
                 </div>
               )}
               <button
-                className="w-20 bg-red-300 text-sm font-semibold rounded-lg text-center px-1 py-1"
+                className="w-20 bg-red-300 text-sm font-semibold rounded-lg text-center px-1 py-1 cursor-pointer"
                 onClick={() => handleRemove(f.id)}
               >
                 Remove
@@ -232,13 +232,13 @@ const UsersList: React.FC<{
               <li className="flex gap-4 justify-between" key={index}>
                 <div className="w-32 content-center">{user.name}</div>
                 <button
-                  className="w-24 bg-green-300 text-sm font-semibold rounded-lg py-1 px-1"
+                  className="w-24 bg-green-300 text-sm font-semibold rounded-lg py-1 px-1 cursor-pointer"
                   onClick={() => handleAddFriend(user.id)}
                 >
                   Add Friend
                 </button>
                 <button
-                  className="w-16 bg-red-300 text-sm font-semibold rounded-lg py-1 px-1"
+                  className="w-16 bg-red-300 text-sm font-semibold rounded-lg py-1 px-1 cursor-pointer"
                   onClick={() => handleBlock(user.id)}
                 >
                   Block

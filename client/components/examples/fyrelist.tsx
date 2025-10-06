@@ -50,7 +50,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
         {fyres &&
           fyres.map((fyre) => (
             <li key={fyre.id}>
-              <div className="grid grid-cols-2 gap-2 items-center">
+              <div className="grid grid-cols-2 gap-2 items-center w-full border-2 rounded-sm">
                 <FyreCard fyre={fyre} />
                 <RemoveFyre onSuccessHandler={onUpdate} fyre_id={fyre.id} />
               </div>

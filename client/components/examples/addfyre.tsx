@@ -51,7 +51,7 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
     return (
       <div className="text-center my-1">
         <button
-          className="rounded-full p-2 text-center bg-green-300 w-full"
+          className="rounded-full p-2 text-center bg-green-300 w-full cursor-pointer"
           onClick={() => setCollapsed(false)}
         >
           Add a new Fyre
@@ -93,7 +93,7 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
         </div>
         <div className="text-center my-1">
           <button
-            className="rounded-xl p-2 text-center bg-green-300 w-full"
+            className="rounded-xl p-2 text-center bg-green-300 w-full cursor-pointer"
             type="submit"
           >
             Submit

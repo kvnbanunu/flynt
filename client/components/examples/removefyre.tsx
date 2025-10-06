@@ -28,7 +28,7 @@ export const RemoveFyre: React.FC<RemoveFyreProps> = (props) => {
     <div>
       {error && <div className="bg-red-100">{error}</div>}
       <button
-        className="rounded-xl p-2 m-2 text-center bg-red-300"
+        className="rounded-xl px-2 py-1 m-2 text-center bg-red-300 cursor-pointer"
         onClick={handleSubmit}
       >
         Remove
