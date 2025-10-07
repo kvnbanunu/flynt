@@ -9,5 +9,3 @@ services:
       - ENV=production
     env_file:
       - .env
-    networks:
-      - app-network
