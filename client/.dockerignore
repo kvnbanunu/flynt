@@ -4,6 +4,5 @@ node_modules
 .next
 README.md
 *.md
-.env
 .env.*
 .vscode
