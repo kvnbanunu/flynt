@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Get } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import { FyreCard } from "./fyrecard";
@@ -18,7 +18,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
       `${CS_ENV.api_url}/api/fyre/user/${user.id}`,
     );
     if (res.success) {
-      setFyres(res.data)
+      setFyres(res.data);
     } else {
       setError(res.error.message);
     }
@@ -27,10 +27,12 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
   };
 
   const onUpdate = () => {
-    setUpdate(true)
-  }
+    setUpdate(true);
+  };
 
-  useEffect(() => { fetchFyres() }, [update]);
+  useEffect(() => {
+    fetchFyres();
+  }, [update]);
 
   if (loading) {
     return <div>Loading your Fyres</div>;
@@ -41,18 +43,19 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
   }
 
   return (
-    <div className="p-2 border-2">
+    <div className="p-2 m-2 border-2 rounded-sm">
       <h1 className="text-xl">Hello {user.name}</h1>
       <div className="mt-1">Your Fyres:</div>
       <ul>
-        {fyres && fyres.map((fyre) => (
-          <li key={fyre.id}>
-            <div className="grid grid-cols-2 gap-2 items-center">
-              <FyreCard fyre={fyre} />
-              <RemoveFyre onSuccessHandler={onUpdate} fyre_id={fyre.id} />
-            </div>
-          </li>
-        ))}
+        {fyres &&
+          fyres.map((fyre) => (
+            <li key={fyre.id}>
+              <div className="grid grid-cols-2 gap-2 items-center w-full border-2 rounded-sm">
+                <FyreCard fyre={fyre} />
+                <RemoveFyre onSuccessHandler={onUpdate} fyre_id={fyre.id} />
+              </div>
+            </li>
+          ))}
       </ul>
       <div>
         <AddFyre onSuccessHandler={onUpdate} user_id={user.id} />

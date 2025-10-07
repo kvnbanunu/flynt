@@ -49,6 +49,16 @@ type Bonfyre struct {
 
 // Represents friend table in db
 type Friend struct {
-	UserID1 int `db:"user_id_1" json:"user_id_1"`
-	UserID2 int `db:"user_id_2" json:"user_id_2"`
+	UserID1 int    `db:"user_id_1" json:"user_id_1"`
+	UserID2 int    `db:"user_id_2" json:"user_id_2"`
+	Status  string `db:"status" json:"status"`
 }
+
+type FriendStatus string
+
+const (
+	Pending FriendStatus = "pending"
+	Sent    FriendStatus = "sent"
+	Friends FriendStatus = "friends"
+	Blocked FriendStatus = "blocked"
+)
