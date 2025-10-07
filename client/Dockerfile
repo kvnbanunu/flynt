@@ -1,19 +1,22 @@
-FROM node:24-alpine AS deps
+FROM node:lts-alpine AS base
+
+# Stage 1: Install dependencies
+FROM base AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-FROM node:24-alpine AS builder
+# Stage 2: Build the application
+FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:24-alpine AS runner
+# Stage 3: Production server
+FROM base AS runner
 WORKDIR /app
-
-ENV NODE_ENV production
-
+ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
