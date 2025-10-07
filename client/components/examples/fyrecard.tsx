@@ -15,7 +15,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
     const checked = isChecked ? false : true
     setIsChecked(checked);
 
-    let copy: Models.Fyre = currentFyre;
+    const copy: Models.Fyre = currentFyre;
 
     copy.streak_count = checked ? streakCount + 1 : streakCount - 1;
 
@@ -30,10 +30,10 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
   };
 
   return (
-    <div className="my-2 p-2 border-2">
-      <label>
+    <div className="my-2 p-2">
+      <label className="text-lg">
         <input
-          className="mr-1"
+          className="mr-1 cursor-pointer"
           type="checkbox"
           checked={isChecked}
           onChange={handleCheckboxChange}

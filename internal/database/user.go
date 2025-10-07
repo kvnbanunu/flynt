@@ -92,7 +92,7 @@ func (db *DB) GetAllUsers() ([]User, error) {
 	query := `
 	SELECT id, name, email, img_url, bio, created_at, updated_at
 	FROM user
-	ORDER BY created_at DESC
+	ORDER BY name ASC
 	`
 
 	var users []User

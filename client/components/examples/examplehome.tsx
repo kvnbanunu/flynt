@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import SigninForm from "./signin";
 import { FyreList } from "./fyrelist";
 import { CS_ENV } from "@/lib/utils";
+import FriendsList from "./friendlist/FriendsList";
 
 interface LoginData {
   email: string;
@@ -18,8 +19,11 @@ export const ExampleHome: React.FC = () => {
 
   const onLogin = async (email: string, password: string) => {
     setLoading(true);
-    const loginData: LoginData = {email: email, password: password}
-    const res = await Post<Models.User>(`${CS_ENV.api_url}/api/account/login`, loginData);
+    const loginData: LoginData = { email: email, password: password };
+    const res = await Post<Models.User, LoginData>(
+      `${CS_ENV.api_url}/api/account/login`,
+      loginData,
+    );
 
     if (res.success) {
       const user: Models.User = res.data;
@@ -45,6 +49,13 @@ export const ExampleHome: React.FC = () => {
   }
 
   if (isloggedIn && currentUser) {
-    return <FyreList user={currentUser} />;
+    return (
+      <main>
+        <div className="flex">
+          <FriendsList id={currentUser.id} />
+          <FyreList user={currentUser} />
+        </div>
+      </main>
+    );
   }
 };

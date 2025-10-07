@@ -28,6 +28,7 @@ tmp/
 # Project build
 main
 *templ.go
+docker-entrypoint.sh
 
 # OS X generated file
 .DS_Store

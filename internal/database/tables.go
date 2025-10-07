@@ -57,8 +57,8 @@ type Friend struct {
 type FriendStatus string
 
 const (
-	Pending  FriendStatus = "pending"
-	Accepted FriendStatus = "accepted"
-	Friends  FriendStatus = "friends"
-	Blocked  FriendStatus = "blocked"
+	Pending FriendStatus = "pending"
+	Sent    FriendStatus = "sent"
+	Friends FriendStatus = "friends"
+	Blocked FriendStatus = "blocked"
 )
