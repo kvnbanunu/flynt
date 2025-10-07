@@ -11,6 +11,8 @@ COPY . .
 
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
+RUN CGO_ENABLED=1 GOOS=linux go build -o insert-dummy ./scripts/dummy/main.go
+
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates sqlite-libs
@@ -20,6 +22,10 @@ WORKDIR /root/
 RUN mkdir -p /data
 
 COPY --from=builder /app/main .
+COPY --from=builder /app/insert-dummy .
+
+COPY --from=builder /app/docker-entrypoint.sh .
+RUN chmod +x docker-entrypoint.sh
 
 COPY .env .env
 
