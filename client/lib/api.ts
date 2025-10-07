@@ -13,12 +13,13 @@ export async function Get<T>(url: string): Promise<Result<T, ApiError>> {
 
     const successData: ApiResponse<T> = await res.json();
     return { success: true, data: successData.data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     return {
       success: false,
       error: {
         status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
-        message: error.message,
+        message: message,
       },
     };
   }
@@ -45,21 +46,22 @@ export async function Put<T>(
 
     const successData: ApiResponse<T> = await res.json();
     return { success: true, data: successData.data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     return {
       success: false,
       error: {
         status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
-        message: error,
+        message: message,
       },
     };
   }
 }
 
 // Generic Post call
-export async function Post<T>(
+export async function Post<T, U>(
   url: string,
-  content: any,
+  content: U,
 ): Promise<Result<T, ApiError>> {
   try {
     const res = await fetch(url, {
@@ -77,12 +79,13 @@ export async function Post<T>(
 
     const successData: ApiResponse<T> = await res.json();
     return { success: true, data: successData.data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     return {
       success: false,
       error: {
         status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
-        message: error,
+        message: message,
       },
     };
   }
@@ -100,12 +103,13 @@ export async function Delete(url: string): Promise<Result<null, ApiError>> {
       return { success: false, error: errData };
     }
     return { success: true, data: null };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     return {
       success: false,
       error: {
         status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
-        message: error,
+        message: message,
       },
     };
   }
@@ -130,12 +134,13 @@ export async function DeleteBody<T>(
       return { success: false, error: errData };
     }
     return { success: true, data: null };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "An unknown error occurred";
     return {
       success: false,
       error: {
         status_code: "" + HttpStatusCode.INTERNAL_SERVER_ERROR,
-        message: error,
+        message: message,
       },
     };
   }

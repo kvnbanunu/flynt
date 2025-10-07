@@ -15,7 +15,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
     const checked = isChecked ? false : true
     setIsChecked(checked);
 
-    let copy: Models.Fyre = currentFyre;
+    const copy: Models.Fyre = currentFyre;
 
     copy.streak_count = checked ? streakCount + 1 : streakCount - 1;
 

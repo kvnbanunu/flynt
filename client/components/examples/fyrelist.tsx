@@ -1,6 +1,6 @@
 "use client";
 import { Get } from "@/lib/api";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FyreCard } from "./fyrecard";
 import { CS_ENV } from "@/lib/utils";
 import AddFyre from "./addfyre";
@@ -13,7 +13,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
   const [error, setError] = useState<string | null>(null);
   const [update, setUpdate] = useState<boolean>(false);
 
-  const fetchFyres = async () => {
+  const fetchFyres = useCallback(async () => {
     const res = await Get<Models.Fyre[]>(
       `${CS_ENV.api_url}/api/fyre/user/${user.id}`,
     );
@@ -24,7 +24,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
     }
     setLoading(false);
     setUpdate(false);
-  };
+  }, [user.id]);
 
   const onUpdate = () => {
     setUpdate(true);
@@ -32,7 +32,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
 
   useEffect(() => {
     fetchFyres();
-  }, [update]);
+  }, [update, fetchFyres]);
 
   if (loading) {
     return <div>Loading your Fyres</div>;

@@ -1,7 +1,7 @@
 "use client";
 import { DeleteBody, Get, Post, Put } from "@/lib/api";
 import { CS_ENV } from "@/lib/utils";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface FriendsListItem {
   id: number;
@@ -24,7 +24,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
   const [update, setUpdate] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>("friendslist");
 
-  const fetchFriends = async () => {
+  const fetchFriends = useCallback(async () => {
     const res = await Get<FriendsListItem[]>(
       `${CS_ENV.api_url}/api/friend/${id}`,
     );
@@ -35,16 +35,16 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
     }
     setLoading(false);
     setUpdate(false);
-  };
+  }, [id]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     const res = await Get<Models.User[]>(`${CS_ENV.api_url}/api/user`);
     if (res.success) {
       setUsers(res.data);
     } else {
       setError(res.error.message);
     }
-  };
+  }, []);
 
   const handleTabSwitch = () => {
     const tab = selectedTab === "friendslist" ? "addfriend" : "friendslist";
@@ -60,7 +60,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
   useEffect(() => {
     fetchFriends();
     fetchUsers();
-  }, [update]);
+  }, [update, fetchFriends, fetchUsers]);
 
   if (loading) {
     return <div>Loading Friends List...</div>;
