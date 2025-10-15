@@ -26,7 +26,7 @@ func NewFriendHandler(db *database.DB) *FriendHandler {
 func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/friend")
+	path := strings.TrimPrefix(r.URL.Path, "/friend")
 
 	switch {
 	case path == "" || path == "/":

@@ -20,7 +20,7 @@ func NewFyreHandler(db *database.DB) *FyreHandler {
 func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/fyre")
+	path := strings.TrimPrefix(r.URL.Path, "/fyre")
 
 	switch {
 	case path == "" || path == "/":

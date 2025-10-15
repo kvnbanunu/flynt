@@ -21,7 +21,7 @@ func NewUserHandler(db *database.DB) *UserHandler {
 func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/user")
+	path := strings.TrimPrefix(r.URL.Path, "/user")
 
 	switch {
 	case path == "" || path == "/":

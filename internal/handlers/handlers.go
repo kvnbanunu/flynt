@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+
+	"flynt/internal/database"
 )
 
 type ErrorResponse struct {
@@ -13,6 +15,44 @@ type ErrorResponse struct {
 type SuccessResponse struct {
 	Message string `json:"message"`
 	Data    any    `json:"data,omitempty"`
+}
+
+func SetupHandlers(db *database.DB) *http.ServeMux {
+	mux := http.NewServeMux()
+
+	// init handlers
+	userHandler := NewUserHandler(db)
+	accountHandler := NewAccountHandler(db)
+	fyreHandler := NewFyreHandler(db)
+	friendHandler := NewFriendHandler(db)
+	healthHandler := NewHealthHandler(db)
+
+	// routes
+	mux.Handle("/user", userHandler)
+	mux.Handle("/user/", userHandler)
+	mux.Handle("/account/", accountHandler)
+	mux.Handle("/fyre", fyreHandler)
+	mux.Handle("/fyre/", fyreHandler)
+	mux.Handle("/fyre/user/", fyreHandler)
+	mux.Handle("/friend", friendHandler)
+	mux.Handle("/friend/", friendHandler)
+	mux.Handle("/health", healthHandler)
+
+	// root handler
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// placeholder, will change later
+		msg := `{"message":"API Server is running","version":"1.0.0","endpoints":["/health","/api/users"]}`
+		w.Write([]byte(msg))
+	})
+
+	return mux
 }
 
 // Generic error response
