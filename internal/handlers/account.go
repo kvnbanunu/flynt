@@ -22,12 +22,39 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.TrimPrefix(r.URL.Path, "/api/account")
 
+	if r.Method != http.MethodPost {
+		h.writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+	}
+
 	switch  path { // add more later
+	case "/register":
+		h.register(w, r)
 	case "/login":
 		h.login(w, r)
 	default:
 		h.writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
+}
+
+// handles POST /api/account/register
+func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
+	var req database.CreateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.writeError(w, http.StatusBadRequest, "Invalid JSON payload")
+		return
+	}
+
+	user, err := h.db.CreateUser(req)
+	if err != nil {
+		if strings.Contains(err.Error(), "Failed to create") {
+			h.writeError(w, http.StatusNotAcceptable, "Failed to register new user")
+			return
+		}
+		log.Printf("Error register: %v", err)
+		h.writeError(w, http.StatusInternalServerError, "Failed to register new user")
+		return
+	}
+	h.writeSuccess(w, http.StatusOK, "New user registered successfully", user)
 }
 
 // Handles POST /api/account/login

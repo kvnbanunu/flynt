@@ -11,6 +11,7 @@ import (
 
 // request payload for creating user
 type CreateUserRequest struct {
+	Username string `json:"username"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
@@ -28,9 +29,9 @@ type UpdateUserRequest struct {
 // query function to create new user in db
 func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	query := `
-	INSERT INTO user (name, password, email)
-	VALUES (?, ?, ?)
-	RETURNING id, name, email, created_at, updated_at
+	INSERT INTO user (username, name, password, email)
+	VALUES (?, ?, ?, ?)
+	RETURNING id, username, name, email, created_at, updated_at
 	`
 
 	hashed, err := utils.HashPassword(req.Password)
@@ -39,7 +40,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	}
 
 	var user User
-	err = db.Get(&user, query, req.Name, hashed, req.Email)
+	err = db.Get(&user, query, req.Username, req.Name, hashed, req.Email)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create user: %w", err)
 	}
@@ -50,7 +51,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 // query function to get user from db
 func (db *DB) GetUserByID(id int) (*User, error) {
 	query := `
-	SELECT id, name, email, img_url, bio, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, created_at, updated_at
 	FROM user
 	WHERE id = ?
 	`
@@ -70,7 +71,7 @@ func (db *DB) GetUserByID(id int) (*User, error) {
 // query function to fetch user matching email
 func (db *DB) GetUserByEmail(email string) (*User, error) {
 	query := `
-	SELECT id, name, email, img_url, bio, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, created_at, updated_at
 	FROM user
 	WHERE email = ?
 	`
@@ -90,7 +91,7 @@ func (db *DB) GetUserByEmail(email string) (*User, error) {
 // fetch all users from db
 func (db *DB) GetAllUsers() ([]User, error) {
 	query := `
-	SELECT id, name, email, img_url, bio, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, created_at, updated_at
 	FROM user
 	ORDER BY name ASC
 	`
@@ -159,7 +160,7 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		UPDATE user
 		SET %s
 		WHERE id = ?
-		RETURNING id, name, email, img_url, bio, created_at, updated_at
+		RETURNING id, username, name, email, img_url, bio, created_at, updated_at
 	`, strings.Join(setParts, ", "))
 
 	var user User

@@ -5,6 +5,7 @@ import SigninForm from "./signin";
 import { FyreList } from "./fyrelist";
 import { CS_ENV } from "@/lib/utils";
 import FriendsList from "./friendlist/FriendsList";
+import { RegisterForm } from "./Register";
 
 interface LoginData {
   email: string;
@@ -16,6 +17,7 @@ export const ExampleHome: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<Models.User | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>("login");
 
   const onLogin = async (email: string, password: string) => {
     setLoading(true);
@@ -35,6 +37,13 @@ export const ExampleHome: React.FC = () => {
     setLoading(false);
   };
 
+  const onRegister = (user: Models.User) => {
+    setError(null);
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+    setLoading(false);
+  }
+
   if (loading) {
     return <div>Logging in...</div>;
   }
@@ -43,7 +52,37 @@ export const ExampleHome: React.FC = () => {
     return (
       <div>
         {error && <div>{error}</div>}
-        <SigninForm onSubmitHandler={onLogin} />
+        {selectedTab == "login" &&
+          <div>
+            <div>
+              <button
+                className="rounded-xl p-2 text-center bg-gray-300"
+                disabled
+              >Login</button>
+              <button
+                className="rounded-xl p-2 text-center bg-green-300 cursor-pointer"
+                onClick={() => setSelectedTab("register")}
+              >Register</button>
+            </div>
+            <SigninForm onSubmitHandler={onLogin} />
+          </div>
+        }
+
+        {selectedTab == "register" &&
+          <div>
+            <div>
+              <button
+                className="rounded-xl p-2 text-center bg-green-300 cursor-pointer"
+                onClick={() => setSelectedTab("login")}
+              >Login</button>
+              <button
+                className="rounded-xl p-2 text-center bg-gray-300"
+                disabled
+              >Register</button>
+            </div>
+            <RegisterForm onSuccessHandler={onRegister} />
+          </div>
+        }
       </div>
     );
   }
