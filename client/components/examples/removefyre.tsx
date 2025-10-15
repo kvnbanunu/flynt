@@ -15,7 +15,7 @@ export const RemoveFyre: React.FC<RemoveFyreProps> = (props) => {
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async () => {
-    const res = await Delete(`${CS_ENV.api_url}/api/fyre/${fyre_id}`)
+    const res = await Delete(`${CS_ENV.api_url}/fyre/${fyre_id}`)
 
     if (res.success) {
       onSuccessHandler()

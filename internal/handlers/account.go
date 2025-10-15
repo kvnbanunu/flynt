@@ -19,7 +19,7 @@ func NewAccountHandler(db *database.DB) *AccountHandler {
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/account")
+	path := strings.TrimPrefix(r.URL.Path, "/account")
 
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -40,6 +40,10 @@ func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 	var req database.CreateUserRequest
 
 	if err := parseBody(w, r, &req); err != nil {
+		return
+	}
+
+	if !validateFields(w, req.Username, req.Name, req.Password, req.Email) {
 		return
 	}
 

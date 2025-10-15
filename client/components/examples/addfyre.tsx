@@ -46,7 +46,7 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
       user_id: user_id,
     };
     const res = await Post<Models.Fyre, AddFyreRequest>(
-      `${CS_ENV.api_url}/api/fyre`,
+      `${CS_ENV.api_url}/fyre`,
       fyre,
     );
 

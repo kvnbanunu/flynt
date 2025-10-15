@@ -21,7 +21,7 @@ func NewUserHandler(db *database.DB) *UserHandler {
 func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/user")
+	path := strings.TrimPrefix(r.URL.Path, "/user")
 
 	switch {
 	case path == "" || path == "/":
@@ -65,15 +65,14 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validation
-	if req.Name == "" || req.Email == "" || req.Password == "" {
-		writeError(w, http.StatusBadRequest, "Name, email, and password are required")
+	if !validateFields(w, req.Username, req.Name, req.Password, req.Email) {
 		return
 	}
 
 	user, err := h.db.CreateUser(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			writeError(w, http.StatusConflict, "User with this email already exists")
+			writeError(w, http.StatusConflict, "User with this name or email already exists")
 			return
 		}
 		log.Printf("Error creating user: %v", err)

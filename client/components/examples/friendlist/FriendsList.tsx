@@ -26,7 +26,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
 
   const fetchFriends = useCallback(async () => {
     const res = await Get<FriendsListItem[]>(
-      `${CS_ENV.api_url}/api/friend/${id}`,
+      `${CS_ENV.api_url}/friend/${id}`,
     );
     if (res.success) {
       setFriends(res.data);
@@ -38,7 +38,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
   }, [id]);
 
   const fetchUsers = useCallback(async () => {
-    const res = await Get<Models.User[]>(`${CS_ENV.api_url}/api/user`);
+    const res = await Get<Models.User[]>(`${CS_ENV.api_url}/user`);
     if (res.success) {
       setUsers(res.data);
     } else {
@@ -117,7 +117,7 @@ const FriendsListList: React.FC<{
       user_id_1: id,
       user_id_2: friendID,
     };
-    const res = await DeleteBody(`${CS_ENV.api_url}/api/friend`, req);
+    const res = await DeleteBody(`${CS_ENV.api_url}/friend`, req);
     if (res.success) {
       setError(null);
       handler();
@@ -132,7 +132,7 @@ const FriendsListList: React.FC<{
       user_id_1: id,
       user_id_2: friendID,
     };
-    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/api/friend`, req);
+    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/friend`, req);
     if (res.success) {
       setError(null);
       handler();
@@ -199,7 +199,7 @@ const UsersList: React.FC<{
       user_id_1: id,
       user_id_2: friendID,
     };
-    const res = await Post(`${CS_ENV.api_url}/api/friend`, req);
+    const res = await Post(`${CS_ENV.api_url}/friend`, req);
     if (res.success) {
       setError(null);
       handler();
@@ -209,7 +209,7 @@ const UsersList: React.FC<{
   };
 
   const handleBlock = async (friendID: number) => {
-    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/api/friend`, {
+    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/friend`, {
       type: "blockfriend",
       user_id_1: id,
       user_id_2: friendID,

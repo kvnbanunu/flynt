@@ -48,7 +48,7 @@ export const RegisterForm: React.FC<RegisterProps> = (props) => {
       password: inputPassword,
       email: inputEmail
     }
-    const res = await Post<Models.User, RegisterRequest>(`${CS_ENV.api_url}/api/account/register`, registerData);
+    const res = await Post<Models.User, RegisterRequest>(`${CS_ENV.api_url}/account/register`, registerData);
 
     if (res.success) {
       const user: Models.User = res.data;

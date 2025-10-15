@@ -23,7 +23,7 @@ export const ExampleHome: React.FC = () => {
     setLoading(true);
     const loginData: LoginData = { email: email, password: password };
     const res = await Post<Models.User, LoginData>(
-      `${CS_ENV.api_url}/api/account/login`,
+      `${CS_ENV.api_url}/account/login`,
       loginData,
     );
 

@@ -15,7 +15,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
 
   const fetchFyres = useCallback(async () => {
     const res = await Get<Models.Fyre[]>(
-      `${CS_ENV.api_url}/api/fyre/user/${user.id}`,
+      `${CS_ENV.api_url}/fyre/user/${user.id}`,
     );
     if (res.success) {
       setFyres(res.data);
