@@ -43,6 +43,10 @@ func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !validateFields(w, req.Username, req.Name, req.Password, req.Email) {
+		return
+	}
+
 	user, err := h.db.CreateUser(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "Failed to create") {

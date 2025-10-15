@@ -18,6 +18,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
     const copy: Models.Fyre = currentFyre;
 
     copy.streak_count = checked ? streakCount + 1 : streakCount - 1;
+    copy.bonfyre_id = -1;
 
     const res = await Put<Models.Fyre>(
       `${CS_ENV.api_url}/api/fyre/${currentFyre.id}`,

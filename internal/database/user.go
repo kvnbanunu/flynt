@@ -22,8 +22,8 @@ type UpdateUserRequest struct {
 	Name     string `json:"name,omitempty"`
 	Password string `json:"password,omitempty"`
 	Email    string `json:"email,omitempty"`
-	ImgURL   string `json:"img_url"`
-	Bio      string `json:"bio"`
+	ImgURL   string `json:"img_url,omitempty"`
+	Bio      string `json:"bio,omitempty"`
 }
 
 // query function to create new user in db
