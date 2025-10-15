@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -39,34 +38,35 @@ func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.MethodDelete:
 			h.deleteFriend(w, r)
 		default:
-			h.writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
 	case strings.HasPrefix(path, "/"):
 		if r.Method != http.MethodGet {
-			h.writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			return
 		}
 		idStr := strings.TrimPrefix(path, "/")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			h.writeError(w, http.StatusBadRequest, "Invalid user ID")
+			writeError(w, http.StatusBadRequest, "Invalid user ID")
 			return
 		}
 		h.getFriendsList(w, r, id)
 	default:
-		h.writeError(w, http.StatusNotFound, "Endpoint not found")
+		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
 }
 
 // handles POST /api/friend
 func (h *FriendHandler) addFriend(w http.ResponseWriter, r *http.Request) {
 	var req FriendRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.writeError(w, http.StatusBadRequest, "Invalid JSON payload")
+
+	if err := parseBody(w, r, &req); err != nil {
 		return
 	}
+
 	if req.Type != "addfriend" {
-		h.writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
+		writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
 		return
 	}
 
@@ -74,17 +74,17 @@ func (h *FriendHandler) addFriend(w http.ResponseWriter, r *http.Request) {
 
 	err := h.db.AddFriend(update)
 	if err != nil {
-		h.writeError(w, http.StatusInternalServerError, "Failed to add friend")
+		writeError(w, http.StatusInternalServerError, "Failed to add friend")
 		return
 	}
-	h.writeSuccess(w, http.StatusCreated, "Friend request created", nil)
+	writeSuccess(w, http.StatusCreated, "Friend request created", nil)
 }
 
 // handles PUT /api/friend
 func (h *FriendHandler) updateFriend(w http.ResponseWriter, r *http.Request) {
 	var req FriendRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.writeError(w, http.StatusBadRequest, "Invalid JSON payload")
+
+	if err := parseBody(w, r, &req); err != nil {
 		return
 	}
 
@@ -94,31 +94,31 @@ func (h *FriendHandler) updateFriend(w http.ResponseWriter, r *http.Request) {
 	case "acceptfriend":
 		err := h.db.AcceptFriend(update)
 		if err != nil {
-			h.writeError(w, http.StatusInternalServerError, "Failed to accept friend request")
+			writeError(w, http.StatusInternalServerError, "Failed to accept friend request")
 			return
 		}
-		h.writeSuccess(w, http.StatusOK, "Friend request accepted", nil)
+		writeSuccess(w, http.StatusOK, "Friend request accepted", nil)
 	case "blockfriend":
 		err := h.db.BlockFriend(update)
 		if err != nil {
-			h.writeError(w, http.StatusInternalServerError, "Failed to block friend")
+			writeError(w, http.StatusInternalServerError, "Failed to block friend")
 			return
 		}
-		h.writeSuccess(w, http.StatusOK, "Friend successfully blocked", nil)
+		writeSuccess(w, http.StatusOK, "Friend successfully blocked", nil)
 	default:
-		h.writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
+		writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
 	}
 }
 
 // handles DELETE /api/friend
 func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 	var req FriendRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.writeError(w, http.StatusBadRequest, "Invalid JSON payload")
+
+	if err := parseBody(w, r, &req); err != nil {
 		return
 	}
 	if req.Type != "deletefriend" {
-		h.writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
+		writeError(w, http.StatusBadRequest, "Incorrect method and request type combination")
 		return
 	}
 
@@ -126,10 +126,10 @@ func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 
 	err := h.db.DeleteFriend(update)
 	if err != nil {
-		h.writeError(w, http.StatusInternalServerError, "Failed to remove friend")
+		writeError(w, http.StatusInternalServerError, "Failed to remove friend")
 		return
 	}
-	h.writeSuccess(w, http.StatusOK, "Friend successfully removed", nil)
+	writeSuccess(w, http.StatusOK, "Friend successfully removed", nil)
 }
 
 // handles GET /api/friend/{user_id_1}
@@ -137,28 +137,8 @@ func (h *FriendHandler) getFriendsList(w http.ResponseWriter, _ *http.Request, i
 	friendsList, err := h.db.GetFriendsList(id)
 	if err != nil {
 		log.Printf("Error getting friendslist: %v", err)
-		h.writeError(w, http.StatusInternalServerError, "Failed to get friendslist")
+		writeError(w, http.StatusInternalServerError, "Failed to get friendslist")
 		return
 	}
-	h.writeSuccess(w, http.StatusOK, "FriendsList retrieved successfully", friendsList)
-}
-
-// error response for FriendHandlers
-func (h *FriendHandler) writeError(w http.ResponseWriter, statusCode int, message string) {
-	w.WriteHeader(statusCode)
-	res := ErrorResponse{
-		Error:   http.StatusText(statusCode),
-		Message: message,
-	}
-	json.NewEncoder(w).Encode(res)
-}
-
-// success response for FriendHandlers
-func (h *FriendHandler) writeSuccess(w http.ResponseWriter, statusCode int, message string, data any) {
-	w.WriteHeader(statusCode)
-	res := SuccessResponse{
-		Message: message,
-		Data:    data,
-	}
-	json.NewEncoder(w).Encode(res)
+	writeSuccess(w, http.StatusOK, "FriendsList retrieved successfully", friendsList)
 }

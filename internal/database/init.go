@@ -39,6 +39,7 @@ func (db *DB) createTables() error {
 	query := `
 	CREATE TABLE IF NOT EXISTS user (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT NOT NULL UNIQUE,
 		name TEXT NOT NULL,
 		password TEXT NOT NULL,
 		email TEXT UNIQUE NOT NULL,
