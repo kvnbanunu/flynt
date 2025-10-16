@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"flynt/internal/database"
+	"flynt/internal/utils"
 )
 
 type AccountHandler struct {
@@ -43,7 +44,8 @@ func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validateFields(w, req.Username, req.Name, req.Password, req.Email) {
+	if !utils.ValidateFields(req.Username, req.Name, req.Password, req.Email) {
+		writeError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
@@ -80,5 +82,11 @@ func (h *AccountHandler) login(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "Failed to login")
 		return
 	}
+
+	err = setCookie(w, user.ID)
+	if err != nil {
+		return
+	}
+
 	writeSuccess(w, http.StatusOK, "User logged in successfully", user)
 }

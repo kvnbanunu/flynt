@@ -4,7 +4,9 @@ import { ApiError, ApiResponse, Result } from "@/types/api";
 // Generic GET call
 export async function Get<T>(url: string): Promise<Result<T, ApiError>> {
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      credentials: "include",
+    });
 
     if (!res.ok) {
       const errData: ApiError = await res.json();
@@ -33,6 +35,7 @@ export async function Put<T>(
   try {
     const res = await fetch(url, {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -66,6 +69,7 @@ export async function Post<T, U>(
   try {
     const res = await fetch(url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -96,6 +100,7 @@ export async function Delete(url: string): Promise<Result<null, ApiError>> {
   try {
     const res = await fetch(url, {
       method: "DELETE",
+      credentials: "include",
     });
 
     if (!res.ok) {
@@ -123,6 +128,7 @@ export async function DeleteBody<T>(
   try {
     const res = await fetch(url, {
       method: "DELETE",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

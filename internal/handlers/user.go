@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"flynt/internal/database"
+	"flynt/internal/utils"
 )
 
 // handles requests for user ops
@@ -65,7 +66,8 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validation
-	if !validateFields(w, req.Username, req.Name, req.Password, req.Email) {
+	if !utils.ValidateFields(req.Username, req.Name, req.Password, req.Email) {
+		writeError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
