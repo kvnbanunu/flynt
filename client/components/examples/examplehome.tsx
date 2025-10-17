@@ -3,7 +3,6 @@ import { Post } from "@/lib/api";
 import React, { useState } from "react";
 import SigninForm from "./signin";
 import { FyreList } from "./fyrelist";
-import { CS_ENV } from "@/lib/utils";
 import FriendsList from "./friendlist/FriendsList";
 import { RegisterForm } from "./Register";
 
@@ -23,7 +22,7 @@ export const ExampleHome: React.FC = () => {
     setLoading(true);
     const loginData: LoginData = { email: email, password: password };
     const res = await Post<Models.User, LoginData>(
-      `${CS_ENV.api_url}/account/login`,
+      "/account/login",
       loginData,
     );
 

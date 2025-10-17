@@ -1,6 +1,5 @@
 "use client";
 import { Post } from "@/lib/api";
-import { CS_ENV } from "@/lib/utils";
 import React, { useState } from "react";
 
 interface AddFyreProps {
@@ -46,7 +45,7 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
       user_id: user_id,
     };
     const res = await Post<Models.Fyre, AddFyreRequest>(
-      `${CS_ENV.api_url}/fyre`,
+      "/fyre",
       fyre,
     );
 

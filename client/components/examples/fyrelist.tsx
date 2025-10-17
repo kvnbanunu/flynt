@@ -2,7 +2,6 @@
 import { Get } from "@/lib/api";
 import React, { useCallback, useEffect, useState } from "react";
 import { FyreCard } from "./fyrecard";
-import { CS_ENV } from "@/lib/utils";
 import AddFyre from "./addfyre";
 import { RemoveFyre } from "./removefyre";
 
@@ -15,7 +14,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
 
   const fetchFyres = useCallback(async () => {
     const res = await Get<Models.Fyre[]>(
-      `${CS_ENV.api_url}/fyre/user/${user.id}`,
+      `/fyre/user/${user.id}`,
     );
     if (res.success) {
       setFyres(res.data);
