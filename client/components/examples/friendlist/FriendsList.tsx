@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useState } from "react";
 
 interface FriendsListItem {
   id: number;
-  name: string;
+  username: string;
+  img_url?: string | null;
   status: string;
 }
 
@@ -140,7 +141,7 @@ const FriendsListList: React.FC<{
         friends.map((f, index) => {
           return (
             <li className="flex gap-4 justify-between" key={index}>
-              <div className="w-32">{f.name}</div>
+              <div className="w-32">{f.username}</div>
               {f.status === "friends" && (
                 <div className="w-20 bg-green-300 text-sm font-semibold text-center rounded-lg px-1 py-1">
                   {f.status}

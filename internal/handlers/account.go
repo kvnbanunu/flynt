@@ -36,7 +36,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handles POST /api/account/register
+// handles POST /account/register
 func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 	var req database.CreateUserRequest
 
@@ -62,7 +62,7 @@ func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusOK, "New user registered successfully", user)
 }
 
-// Handles POST /api/account/login
+// Handles POST /account/login
 func (h *AccountHandler) login(w http.ResponseWriter, r *http.Request) {
 	var req database.AccountLoginRequest
 

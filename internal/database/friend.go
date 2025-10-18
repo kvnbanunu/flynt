@@ -8,9 +8,10 @@ type UpdateFriendRequest struct {
 }
 
 type FriendsListItem struct {
-	ID     int          `db:"id" json:"id"`
-	Name   string       `db:"name" json:"name"`
-	Status FriendStatus `db:"status" json:"status"`
+	ID       int          `db:"id" json:"id"`
+	Username string       `db:"username" json:"username"`
+	ImgURL   *string      `db:"img_url" json:"img_url"`
+	Status   FriendStatus `db:"status" json:"status"`
 }
 
 func (db *DB) AddFriend(req UpdateFriendRequest) error {
@@ -82,7 +83,7 @@ func (db *DB) BlockFriend(req UpdateFriendRequest) error {
 	if err != nil {
 		return fmt.Errorf("Error parsing rows affected: %w", err)
 	}
-	
+
 	if rowsAffected == 0 {
 		return fmt.Errorf("Error blocking friend: %w", err)
 	}
@@ -115,7 +116,7 @@ func (db *DB) DeleteFriend(req UpdateFriendRequest) error {
 
 func (db *DB) GetFriendsList(id int) ([]FriendsListItem, error) {
 	query := `
-	SELECT u.id, u.name, f.status FROM friend f
+	SELECT u.id, u.username, u.img_url, f.status FROM friend f
 	JOIN user u ON u.id = f.user_id_2
 	WHERE f.user_id_1 = ?
 	ORDER BY u.name ASC
