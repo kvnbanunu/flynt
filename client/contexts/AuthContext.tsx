@@ -1,11 +1,34 @@
 "use client";
 
 import { Get, Post } from "@/lib/api";
-import { useRouter } from "next/router";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { LoginRequest, RegisterRequest } from "@/types/req";
 
-const AuthContext = createContext({});
+export interface AuthContextType {
+  user?: Models.User | null;
+  loading: boolean;
+  login: (credentials: LoginRequest) => Promise<Boolean>;
+  register: (credentials: RegisterRequest) => Promise<Boolean>;
+  isAuthenticated: boolean;
+}
+
+const AuthContext = createContext<AuthContextType>({
+  loading: false,
+  login: function(_credentials: LoginRequest): Promise<Boolean> {
+    throw new Error("Function not implemented.");
+  },
+  register: function(_credentials: RegisterRequest): Promise<Boolean> {
+    throw new Error("Function not implemented.");
+  },
+  isAuthenticated: false,
+});
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -13,7 +36,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Models.User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,33 +54,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (credentials: LoginRequest): Promise<Boolean> => {
     setLoading(true);
-    const res = await Post<Models.User, LoginRequest>("/account/login", credentials);
+    const res = await Post<Models.User, LoginRequest>(
+      "/account/login",
+      credentials,
+    );
     if (res.success) {
       setUser(res.data);
       // set other stuff here
-      router.push('/'); // send to home
+      router.push("/"); // send to home
     }
     setLoading(false);
     return res.success;
-  }
+  };
 
   const register = async (credentials: RegisterRequest): Promise<Boolean> => {
     setLoading(true);
-    const res = await Post<Models.User, RegisterRequest>("/account/register", credentials);
+    const res = await Post<Models.User, RegisterRequest>(
+      "/account/register",
+      credentials,
+    );
     if (res.success) {
       setUser(res.data);
       // set other stuff here
-      router.push('/'); // send to home
+      router.push("/"); // send to home
     }
     setLoading(false);
     return res.success;
-  }
+  };
 
-  const value = {
-    user,
-    loading,
-    login,
-    register,
+  const value: AuthContextType = {
+    user: user,
+    loading: loading,
+    login: login,
+    register: register,
     isAuthenticated: !!user,
   };
 
