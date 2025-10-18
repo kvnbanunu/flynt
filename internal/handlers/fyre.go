@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"flynt/internal/database"
+	"flynt/internal/utils"
 )
 
 type FyreHandler struct {
@@ -21,24 +22,16 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	path := strings.TrimPrefix(r.URL.Path, "/fyre")
+	userID := r.Context().Value("userID").(int)
 
 	switch {
 	case path == "" || path == "/":
-		if r.Method == http.MethodPost {
-			h.createFyre(w, r)
-		} else {
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
-		}
-	case strings.HasPrefix(path, "/user/"):
-		if r.Method == http.MethodGet {
-			idStr := strings.TrimPrefix(path, "/user/")
-			id, err := strconv.Atoi(idStr)
-			if err != nil {
-				writeError(w, http.StatusBadRequest, "Invalid user ID")
-				return
-			}
-			h.getAllUserFyres(w, r, id)
-		} else {
+		switch r.Method {
+		case http.MethodGet:
+			h.getAllUserFyres(w, r, userID)
+		case http.MethodPost:
+			h.createFyre(w, r, userID)
+		default:
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
 	case strings.HasPrefix(path, "/"):
@@ -63,20 +56,20 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handles POST /api/fyre
-func (h *FyreHandler) createFyre(w http.ResponseWriter, r *http.Request) {
+// handles POST /fyre
+func (h *FyreHandler) createFyre(w http.ResponseWriter, r *http.Request, id int) {
 	var req database.CreateFyreRequest
 
 	if err := parseBody(w, r, &req); err != nil {
 		return
 	}
 
-	if req.Title == "" || req.UserID == 0 {
-		writeError(w, http.StatusBadRequest, "Title and user_id are required")
+	if !utils.ValidateFields(req.Title) {
+		writeError(w, http.StatusBadRequest, "Title is required")
 		return
 	}
 
-	fyre, err := h.db.CreateFyre(req)
+	fyre, err := h.db.CreateFyre(req, id)
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists") {
 			writeError(w, http.StatusConflict, "Fyre with this title already exists")
@@ -89,7 +82,7 @@ func (h *FyreHandler) createFyre(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusCreated, "Fyre created successfully", fyre)
 }
 
-// handles GET /api/fyre/{id}
+// handles GET /fyre/{id}
 func (h *FyreHandler) getFyreById(w http.ResponseWriter, _ *http.Request, id int) {
 	fyre, err := h.db.GetFyreByID(id)
 	if err != nil {
@@ -140,7 +133,7 @@ func (h *FyreHandler) deleteFyre(w http.ResponseWriter, _ *http.Request, id int)
 	writeSuccess(w, http.StatusOK, "Fyre successfully deleted", nil)
 }
 
-// handles GET /api/fyre/user/{id}
+// handles GET /fyre
 // Finds all fyres that belong to this user id
 func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id int) {
 	fyres, err := h.db.GetAllUserFyres(id)

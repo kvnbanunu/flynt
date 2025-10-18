@@ -27,9 +27,9 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch path { // add more later
-	case "/register":
+	case "/register", "/register/":
 		h.register(w, r)
-	case "/login":
+	case "/login", "/login/":
 		h.login(w, r)
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")

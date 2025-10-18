@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"flynt/internal/database"
@@ -11,7 +10,6 @@ import (
 
 type FriendRequest struct {
 	Type string `json:"type"`
-	ID1  int    `json:"user_id_1"`
 	ID2  int    `json:"user_id_2"`
 }
 
@@ -27,38 +25,29 @@ func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	path := strings.TrimPrefix(r.URL.Path, "/friend")
+	id := r.Context().Value("userID").(int)
 
-	switch {
-	case path == "" || path == "/":
+	switch  path{
+	case "", "/":
 		switch r.Method {
+		case http.MethodGet:
+			h.getFriendsList(w, r, id)
 		case http.MethodPut:
-			h.updateFriend(w, r)
+			h.updateFriend(w, r, id)
 		case http.MethodPost:
-			h.addFriend(w, r)
+			h.addFriend(w, r, id)
 		case http.MethodDelete:
-			h.deleteFriend(w, r)
+			h.deleteFriend(w, r, id)
 		default:
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
-	case strings.HasPrefix(path, "/"):
-		if r.Method != http.MethodGet {
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
-			return
-		}
-		idStr := strings.TrimPrefix(path, "/")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid user ID")
-			return
-		}
-		h.getFriendsList(w, r, id)
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
 }
 
-// handles POST /api/friend
-func (h *FriendHandler) addFriend(w http.ResponseWriter, r *http.Request) {
+// handles POST /friend
+func (h *FriendHandler) addFriend(w http.ResponseWriter, r *http.Request, id int) {
 	var req FriendRequest
 
 	if err := parseBody(w, r, &req); err != nil {
@@ -70,7 +59,7 @@ func (h *FriendHandler) addFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	update := database.UpdateFriendRequest{ID1: req.ID1, ID2: req.ID2}
+	update := database.UpdateFriendRequest{ID1: id, ID2: req.ID2}
 
 	err := h.db.AddFriend(update)
 	if err != nil {
@@ -80,15 +69,15 @@ func (h *FriendHandler) addFriend(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusCreated, "Friend request created", nil)
 }
 
-// handles PUT /api/friend
-func (h *FriendHandler) updateFriend(w http.ResponseWriter, r *http.Request) {
+// handles PUT /friend
+func (h *FriendHandler) updateFriend(w http.ResponseWriter, r *http.Request, id int) {
 	var req FriendRequest
 
 	if err := parseBody(w, r, &req); err != nil {
 		return
 	}
 
-	update := database.UpdateFriendRequest{ID1: req.ID1, ID2: req.ID2}
+	update := database.UpdateFriendRequest{ID1: id, ID2: req.ID2}
 
 	switch req.Type {
 	case "acceptfriend":
@@ -110,8 +99,8 @@ func (h *FriendHandler) updateFriend(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handles DELETE /api/friend
-func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
+// handles DELETE /friend
+func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request, id int) {
 	var req FriendRequest
 
 	if err := parseBody(w, r, &req); err != nil {
@@ -122,7 +111,7 @@ func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	update := database.UpdateFriendRequest{ID1: req.ID1, ID2: req.ID2}
+	update := database.UpdateFriendRequest{ID1: id, ID2: req.ID2}
 
 	err := h.db.DeleteFriend(update)
 	if err != nil {
@@ -132,7 +121,7 @@ func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusOK, "Friend successfully removed", nil)
 }
 
-// handles GET /api/friend/{user_id_1}
+// handles GET /friend
 func (h *FriendHandler) getFriendsList(w http.ResponseWriter, _ *http.Request, id int) {
 	friendsList, err := h.db.GetFriendsList(id)
 	if err != nil {

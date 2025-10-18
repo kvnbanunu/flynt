@@ -7,6 +7,7 @@ import FriendsList from "./friendlist/FriendsList";
 import { RegisterForm } from "./Register";
 
 interface LoginData {
+  type: string;
   email: string;
   password: string;
 }
@@ -20,7 +21,7 @@ export const ExampleHome: React.FC = () => {
 
   const onLogin = async (email: string, password: string) => {
     setLoading(true);
-    const loginData: LoginData = { email: email, password: password };
+    const loginData: LoginData = { type: "email", email: email, password: password };
     const res = await Post<Models.User, LoginData>(
       "/account/login",
       loginData,

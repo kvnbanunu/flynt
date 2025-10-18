@@ -12,7 +12,7 @@ export default function Home() {
         <button className="text-md px-2 py-1 bg-blue-300 rounded-lg text-center">
           <a href="/example">Click here to try out Flynt</a>
         </button>
-        <AuthGuard redirectTo="/example">
+        <AuthGuard redirectTo="/login">
           <div>{isAuthenticated}</div>
         </AuthGuard>
       </main>

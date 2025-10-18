@@ -10,7 +10,6 @@ import (
 type CreateFyreRequest struct {
 	Title       string `json:"title"`
 	StreakCount int    `json:"streak_count,omitempty"`
-	UserID      int    `json:"user_id"`
 	ActiveDays  string `json:"active_days,omitempty"`
 }
 
@@ -21,15 +20,15 @@ type UpdateFyreRequest struct{
 	ActiveDays  string `json:"active_days,omitempty"`
 }
 
-func (db *DB) CreateFyre(req CreateFyreRequest) (*Fyre, error) {
-	err := db.Get(nil, `SELECT * FROM fyre WHERE title = ? AND user_id = ?`, req.Title, req.UserID)
+func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
+	err := db.Get(nil, `SELECT * FROM fyre WHERE title = ? AND user_id = ?`, req.Title, id)
 	if err == nil {
 		return nil, fmt.Errorf("Fyre already exists: %w", err)
 	}
 
 	fields := []string{"title", "user_id"}
 	placeholders := []string{"?", "?"}
-	args := []any{req.Title, req.UserID}
+	args := []any{req.Title, id}
 
 	if req.StreakCount != 0 {
 		fields = append(fields, "streak_count")

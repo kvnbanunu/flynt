@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"flynt/internal/database"
@@ -22,29 +21,17 @@ func NewUserHandler(db *database.DB) *UserHandler {
 func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	id := r.Context().Value("userID").(int)
+
 	path := strings.TrimPrefix(r.URL.Path, "/user")
 
 	switch {
 	case path == "" || path == "/":
 		switch r.Method {
 		case http.MethodGet:
-			h.getAllUsers(w, r)
-		case http.MethodPost:
-			h.createUser(w, r)
-		default:
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
-		}
-	case strings.HasPrefix(path, "/"): // id queries
-		idStr := strings.TrimPrefix(path, "/")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid user ID")
-			return
-		}
-
-		switch r.Method {
-		case http.MethodGet:
 			h.getUserByID(w, r, id)
+		case http.MethodPost: // use account/register instead
+			h.createUser(w, r)
 		case http.MethodPut:
 			h.updateUser(w, r, id)
 		case http.MethodDelete:
@@ -52,12 +39,26 @@ func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		default:
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
+	case strings.HasPrefix(path, "/"):
+		path = strings.TrimPrefix(path, "/")
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			return
+		}
+		switch path {
+		case "all", "all/":
+			h.getAllUsers(w, r, 0, false)
+		case "redacted", "redacted/":
+			h.getAllUsers(w, r, id, true)
+		default:
+			writeError(w, http.StatusNotFound, "Endpoint not found")
+		}
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
 }
 
-// handles	POST /api/user
+// handles	POST /user
 func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	var req database.CreateUserRequest
 
@@ -85,9 +86,15 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusCreated, "User created successfully", user)
 }
 
-// handles	GET /api/user
-func (h *UserHandler) getAllUsers(w http.ResponseWriter, _ *http.Request) {
-	users, err := h.db.GetAllUsers()
+// handles	GET /user/all or /user/redacted
+func (h *UserHandler) getAllUsers(w http.ResponseWriter, _ *http.Request, id int, redacted bool) {
+	var users []database.User
+	var err error
+	if redacted {
+		users, err = h.db.GetAllUsersRedacted(id)
+	} else {
+		users, err = h.db.GetAllUsers()
+	}
 	if err != nil {
 		log.Printf("Error getting users: %v", err)
 		writeError(w, http.StatusInternalServerError, "Failed to get users")
@@ -97,7 +104,7 @@ func (h *UserHandler) getAllUsers(w http.ResponseWriter, _ *http.Request) {
 	writeSuccess(w, http.StatusOK, "Users retrieved successfully", users)
 }
 
-// handles	GET /api/user/{id}
+// handles	GET /user/
 func (h *UserHandler) getUserByID(w http.ResponseWriter, _ *http.Request, id int) {
 	user, err := h.db.GetUserByID(id)
 	if err != nil {
@@ -113,7 +120,7 @@ func (h *UserHandler) getUserByID(w http.ResponseWriter, _ *http.Request, id int
 	writeSuccess(w, http.StatusOK, "User retrieved successfully", user)
 }
 
-// handles	PUT /api/user/{id}
+// handles	PUT /user
 func (h *UserHandler) updateUser(w http.ResponseWriter, r *http.Request, id int) {
 	var req database.UpdateUserRequest
 
@@ -135,7 +142,7 @@ func (h *UserHandler) updateUser(w http.ResponseWriter, r *http.Request, id int)
 	writeSuccess(w, http.StatusOK, "User updated successfully", user)
 }
 
-// handles	DELETE /api/users/{id}
+// handles	DELETE /users
 func (h *UserHandler) deleteUser(w http.ResponseWriter, _ *http.Request, id int) {
 	err := h.db.DeleteUser(id)
 	if err != nil {

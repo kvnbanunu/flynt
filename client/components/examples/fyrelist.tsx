@@ -14,7 +14,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
 
   const fetchFyres = useCallback(async () => {
     const res = await Get<Models.Fyre[]>(
-      `/fyre/user/${user.id}`,
+      "/fyre",
     );
     if (res.success) {
       setFyres(res.data);
@@ -23,7 +23,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
     }
     setLoading(false);
     setUpdate(false);
-  }, [user.id]);
+  }, []);
 
   const onUpdate = () => {
     setUpdate(true);
@@ -57,7 +57,7 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
           ))}
       </ul>
       <div>
-        <AddFyre onSuccessHandler={onUpdate} user_id={user.id} />
+        <AddFyre onSuccessHandler={onUpdate} />
       </div>
     </div>
   );

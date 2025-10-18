@@ -1,4 +1,7 @@
+export type LoginType = "username" | "email"
+
 export interface LoginRequest {
+  type: LoginType;
   username?: string | null;
   email?: string | null;
   password: string;
