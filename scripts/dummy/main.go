@@ -8,10 +8,12 @@ import (
 )
 
 func main() {
-	cfg, err := utils.LoadConfig()
+	err := utils.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+
+	cfg := utils.GetConfig()
 
 	db, err := database.InitDB(cfg.DBPath)
 	if err != nil {

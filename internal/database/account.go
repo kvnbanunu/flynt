@@ -1,20 +1,29 @@
 package database
 
 import (
-	"flynt/internal/utils"
 	"fmt"
+
+	"flynt/internal/utils"
 )
 
 type AccountLoginRequest struct {
-	Email     string `json:"email"`
-	Password string `json:"password"`
+	LoginType string `json:"type"`
+	Username  string `json:"username,omitempty"`
+	Email     string `json:"email,omitempty"`
+	Password  string `json:"password"`
 }
 
 // check if login details match in database
 func (db *DB) ValidateLogin(req AccountLoginRequest) (*User, error) {
-	query := `SELECT * FROM user WHERE email = ?`
+	query := fmt.Sprintf("SELECT * FROM user WHERE %s = ?", req.LoginType)
+
+	qparam := req.Email
+	if req.LoginType == "username" {
+		qparam = req.Username
+	}
+	
 	var existingUser User
-	err := db.Get(&existingUser, query, req.Email)
+	err := db.Get(&existingUser, query, qparam)
 	if err != nil { // user does not exist, but do not expose info
 		return nil, fmt.Errorf("Failed to login")
 	}
@@ -23,12 +32,12 @@ func (db *DB) ValidateLogin(req AccountLoginRequest) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Failed to hash password: %w", err)
 	}
-	
+
 	if !match {
 		return nil, fmt.Errorf("Failed to login")
 	}
 
 	existingUser.Password = ""
-	
+
 	return &existingUser, nil
 }

@@ -1,7 +1,6 @@
 "use client";
 import { Put } from "@/lib/api";
 import React, { useState } from "react";
-import { CS_ENV } from "@/lib/utils";
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(props.fyre);
@@ -18,9 +17,10 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
     const copy: Models.Fyre = currentFyre;
 
     copy.streak_count = checked ? streakCount + 1 : streakCount - 1;
+    copy.bonfyre_id = -1;
 
     const res = await Put<Models.Fyre>(
-      `${CS_ENV.api_url}/api/fyre/${currentFyre.id}`,
+      `/fyre/${currentFyre.id}`,
       copy,
     );
     if (res.success) {

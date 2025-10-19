@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
-	"log"
 
 	"flynt/internal/database"
+	"flynt/internal/utils"
 )
 
 type AccountHandler struct {
@@ -20,21 +20,53 @@ func NewAccountHandler(db *database.DB) *AccountHandler {
 func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/account")
+	path := strings.TrimPrefix(r.URL.Path, "/account")
 
-	switch  path { // add more later
-	case "/login":
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+	}
+
+	switch path { // add more later
+	case "/register", "/register/":
+		h.register(w, r)
+	case "/login", "/login/":
 		h.login(w, r)
 	default:
-		h.writeError(w, http.StatusNotFound, "Endpoint not found")
+		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
 }
 
-// Handles POST /api/account/login
+// handles POST /account/register
+func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
+	var req database.CreateUserRequest
+
+	if err := parseBody(w, r, &req); err != nil {
+		return
+	}
+
+	if !utils.ValidateFields(req.Username, req.Name, req.Password, req.Email) {
+		writeError(w, http.StatusBadRequest, "Missing required fields")
+		return
+	}
+
+	user, err := h.db.CreateUser(req)
+	if err != nil {
+		if strings.Contains(err.Error(), "Failed to create") {
+			writeError(w, http.StatusNotAcceptable, "Failed to register new user")
+			return
+		}
+		log.Printf("Error register: %v", err)
+		writeError(w, http.StatusInternalServerError, "Failed to register new user")
+		return
+	}
+	writeSuccess(w, http.StatusOK, "New user registered successfully", user)
+}
+
+// Handles POST /account/login
 func (h *AccountHandler) login(w http.ResponseWriter, r *http.Request) {
 	var req database.AccountLoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.writeError(w, http.StatusBadRequest, "Invalid JSON payload")
+
+	if err := parseBody(w, r, &req); err != nil {
 		return
 	}
 
@@ -43,32 +75,18 @@ func (h *AccountHandler) login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.db.ValidateLogin(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "Failed to login") {
-			h.writeError(w, http.StatusNotAcceptable, "Email or Password incorrect")
+			writeError(w, http.StatusNotAcceptable, "Email or Password incorrect")
 			return
 		}
 		log.Printf("Error validating login: %v", err)
-		h.writeError(w, http.StatusInternalServerError, "Failed to login")
+		writeError(w, http.StatusInternalServerError, "Failed to login")
 		return
 	}
-	h.writeSuccess(w, http.StatusOK, "User logged in successfully", user)
-}
 
-// error response for UserHandlers
-func (h *AccountHandler) writeError(w http.ResponseWriter, statusCode int, message string) {
-	w.WriteHeader(statusCode)
-	res := ErrorResponse{
-		Error:   http.StatusText(statusCode),
-		Message: message,
+	err = setCookie(w, user.ID)
+	if err != nil {
+		return
 	}
-	json.NewEncoder(w).Encode(res)
-}
 
-// success response for UserHandlers
-func (h *AccountHandler) writeSuccess(w http.ResponseWriter, statusCode int, message string, data any) {
-	w.WriteHeader(statusCode)
-	res := SuccessResponse{
-		Message: message,
-		Data:    data,
-	}
-	json.NewEncoder(w).Encode(res)
+	writeSuccess(w, http.StatusOK, "User logged in successfully", user)
 }
