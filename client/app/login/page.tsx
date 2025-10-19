@@ -1,5 +1,6 @@
 "use client";
 
+import { LoginCard } from "@/components/login/Login";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -18,5 +19,7 @@ export default function LoginPage() {
     return null;
   }
 
-  return <div>Login here</div>;
+  return (
+    <LoginCard />
+  );
 }

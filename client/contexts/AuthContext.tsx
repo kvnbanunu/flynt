@@ -20,7 +20,7 @@ export interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({
-  loading: false,
+  loading: true,
   login: function(_credentials: LoginRequest): Promise<Boolean> {
     throw new Error("Function not implemented.");
   },
