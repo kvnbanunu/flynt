@@ -139,6 +139,7 @@ export const LoginForm: React.FC = () => {
             Reset
           </Button>
           <Button type="submit" form="form-login">
+            {loading && <Spinner />}
             Submit
           </Button>
         </Field>
