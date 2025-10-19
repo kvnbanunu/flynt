@@ -135,7 +135,7 @@ export const LoginForm: React.FC = () => {
       </CardContent>
       <CardFooter>
         <Field orientation="horizontal">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
+          <Button type="button" variant="secondary" onClick={() => form.reset()}>
             Reset
           </Button>
           <Button type="submit" form="form-login">
@@ -262,7 +262,7 @@ export const RegisterForm: React.FC = () => {
       </CardContent>
       <CardFooter>
         <Field orientation="horizontal">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
+          <Button type="button" variant="secondary" onClick={() => form.reset()}>
             Reset
           </Button>
           <Button type="submit" form="form-register">
