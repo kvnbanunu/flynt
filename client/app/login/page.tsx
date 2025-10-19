@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginCard } from "@/components/login/Login";
+import { LoginCard } from "@/components/login/LoginCard";
 import { MainContainer } from "@/components/MainContainer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
