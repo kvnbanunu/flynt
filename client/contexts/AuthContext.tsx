@@ -14,15 +14,28 @@ import { LoginRequest, RegisterRequest } from "@/types/req";
 export interface AuthContextType {
   user?: Models.User | null;
   error?: string | null;
-  fyres?: Models.Fyre[];
-  loading?: boolean;
-  login?: (credentials: LoginRequest) => Promise<Boolean>;
-  register?: (credentials: RegisterRequest) => Promise<Boolean>;
-  fetchFyres?: () => void;
-  isAuthenticated?: boolean;
+  fyres: Models.Fyre[];
+  loading: boolean;
+  login: (credentials: LoginRequest) => Promise<Boolean>;
+  register: (credentials: RegisterRequest) => Promise<Boolean>;
+  fetchFyres: () => void;
+  isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({});
+const AuthContext = createContext<AuthContextType>({
+    fyres: [],
+    loading: false,
+    login: function(_credentials: LoginRequest): Promise<Boolean> {
+        throw new Error("Function not implemented.");
+    },
+    register: function(_credentials: RegisterRequest): Promise<Boolean> {
+        throw new Error("Function not implemented.");
+    },
+    fetchFyres: function(): void {
+        throw new Error("Function not implemented.");
+    },
+    isAuthenticated: false
+});
 
 interface AuthProviderProps {
   children: ReactNode;

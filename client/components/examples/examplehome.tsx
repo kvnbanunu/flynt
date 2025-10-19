@@ -91,7 +91,7 @@ export const ExampleHome: React.FC = () => {
     return (
       <main>
         <div className="flex">
-          <FriendsList id={currentUser.id} />
+          <FriendsList />
           <FyreList user={currentUser} />
         </div>
       </main>
