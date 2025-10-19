@@ -13,22 +13,16 @@ import { LoginRequest, RegisterRequest } from "@/types/req";
 
 export interface AuthContextType {
   user?: Models.User | null;
-  loading: boolean;
-  login: (credentials: LoginRequest) => Promise<Boolean>;
-  register: (credentials: RegisterRequest) => Promise<Boolean>;
-  isAuthenticated: boolean;
+  error?: string | null;
+  fyres?: Models.Fyre[];
+  loading?: boolean;
+  login?: (credentials: LoginRequest) => Promise<Boolean>;
+  register?: (credentials: RegisterRequest) => Promise<Boolean>;
+  fetchFyres?: () => void;
+  isAuthenticated?: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  loading: true,
-  login: function(_credentials: LoginRequest): Promise<Boolean> {
-    throw new Error("Function not implemented.");
-  },
-  register: function(_credentials: RegisterRequest): Promise<Boolean> {
-    throw new Error("Function not implemented.");
-  },
-  isAuthenticated: false,
-});
+const AuthContext = createContext<AuthContextType>({});
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -36,6 +30,8 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Models.User | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [fyres, setFyres] = useState<Models.Fyre[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
@@ -44,6 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const res = await Get<Models.User>("/user");
       if (res.success) {
         setUser(res.data);
+        fetchFyres();
       } else {
         setUser(null);
       }
@@ -60,8 +57,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     );
     if (res.success) {
       setUser(res.data);
+      await fetchFyres();
       // set other stuff here
       router.push("/"); // send to home
+    } else {
+      setError(res.error.message);
     }
     setLoading(false);
     return res.success;
@@ -77,16 +77,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(res.data);
       // set other stuff here
       router.push("/"); // send to home
+    } else {
+      setError(res.error.message);
     }
     setLoading(false);
     return res.success;
   };
 
+  const fetchFyres = async () => {
+    const res = await Get<Models.Fyre[]>("/fyre")
+    if (res.success) {
+      setFyres(res.data);
+    } else {
+      setError(res.error.message);
+    }
+  }
+
   const value: AuthContextType = {
-    user: user,
-    loading: loading,
-    login: login,
-    register: register,
+    user,
+    error,
+    fyres,
+    loading,
+    login,
+    register,
+    fetchFyres,
     isAuthenticated: !!user,
   };
 
