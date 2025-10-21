@@ -13,3 +13,10 @@ export interface RegisterRequest {
   email: string;
   password: string;
 }
+
+export interface UpdateFyreRequest {
+  title?: string;
+  streak_count?: number;
+  bonfyre_id?: number;
+  active_days?: string;
+}

@@ -125,7 +125,7 @@ const FriendsListList: React.FC<{
       type: "acceptfriend",
       user_id_2: friendID,
     };
-    const res = await Put<FriendRequest>("/friend", req);
+    const res = await Put<null, FriendRequest>("/friend", req);
     if (res.success) {
       setError(null);
       handler();
@@ -200,7 +200,7 @@ const UsersList: React.FC<{
   };
 
   const handleBlock = async (friendID: number) => {
-    const res = await Put<FriendRequest>("/friend", {
+    const res = await Put<null, FriendRequest>("/friend", {
       type: "blockfriend",
       user_id_2: friendID,
     });
