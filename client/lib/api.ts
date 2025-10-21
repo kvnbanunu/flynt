@@ -31,10 +31,10 @@ export async function Get<T>(url: string): Promise<Result<T, ApiError>> {
 }
 
 // Generic PUT/update call
-// <T> is the type you are updating and receiving
-export async function Put<T>(
+// <T> is the recieving type and <U> is the content
+export async function Put<T, U>(
   url: string,
-  content: T,
+  content: U,
 ): Promise<Result<T, ApiError>> {
   try {
     const res = await fetch((CS_ENV.api_url ?? SS_ENV.api_url) + url, {
