@@ -1,7 +1,6 @@
 "use client";
 
 import { LoginCard } from "@/components/login/LoginCard";
-import { MainContainer } from "@/components/MainContainer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -20,9 +19,5 @@ export default function LoginPage() {
     return null;
   }
 
-  return (
-    <MainContainer>
-      <LoginCard />
-    </MainContainer>
-  );
+  return <LoginCard />;
 }

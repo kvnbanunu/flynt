@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { DesktopSidebar } from "@/components/sidebar/Sidebar";
 import { MobileNavbar } from "@/components/navbar/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { MainContainer } from "@/components/MainContainer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +36,13 @@ export default function RootLayout({
         <AuthProvider>
           <SidebarProvider>
             <DesktopSidebar />
-            {children}
             <Toaster />
-            <MobileNavbar />
+            <div className="flex flex-col md:flex-row w-screen md:w-full h-full items-stretch">
+              <MainContainer>
+                {children}
+              </MainContainer>
+              <MobileNavbar />
+            </div>
           </SidebarProvider>
         </AuthProvider>
       </body>

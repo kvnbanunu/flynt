@@ -44,22 +44,25 @@ export const MobileNavbar: React.FC = () => {
   }
 
   return (
-    <NavigationMenu viewport={isMobile}>
-      <NavigationMenuList className="flex md:hidden fixed bottom-0 left-0 z-50 w-full bg-background ">
-        <div className="flex gap-8 rounded-2xl px-6 py-4 my-4 mx-4 bg-sidebar w-full justify-evenly">
-          {items.map((item) => (
-            <NavigationMenuItem key={item.title}>
-              <NavigationMenuLink asChild className="rounded-full">
-                <Link
-                  href={item.url}
-                  className="w-14 h-14 bg-ftrim text-center items-center justify-center"
-                >
-                  <item.icon />
-                  <span className="sr-only">{item.title}</span>
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          ))}
+    <NavigationMenu
+      viewport={isMobile}
+      className="md:hidden sticky bottom-0 bg-background"
+    >
+      <NavigationMenuList className="bg-background w-screen">
+        <div className="flex gap-8 rounded-2xl px-6 py-4 my-4 mx-4 bg-sidebar justify-evenly w-full">
+        {items.map((item) => (
+          <NavigationMenuItem key={item.title}>
+            <NavigationMenuLink asChild className="rounded-full">
+              <Link
+                href={item.url}
+                className="w-14 h-14 bg-ftrim text-center items-center justify-center"
+              >
+                <item.icon />
+                <span className="sr-only">{item.title}</span>
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        ))}
         </div>
       </NavigationMenuList>
     </NavigationMenu>
