@@ -2,9 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"flynt/internal/database"
+	"flynt/internal/middleware"
+	"flynt/internal/utils"
 )
 
 type ErrorResponse struct {
@@ -17,7 +21,7 @@ type SuccessResponse struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func SetupHandlers(db *database.DB) *http.ServeMux {
+func SetupHandlers(db *database.DB) http.Handler {
 	mux := http.NewServeMux()
 
 	// init handlers
@@ -27,16 +31,20 @@ func SetupHandlers(db *database.DB) *http.ServeMux {
 	friendHandler := NewFriendHandler(db)
 	healthHandler := NewHealthHandler(db)
 
+	// alias for readability
+	auth := middleware.Auth
+	admin := middleware.Admin
+
 	// routes
-	mux.Handle("/user", userHandler)
-	mux.Handle("/user/", userHandler)
+	mux.Handle("/user", auth(userHandler))
+	mux.Handle("/user/", auth(userHandler))
 	mux.Handle("/account/", accountHandler)
-	mux.Handle("/fyre", fyreHandler)
-	mux.Handle("/fyre/", fyreHandler)
-	mux.Handle("/fyre/user/", fyreHandler)
-	mux.Handle("/friend", friendHandler)
-	mux.Handle("/friend/", friendHandler)
-	mux.Handle("/health", healthHandler)
+	mux.Handle("/fyre", auth(fyreHandler))
+	mux.Handle("/fyre/", auth(fyreHandler))
+	mux.Handle("/fyre/user/", auth(fyreHandler))
+	mux.Handle("/friend", auth(friendHandler))
+	mux.Handle("/friend/", auth(friendHandler))
+	mux.Handle("/health", auth(admin(healthHandler)))
 
 	// root handler
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +60,30 @@ func SetupHandlers(db *database.DB) *http.ServeMux {
 		w.Write([]byte(msg))
 	})
 
-	return mux
+	return middleware.Logger(middleware.Cors(mux))
+}
+
+func setCookie(w http.ResponseWriter, id int) error {
+	cfg := utils.GetConfig()
+	token, err := utils.NewToken(id)
+	if err != nil {
+		fmt.Println("Failed to create token")
+		writeError(w, http.StatusInternalServerError, "Failed to create token")
+		return err
+	}
+
+	cookie := &http.Cookie{
+		Name:     cfg.Context,
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour),
+		Path:     "/",
+		Secure:   cfg.Env == "production",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	http.SetCookie(w, cookie)
+	return nil
 }
 
 // Generic error response
@@ -82,31 +113,4 @@ func parseBody(w http.ResponseWriter, r *http.Request, data any) error {
 		return err
 	}
 	return nil
-}
-
-// Writes error and returns false if any fields are empty
-func validateFields(w http.ResponseWriter, models ...any) bool {
-	count := 0
-	for _, v := range models {
-		switch v := v.(type) {
-		case int:
-			if v < 0 {
-				break
-			}
-		case string:
-			if v == "" {
-				break
-			}
-		default:
-			if v == nil {
-				break
-			}
-		}
-		count++
-	}
-	if count < len(models) {
-		writeError(w, http.StatusBadRequest, "Missing required fields")
-		return false
-	}
-	return true
 }

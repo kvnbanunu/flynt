@@ -11,15 +11,15 @@ import (
 
 	"flynt/internal/database"
 	"flynt/internal/handlers"
-	"flynt/internal/middleware"
 	"flynt/internal/utils"
 )
 
 func main() {
-	cfg, err := utils.LoadConfig()
+	err := utils.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	cfg := utils.GetConfig()
 
 	db, err := database.InitDB(cfg.DBPath)
 	if err != nil {
@@ -37,7 +37,7 @@ func main() {
 	// setup server
 	server := &http.Server{
 		Addr:         ":" + cfg.Port,
-		Handler:      middleware.Logger(middleware.Cors(mux)),
+		Handler:      mux,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

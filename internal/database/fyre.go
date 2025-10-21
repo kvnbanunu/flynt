@@ -8,36 +8,35 @@ import (
 )
 
 type CreateFyreRequest struct {
-	Title       string `json:"title"`
-	StreakCount int    `json:"streak_count,omitempty"`
-	UserID      int    `json:"user_id"`
-	ActiveDays  string `json:"active_days,omitempty"`
+	Title       string  `json:"title"`
+	StreakCount *int    `json:"streak_count,omitempty"`
+	ActiveDays  *string `json:"active_days,omitempty"`
 }
 
-type UpdateFyreRequest struct{
-	Title       string `json:"title,omitempty"`
-	StreakCount int    `json:"streak_count"` // set to -1 if no change
-	BonfyreID   int    `json:"bonfyre_id"` // set to -1 if no change
-	ActiveDays  string `json:"active_days,omitempty"`
+type UpdateFyreRequest struct {
+	Title       *string `json:"title,omitempty"`
+	StreakCount *int    `json:"streak_count,omitempty"`
+	BonfyreID   *int    `json:"bonfyre_id,omitempty"`
+	ActiveDays  *string `json:"active_days,omitempty"`
 }
 
-func (db *DB) CreateFyre(req CreateFyreRequest) (*Fyre, error) {
-	err := db.Get(nil, `SELECT * FROM fyre WHERE title = ? AND user_id = ?`, req.Title, req.UserID)
+func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
+	err := db.Get(nil, `SELECT * FROM fyre WHERE title = ? AND user_id = ?`, req.Title, id)
 	if err == nil {
 		return nil, fmt.Errorf("Fyre already exists: %w", err)
 	}
 
 	fields := []string{"title", "user_id"}
 	placeholders := []string{"?", "?"}
-	args := []any{req.Title, req.UserID}
+	args := []any{req.Title, id}
 
-	if req.StreakCount != 0 {
+	if req.StreakCount != nil {
 		fields = append(fields, "streak_count")
 		placeholders = append(placeholders, "?")
 		args = append(args, req.StreakCount)
 	}
-	
-	if req.ActiveDays != "" {
+
+	if req.ActiveDays != nil {
 		fields = append(fields, "active_days")
 		placeholders = append(placeholders, "?")
 		args = append(args, req.ActiveDays)
@@ -92,25 +91,22 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 	fields := []string{}
 	args := []any{}
 
-	if req.Title != "" {
+	if req.Title != nil {
 		fields = append(fields, "title = ?")
 		args = append(args, req.Title)
 	}
 
-
-	if req.StreakCount > -1 {
+	if req.StreakCount != nil {
 		fields = append(fields, "streak_count = ?")
 		args = append(args, req.StreakCount)
 	}
 
-
-	if req.BonfyreID > -1 {
+	if req.BonfyreID != nil {
 		fields = append(fields, "bonfyre_id = ?")
 		args = append(args, req.BonfyreID)
 	}
 
-
-	if req.ActiveDays != "" {
+	if req.ActiveDays != nil {
 		fields = append(fields, "active_days = ?")
 		args = append(args, req.ActiveDays)
 	}
@@ -122,7 +118,7 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 	fields = append(fields, "updated_at = ?")
 	args = append(args, time.Now())
 	args = append(args, id)
-	
+
 	query := fmt.Sprintf(`
 		UPDATE fyre
 		SET %s

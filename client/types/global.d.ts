@@ -19,9 +19,10 @@ declare namespace Models {
   export interface Fyre {
     id: number;
     title: string;
-    user_id: number;
     streak_count: number;
+    user_id: number;
     bonfyre_id?: number | null;
+    active_days: string;
     created_at?: string | null;
     updated_at?: string | null;
   }

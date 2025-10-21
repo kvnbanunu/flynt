@@ -1,7 +1,6 @@
 "use client"
 
 import { Delete } from "@/lib/api";
-import { CS_ENV } from "@/lib/utils";
 import React, { useState } from "react"
 
 interface RemoveFyreProps {
@@ -15,7 +14,7 @@ export const RemoveFyre: React.FC<RemoveFyreProps> = (props) => {
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async () => {
-    const res = await Delete(`${CS_ENV.api_url}/fyre/${fyre_id}`)
+    const res = await Delete(`/fyre/${fyre_id}`)
 
     if (res.success) {
       onSuccessHandler()

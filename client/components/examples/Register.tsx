@@ -1,7 +1,6 @@
 "use client";
 
 import { Post } from "@/lib/api";
-import { CS_ENV } from "@/lib/utils";
 import React, { useState } from "react";
 
 interface RegisterProps {
@@ -48,7 +47,7 @@ export const RegisterForm: React.FC<RegisterProps> = (props) => {
       password: inputPassword,
       email: inputEmail
     }
-    const res = await Post<Models.User, RegisterRequest>(`${CS_ENV.api_url}/account/register`, registerData);
+    const res = await Post<Models.User, RegisterRequest>("/account/register", registerData);
 
     if (res.success) {
       const user: Models.User = res.data;

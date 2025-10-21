@@ -3,11 +3,11 @@ import { Post } from "@/lib/api";
 import React, { useState } from "react";
 import SigninForm from "./signin";
 import { FyreList } from "./fyrelist";
-import { CS_ENV } from "@/lib/utils";
 import FriendsList from "./friendlist/FriendsList";
 import { RegisterForm } from "./Register";
 
 interface LoginData {
+  type: string;
   email: string;
   password: string;
 }
@@ -21,9 +21,9 @@ export const ExampleHome: React.FC = () => {
 
   const onLogin = async (email: string, password: string) => {
     setLoading(true);
-    const loginData: LoginData = { email: email, password: password };
+    const loginData: LoginData = { type: "email", email: email, password: password };
     const res = await Post<Models.User, LoginData>(
-      `${CS_ENV.api_url}/account/login`,
+      "/account/login",
       loginData,
     );
 
@@ -91,7 +91,7 @@ export const ExampleHome: React.FC = () => {
     return (
       <main>
         <div className="flex">
-          <FriendsList id={currentUser.id} />
+          <FriendsList />
           <FyreList user={currentUser} />
         </div>
       </main>

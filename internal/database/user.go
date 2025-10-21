@@ -106,6 +106,23 @@ func (db *DB) GetAllUsers() ([]User, error) {
 	return users, nil
 }
 
+// get users not including current user and admin
+func (db *DB) GetAllUsersRedacted(id int) ([]User, error) {
+	query := `
+	SELECT id, username, name, img_url, bio
+	FROM user
+	WHERE id != ? AND id != ?
+	ORDER BY name ASC
+	`
+	
+	var users []User
+	err := db.Select(&users, query, id, utils.CFG.AdminID)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get users: %w", err)
+	}
+	return users, nil
+}
+
 // update user row in database
 func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 	existingUser, err := db.GetUserByID(id) // check if user exists first
