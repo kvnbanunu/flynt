@@ -1,53 +1,67 @@
+"use client";
 import Link from "next/link";
 import {
-    NavigationMenu,
-    NavigationMenuList,
-    NavigationMenuItem,
-    NavigationMenuLink,
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import React from "react";
+import { Home, Inbox, Sticker, Users } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // menu items
 const items = [
   {
     title: "HOME",
     url: "#",
+    icon: Home,
   },
   {
     title: "FEED",
     url: "#",
+    icon: Inbox,
   },
   {
     title: "FRIEND",
     url: "#",
+    icon: Users,
   },
   {
     title: "PROFILE",
     url: "#",
+    icon: Sticker,
   },
-]
+];
 
-export function MobileNavbar() {
-    return (
+export const MobileNavbar: React.FC = () => {
+  const isMobile = useIsMobile();
+  const { isAuthenticated } = useAuth();
 
-        <NavigationMenu>
-            <NavigationMenuList className="flex md:hidden fixed bottom-0 left-0 z-50 w-full bg-background ">
-                <div className="flex gap-8 rounded-2xl px-6 py-4 mb-5 bg-sidebar">
+  if (!isAuthenticated) {
+    return null;
+  }
 
-
-                    {items.map((item) => (
-                        <NavigationMenuItem key={item.title}>
-                            <NavigationMenuLink asChild>
-                                <Link
-                                    href={item.url}
-                                    className="w-14 h-14 bg-ftrim text-center items-center justify-center"
-                                >
-                                    {item.title}
-                                </Link>
-                            </NavigationMenuLink>
-                        </NavigationMenuItem>
-                    ))}
-                </div>
-            </NavigationMenuList>
-        </NavigationMenu>
-    );
+  return (
+    <NavigationMenu viewport={isMobile}>
+      <NavigationMenuList className="flex md:hidden fixed bottom-0 left-0 z-50 w-full bg-background ">
+        <div className="flex gap-8 rounded-2xl px-6 py-4 my-4 mx-4 bg-sidebar w-full justify-evenly">
+          {items.map((item) => (
+            <NavigationMenuItem key={item.title}>
+              <NavigationMenuLink asChild className="rounded-full">
+                <Link
+                  href={item.url}
+                  className="w-14 h-14 bg-ftrim text-center items-center justify-center"
+                >
+                  <item.icon />
+                  <span className="sr-only">{item.title}</span>
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          ))}
+        </div>
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
 };

@@ -1,4 +1,5 @@
-import { Home, Inbox, Users, Sticker } from "lucide-react"
+"use client";
+import { Home, Inbox, Users, Sticker } from "lucide-react";
 
 import {
   Sidebar,
@@ -9,7 +10,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import React from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Menu items.
 const items = [
@@ -33,9 +36,15 @@ const items = [
     url: "#",
     icon: Sticker,
   },
-]
+];
 
-export function DesktopSidebar() {
+export const DesktopSidebar: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -58,6 +67,5 @@ export function DesktopSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
-}
-
+  );
+};
