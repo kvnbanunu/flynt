@@ -135,6 +135,11 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 	return &fyre, nil
 }
 
+// either increment or decrement streakcount and set last_checked
+func (db *DB) CheckFyre(id, streakCount int, increment bool) (Fyre, error) {
+	query := ``
+}
+
 func (db *DB) DeleteFyre(id int) error {
 	_, err := db.GetFyreByID(id)
 	if err != nil {

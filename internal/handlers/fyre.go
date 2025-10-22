@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"flynt/internal/database"
 	"flynt/internal/utils"
@@ -23,6 +24,7 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.TrimPrefix(r.URL.Path, "/fyre")
 	userID := r.Context().Value("userID").(int)
+	timezone := r.Context().Value("timezone").(string)
 
 	switch {
 	case path == "" || path == "/":
@@ -35,6 +37,10 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
 	case strings.HasPrefix(path, "/"):
+		if path == "/check" || path == "/check/" {
+			h.checkFyre(w, r, timezone)
+			return
+		}
 		idStr := strings.TrimPrefix(path, "/")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
@@ -131,6 +137,63 @@ func (h *FyreHandler) deleteFyre(w http.ResponseWriter, _ *http.Request, id int)
 		return
 	}
 	writeSuccess(w, http.StatusOK, "Fyre successfully deleted", nil)
+}
+
+type CheckFyreRequest struct {
+	FyreID      int `json:"id"`
+	StreakCount int `json:"streak_count"`
+}
+
+// Handles POST /fyre/check
+func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request, timezone string) {
+	var req CheckFyreRequest
+	err := parseBody(w, r, &req)
+	if err != nil {
+		return
+	}
+
+	existingFyre, err := h.db.GetFyreByID(req.FyreID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			writeError(w, http.StatusNotFound, "Fyre not found")
+			return
+		}
+		log.Printf("Error fetching fyre: %v", err)
+		writeError(w, http.StatusInternalServerError, "Failed to fetch fyre")
+		return
+	}
+
+	increment := true
+	if req.StreakCount < existingFyre.StreakCount {
+		increment = false
+	}
+
+	// Check if a day has already passed
+	dayPassed := false
+	loc, _ := time.LoadLocation(timezone)
+	lastChecked := existingFyre.LastCheckedAt.In(loc)
+	if lastChecked.Day() < time.Now().Day() {
+		dayPassed = true
+	}
+
+	// if unchecking we need to set the last_checked date to yesterday
+
+	switch {
+	case increment && dayPassed:
+		existingFyre.StreakCount = req.StreakCount
+		writeSuccess(w, http.StatusOK, "Fyre updated successfully", existingFyre)
+	case !increment && existingFyre.IsChecked && !dayPassed:
+		existingFyre.StreakCount = req.StreakCount
+		writeSuccess(w, http.StatusOK, "Fyre updated successfully", existingFyre)
+	case increment && existingFyre.IsChecked && !dayPassed:
+		writeError(w, http.StatusBadRequest, "Already checked fyre today")
+	case !increment && !existingFyre.IsChecked:
+		writeError(w, http.StatusBadRequest, "Trying to uncheck fyre that isn't checked")
+	case !increment && dayPassed: // maybe impossible
+		writeError(w, http.StatusBadRequest, "Trying to uncheck fyre that isn't checked")
+	default:
+		writeError(w, http.StatusBadRequest, "Unknown Error")
+	}
 }
 
 // handles GET /fyre

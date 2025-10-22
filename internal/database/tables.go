@@ -13,20 +13,23 @@ type User struct {
 	Email     string    `db:"email" json:"email"`
 	ImgURL    *string   `db:"img_url" json:"img_url"`
 	Bio       *string   `db:"bio" json:"bio"`
+	Timezone  string    `db:"timezone" json:"timezone"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
 // Represents fyre table in db
 type Fyre struct {
-	ID          int       `db:"id" json:"id"`
-	Title       string    `db:"title" json:"title"`
-	StreakCount int       `db:"streak_count" json:"streak_count"`
-	UserID      int       `db:"user_id" json:"user_id"`
-	BonfyreID   *int      `db:"bonfyre_id" json:"bonfyre_id"`
-	ActiveDays  string    `db:"active_days" json:"active_days"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+	ID            int        `db:"id" json:"id"`
+	Title         string     `db:"title" json:"title"`
+	StreakCount   int        `db:"streak_count" json:"streak_count"`
+	UserID        int        `db:"user_id" json:"user_id"`
+	BonfyreID     *int       `db:"bonfyre_id" json:"bonfyre_id"`
+	ActiveDays    string     `db:"active_days" json:"active_days"`
+	IsChecked     bool       `db:"is_checked" json:"is_checked"`
+	LastCheckedAt *time.Time `db:"last_checked_at" json:"last_checked_at"`
+	CreatedAt     time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt     time.Time  `db:"updated_at" json:"updated_at"`
 }
 
 // Represents goal_type table in db

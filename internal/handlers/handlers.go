@@ -63,9 +63,9 @@ func SetupHandlers(db *database.DB) http.Handler {
 	return middleware.Logger(middleware.Cors(mux))
 }
 
-func setCookie(w http.ResponseWriter, id int) error {
+func setCookie(w http.ResponseWriter, id int, timezone string) error {
 	cfg := utils.GetConfig()
-	token, err := utils.NewToken(id)
+	token, err := utils.NewToken(id, timezone)
 	if err != nil {
 		fmt.Println("Failed to create token")
 		writeError(w, http.StatusInternalServerError, "Failed to create token")
@@ -84,6 +84,22 @@ func setCookie(w http.ResponseWriter, id int) error {
 
 	http.SetCookie(w, cookie)
 	return nil
+}
+
+func setExpiredCookie(w http.ResponseWriter) {
+	cfg := utils.GetConfig()
+
+	cookie := &http.Cookie{
+		Name: cfg.Context,
+		Value: "",
+		MaxAge: -1,
+		Path: "/",
+		Secure:   cfg.Env == "production",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	
+	http.SetCookie(w, cookie)
 }
 
 // Generic error response

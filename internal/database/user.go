@@ -15,23 +15,25 @@ type CreateUserRequest struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
+	Timezone string `json:"timezone"`
 }
 
 // request payload for updating user
 type UpdateUserRequest struct {
-	Name     string `json:"name,omitempty"`
-	Password string `json:"password,omitempty"`
-	Email    string `json:"email,omitempty"`
-	ImgURL   string `json:"img_url,omitempty"`
-	Bio      string `json:"bio,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	ImgURL   *string `json:"img_url,omitempty"`
+	Bio      *string `json:"bio,omitempty"`
+	Timezone *string `json:"timezone,omitempty"`
 }
 
 // query function to create new user in db
 func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	query := `
-	INSERT INTO user (username, name, password, email)
+	INSERT INTO user (username, name, password, email, timezone)
 	VALUES (?, ?, ?, ?)
-	RETURNING id, username, name, email, created_at, updated_at
+	RETURNING id, username, name, email, timezone, created_at, updated_at
 	`
 
 	hashed, err := utils.HashPassword(req.Password)
@@ -51,7 +53,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 // query function to get user from db
 func (db *DB) GetUserByID(id int) (*User, error) {
 	query := `
-	SELECT id, username, name, email, img_url, bio, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, timezone, created_at, updated_at
 	FROM user
 	WHERE id = ?
 	`
@@ -71,7 +73,7 @@ func (db *DB) GetUserByID(id int) (*User, error) {
 // query function to fetch user matching email
 func (db *DB) GetUserByEmail(email string) (*User, error) {
 	query := `
-	SELECT id, username, name, email, img_url, bio, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, timezone, created_at, updated_at
 	FROM user
 	WHERE email = ?
 	`
@@ -91,7 +93,7 @@ func (db *DB) GetUserByEmail(email string) (*User, error) {
 // fetch all users from db
 func (db *DB) GetAllUsers() ([]User, error) {
 	query := `
-	SELECT id, username, name, email, img_url, bio, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, timezone, created_at, updated_at
 	FROM user
 	ORDER BY name ASC
 	`
@@ -114,7 +116,7 @@ func (db *DB) GetAllUsersRedacted(id int) ([]User, error) {
 	WHERE id != ? AND id != ?
 	ORDER BY name ASC
 	`
-	
+
 	var users []User
 	err := db.Select(&users, query, id, utils.CFG.AdminID)
 	if err != nil {
@@ -134,12 +136,12 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 	setParts := []string{}
 	args := []any{}
 
-	if req.Name != "" {
+	if req.Name != nil {
 		setParts = append(setParts, "name = ?")
 		args = append(args, req.Name)
 	}
 
-	if req.Password != "" {
+	if req.Password != nil {
 		hashed, err := utils.HashPassword(req.Password)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to hash password: %w", err)
@@ -148,19 +150,24 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		args = append(args, hashed)
 	}
 
-	if req.Email != "" {
+	if req.Email != nil {
 		setParts = append(setParts, "email = ?")
 		args = append(args, req.Email)
 	}
 
-	if req.ImgURL != "" {
+	if req.ImgURL != nil {
 		setParts = append(setParts, "img_url = ?")
 		args = append(args, req.ImgURL)
 	}
 
-	if req.Bio != "" {
+	if req.Bio != nil {
 		setParts = append(setParts, "bio = ?")
 		args = append(args, req.Bio)
+	}
+
+	if req.Timezone != nil {
+		setParts = append(setParts, "timezone = ?")
+		args = append(args, req.Timezone)
 	}
 
 	if len(setParts) == 0 { // no parts changed
@@ -177,7 +184,7 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		UPDATE user
 		SET %s
 		WHERE id = ?
-		RETURNING id, username, name, email, img_url, bio, created_at, updated_at
+		RETURNING id, username, name, email, img_url, bio, timezone, created_at, updated_at
 	`, strings.Join(setParts, ", "))
 
 	var user User
@@ -212,4 +219,13 @@ func (db *DB) DeleteUser(id int) error {
 	}
 
 	return nil
+}
+
+func (db *DB) GetUserTimezone(id int) (string, error) {
+	var timezone string
+	err := db.Get(&timezone, "SELECT timezone FROM user WHERE id = ?", id)
+	if err != nil {
+		return "", fmt.Errorf("Failed to get user timezone: %w", err)
+	}
+	return timezone, nil
 }

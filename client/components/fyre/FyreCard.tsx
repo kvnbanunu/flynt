@@ -158,7 +158,7 @@ const ActiveDays: React.FC<ActiveDaysProps> = ({
 
   if (active === "1111111" && !isOpen) {
     return (
-      <Button className="w-44" disabled>
+      <Button className="w-39 sm:w-46 md:w-60" disabled>
         Everyday
       </Button>
     );
@@ -170,7 +170,7 @@ const ActiveDays: React.FC<ActiveDaysProps> = ({
         <Button
           key={index}
           variant={active[index] === "0" ? "secondary" : "default"}
-          className="px-2 border-1"
+          className="px-1.5 sm:px-2 md:px-3 border-1"
           disabled={!isOpen}
           onClick={() => onChange(index)}
         >
