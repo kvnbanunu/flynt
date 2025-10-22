@@ -30,7 +30,7 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case path == "" || path == "/":
 		switch r.Method {
 		case http.MethodGet:
-			h.getAllUserFyres(w, r, userID)
+			h.getAllUserFyres(w, r, userID, timezone)
 		case http.MethodPost:
 			h.createFyre(w, r, userID)
 		default:
@@ -198,12 +198,41 @@ func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request, timezone
 
 // handles GET /fyre
 // Finds all fyres that belong to this user id
-func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id int) {
+func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id int, timezone string) {
 	fyres, err := h.db.GetAllUserFyres(id)
 	if err != nil {
 		log.Printf("Error getting fyres: %v", err)
 		writeError(w, http.StatusInternalServerError, "Failed to get fyres")
 		return
 	}
+
+	var toUpdate []int
+	var indexes []int
+	for i, f := range fyres {
+		if f.LastCheckedAt == nil || !f.IsChecked {
+			continue
+		}
+		passed, err := utils.CheckDayPassed(*f.LastCheckedAt, timezone)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "Failed to check fyre dates")
+			return
+		}
+		if passed {
+			toUpdate = append(toUpdate, f.ID)
+			indexes = append(indexes, i)
+		}
+	}
+
+	updated, err := h.db.ResetChecks(toUpdate)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to reset fyre checks")
+		return
+	}
+	
+	// remap fyres list
+	for i, _ := range updated {
+		fyres[indexes[i]] = updated[i]
+	}
+
 	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fyres)
 }

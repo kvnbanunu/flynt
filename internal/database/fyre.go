@@ -135,9 +135,58 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 	return &fyre, nil
 }
 
+// resets all fyre checks in list
+func (db *DB) ResetChecks(ids []int) ([]Fyre, error) {
+	var params []string
+	for _, r := range ids {
+		params = append(params, fmt.Sprintf("id = %d", r))
+	}
+	query := fmt.Sprintf(`
+	UPDATE fyre
+	SET is_checked = false
+	WHERE %s
+	RETURNING *
+	`, strings.Join(params, " OR "))
+	
+	var fyres []Fyre
+	err := db.Select(fyres, query)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to reset fyre checks: %w", err)
+	}
+	return fyres, nil
+}
+
 // either increment or decrement streakcount and set last_checked
-func (db *DB) CheckFyre(id, streakCount int, increment bool) (Fyre, error) {
-	query := ``
+func (db *DB) CheckFyre(id, streakCount int, timezone string, increment bool) (*Fyre, error) {
+	query := `
+	UPDATE fyre
+	SET streak_count = ?,
+	last_checked_at = ?,
+	is_checked = ?
+	WHERE id = ?
+	RETURNING *
+	`
+	updatedStreak := streakCount
+	lastChecked := time.Now()
+	isChecked := true
+	if (increment) {
+		updatedStreak++
+	} else {
+		// set lastChecked to 12pm yesterday in timezone
+		updatedStreak--
+		loc, _ := time.LoadLocation(timezone)
+		rel := lastChecked.In(loc)
+		yesterday := rel.Day() - 1
+		lastChecked = time.Date(rel.Year(), rel.Month(), yesterday, 12, 0, 0, 0, loc)
+		isChecked = false
+	}
+
+	var fyre Fyre
+	err := db.Get(&fyre, query, streakCount, lastChecked.UTC(), isChecked, id)
+	if err != nil {
+		return nil, err
+	}
+	return &fyre, nil
 }
 
 func (db *DB) DeleteFyre(id int) error {
