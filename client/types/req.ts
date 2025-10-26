@@ -30,6 +30,11 @@ export interface CreateFyreRequest {
   active_days: string | "1111111";
 }
 
+export interface CheckFyreRequest {
+  id: number; // fyre_id
+  increment: boolean;
+}
+
 export interface UpdateFyreRequest {
   title?: string;
   streak_count?: number;

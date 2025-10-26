@@ -37,7 +37,11 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case strings.HasPrefix(path, "/"):
 		if path == "/check" || path == "/check/" {
-			h.checkFyre(w, r)
+			if r.Method == http.MethodPut {
+				h.checkFyre(w, r)
+			} else {
+				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			}
 			return
 		}
 		idStr := strings.TrimPrefix(path, "/")
@@ -138,14 +142,9 @@ func (h *FyreHandler) deleteFyre(w http.ResponseWriter, _ *http.Request, id int)
 	writeSuccess(w, http.StatusOK, "Fyre successfully deleted", nil)
 }
 
-type CheckFyreRequest struct {
-	FyreID      int `json:"id"`
-	StreakCount int `json:"streak_count"`
-}
-
-// Handles POST /fyre/check
+// Handles PUT /fyre/check
 func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request) {
-	var req CheckFyreRequest
+	var req database.CheckFyreRequest
 	err := parseBody(w, r, &req)
 	if err != nil {
 		return
@@ -162,19 +161,14 @@ func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	increment := true
-	if req.StreakCount < existingFyre.StreakCount {
-		increment = false
-	}
-
 	// if unchecking we need to set the last_checked date to yesterday
-	if increment && existingFyre.IsChecked ||
-		!increment && !existingFyre.IsChecked {
+	if req.Increment && existingFyre.IsChecked ||
+		!req.Increment && !existingFyre.IsChecked {
 		writeError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
-	existingFyre, err = h.db.CheckFyre(existingFyre.ID, req.StreakCount, increment)
+	existingFyre, err = h.db.CheckFyre(req)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "Failed to check Fyre")
 		return
@@ -209,15 +203,16 @@ func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id
 		}
 	}
 
-	updated, err := h.db.ResetChecks(toUpdate)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Failed to reset fyre checks")
-		return
-	}
-
-	// remap fyres list
-	for i := range updated {
-		fyres[indexes[i]] = updated[i]
+	if len(toUpdate) > 0 {
+		updated, err := h.db.ResetChecks(toUpdate)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "Failed to reset fyre checks")
+			return
+		}
+		// remap fyres list
+		for i := range updated {
+			fyres[indexes[i]] = updated[i]
+		}
 	}
 
 	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fyres)

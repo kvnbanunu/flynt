@@ -10,11 +10,11 @@ declare namespace Models {
     username: string;
     name: string;
     email: string;
-    img_url?: string | null;
-    bio?: string | null;
+    img_url?: string;
+    bio?: string;
     timezone: string;
-    created_at?: string | null;
-    updated_at?: string | null;
+    created_at?: string;
+    updated_at?: string;
   }
 
   export interface Fyre {
@@ -22,13 +22,13 @@ declare namespace Models {
     title: string;
     streak_count: number;
     user_id: number;
-    bonfyre_id?: number | null;
+    bonfyre_id?: number;
     active_days: string;
     is_checked: boolean;
-    last_checked_at?: string | null;
-    last_checked_at_prev?: string | null;
-    created_at?: string | null;
-    updated_at?: string | null;
+    last_checked_at?: string;
+    last_checked_at_prev?: string;
+    created_at?: string;
+    updated_at?: string;
   }
 
   export interface Goal {

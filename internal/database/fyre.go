@@ -20,6 +20,11 @@ type UpdateFyreRequest struct {
 	ActiveDays  *string `json:"active_days"`
 }
 
+type CheckFyreRequest struct {
+	FyreID    int  `json:"id"`
+	Increment bool `json:"increment"`
+}
+
 func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
 	query := `
 	INSERT INTO fyre (title, user_id, streak_count, active_days)
@@ -126,44 +131,44 @@ func (db *DB) ResetChecks(ids []int) ([]Fyre, error) {
 	WHERE %s
 	RETURNING *
 	`, strings.Join(params, " OR "))
+	fmt.Println(query)
 
 	var fyres []Fyre
 	err := db.Select(fyres, query)
 	if err != nil {
+		fmt.Println(err)
 		return nil, fmt.Errorf("Failed to reset fyre checks: %w", err)
 	}
 	return fyres, nil
 }
 
 // either increment or decrement streakcount and set last_checked
-func (db *DB) CheckFyre(id, streakCount int, increment bool) (*Fyre, error) {
+func (db *DB) CheckFyre(req CheckFyreRequest) (*Fyre, error) {
 	query := `
 	UPDATE fyre
-	SET streak_count = ?,%s
+	SET streak_count = streak_count %s
 	is_checked = ?
 	WHERE id = ?
 	RETURNING *
 	`
 	var fyre Fyre
 	var err error
-	updateLastChecked := `
+	updateLastChecked := `+ 1,
 	last_checked_at_prev = last_checked_at,
 	last_checked_at = ?,
 	`
 	isChecked := true
-	if increment {
+	if req.Increment {
 		lastChecked := time.Now()
-		streakCount++
 		query = fmt.Sprintf(query, updateLastChecked)
-		err = db.Get(&fyre, query, streakCount, lastChecked.UTC(), isChecked, id)
+		err = db.Get(&fyre, query, lastChecked.UTC(), isChecked, req.FyreID)
 	} else {
-		updateLastChecked = `
+		updateLastChecked = `- 1,
 		last_checked_at = last_checked_at_prev,
 		`
-		streakCount--
 		isChecked = false
 		query = fmt.Sprintf(query, updateLastChecked)
-		err = db.Get(&fyre, query, streakCount, isChecked, id)
+		err = db.Get(&fyre, query, isChecked, req.FyreID)
 	}
 	if err != nil {
 		return nil, err

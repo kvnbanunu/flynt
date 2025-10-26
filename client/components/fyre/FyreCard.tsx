@@ -18,12 +18,12 @@ import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { ButtonGroup } from "../ui/button-group";
 import { Put } from "@/lib/api";
-import { UpdateFyreRequest } from "@/types/req";
+import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isChecked, setIsChecked] = useState<boolean>(false);
+  const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
   const [activeDays, setActiveDays] = useState<string>(fyre.active_days);
   const [error, setError] = useState<string | null>(null);
@@ -36,19 +36,11 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     setChanges(temp);
   };
 
-  const checkFyre = async (checked: boolean) => {
-    const newCount = checked
-      ? currentFyre.streak_count + 1
-      : currentFyre.streak_count - 1;
-    const req: UpdateFyreRequest = { streak_count: newCount };
-    await fetchFyre(req);
-  };
-
-  const fetchFyre = async (req: UpdateFyreRequest) => {
-    const res = await Put<Models.Fyre, UpdateFyreRequest>(
-      `/fyre/${fyre.id}`,
-      req,
-    );
+  const fetchFyre = async (
+    path: string,
+    req: UpdateFyreRequest | CheckFyreRequest,
+  ) => {
+    const res = await Put<Models.Fyre, UpdateFyreRequest | CheckFyreRequest>(path, req);
     if (res.success) {
       setCurrentFyre(res.data);
       setError(null);
@@ -56,6 +48,12 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     } else {
       setError(res.error.message);
     }
+  };
+
+  const checkFyre = async (checked: boolean) => {
+    const increment = checked;
+    const req: CheckFyreRequest = { id: fyre.id, increment: increment };
+    await fetchFyre("/fyre/check", req);
   };
 
   const changeDays = (index: number) => {
@@ -86,7 +84,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
           break;
       }
     }
-    await fetchFyre(req);
+    await fetchFyre(`/fyre/${fyre.id}`, req);
     const newChanges = changes;
     newChanges.clear();
     setChanges(newChanges);
