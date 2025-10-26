@@ -32,7 +32,7 @@ type UpdateUserRequest struct {
 func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	query := `
 	INSERT INTO user (username, name, password, email, timezone)
-	VALUES (?, ?, ?, ?)
+	VALUES (?, ?, ?, ?, ?)
 	RETURNING id, username, name, email, timezone, created_at, updated_at
 	`
 
@@ -42,7 +42,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	}
 
 	var user User
-	err = db.Get(&user, query, req.Username, req.Name, hashed, req.Email)
+	err = db.Get(&user, query, req.Username, req.Name, hashed, req.Email, req.Timezone)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create user: %w", err)
 	}

@@ -101,10 +101,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const res = await Get<Models.Fyre[]>("/fyre")
     if (res.success) {
       setFyres(res.data);
-      console.log(`Fyres: ${res.data}`)
     } else {
       setError(res.error.message);
-      console.log(`Fyres: ${res.error.message}`)
     }
   }
 

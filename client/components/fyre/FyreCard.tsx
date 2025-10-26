@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import {
   Card,
@@ -34,13 +33,17 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     const temp = changes;
     temp.clear();
     setChanges(temp);
+    setError(null);
   };
 
   const fetchFyre = async (
     path: string,
     req: UpdateFyreRequest | CheckFyreRequest,
   ) => {
-    const res = await Put<Models.Fyre, UpdateFyreRequest | CheckFyreRequest>(path, req);
+    const res = await Put<Models.Fyre, UpdateFyreRequest | CheckFyreRequest>(
+      path,
+      req,
+    );
     if (res.success) {
       setCurrentFyre(res.data);
       setError(null);
@@ -48,6 +51,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     } else {
       setError(res.error.message);
     }
+    setIsOpen(false);
   };
 
   const checkFyre = async (checked: boolean) => {
@@ -84,10 +88,10 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
           break;
       }
     }
-    await fetchFyre(`/fyre/${fyre.id}`, req);
     const newChanges = changes;
     newChanges.clear();
     setChanges(newChanges);
+    await fetchFyre(`/fyre/${fyre.id}`, req);
   };
 
   return (

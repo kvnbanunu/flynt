@@ -12,7 +12,7 @@ import (
 )
 
 type ErrorResponse struct {
-	Error   string `json:"statusCode"`
+	Error   string `json:"status_code"`
 	Message string `json:"message,omitempty"`
 }
 
