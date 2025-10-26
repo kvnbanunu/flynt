@@ -23,6 +23,7 @@ const registerSchema = z.object({
   name: z.string().min(5).max(50),
   password: z.string().trim().min(8).max(50),
   email: z.email().toLowerCase(),
+  timezone: z.string(),
 });
 
 export const RegisterForm: React.FC = () => {
@@ -36,6 +37,7 @@ export const RegisterForm: React.FC = () => {
       name: "",
       password: "",
       email: "",
+      timezone: "Canada/Pacific",
     },
   });
 

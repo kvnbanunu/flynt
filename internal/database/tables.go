@@ -9,11 +9,11 @@ type User struct {
 	ID        int       `db:"id" json:"id"`
 	Username  string    `db:"username" json:"username"`
 	Name      string    `db:"name" json:"name"`
-	Password  string    `db:"password" json:"password"`
-	Email     string    `db:"email" json:"email"`
-	ImgURL    *string   `db:"img_url" json:"img_url"`
-	Bio       *string   `db:"bio" json:"bio"`
-	Timezone  string    `db:"timezone" json:"timezone"`
+	Password  string    `db:"password" json:"password,omitempty"`
+	Email     string    `db:"email" json:"email,omitempty"`
+	ImgURL    *string   `db:"img_url" json:"img_url,omitempty"`
+	Bio       *string   `db:"bio" json:"bio,omitempty"`
+	Timezone  string    `db:"timezone" json:"timezone,omitempty"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
@@ -27,8 +27,8 @@ type Fyre struct {
 	BonfyreID         *int       `db:"bonfyre_id" json:"bonfyre_id"`
 	ActiveDays        string     `db:"active_days" json:"active_days"`
 	IsChecked         bool       `db:"is_checked" json:"is_checked"`
-	LastCheckedAt     *time.Time `db:"last_checked_at" json:"last_checked_at"`
-	LastCheckedAtPrev *time.Time `db:"last_checked_at_prev" json:"last_checked_at_prev"`
+	LastCheckedAt     *time.Time `db:"last_checked_at" json:"last_checked_at,omitempty"`
+	LastCheckedAtPrev *time.Time `db:"last_checked_at_prev" json:"last_checked_at_prev,omitempty"`
 	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
 }
@@ -54,7 +54,7 @@ type Bonfyre struct {
 
 // Represents friend table in db
 type Friend struct {
-	UserID1 int    `db:"user_id_1" json:"user_id_1"`
+	UserID1 int    `db:"user_id_1" json:"user_id_1,omitempty"`
 	UserID2 int    `db:"user_id_2" json:"user_id_2"`
 	Status  string `db:"status" json:"status"`
 }

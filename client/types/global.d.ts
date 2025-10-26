@@ -12,6 +12,7 @@ declare namespace Models {
     email: string;
     img_url?: string | null;
     bio?: string | null;
+    timezone: string;
     created_at?: string | null;
     updated_at?: string | null;
   }
@@ -23,6 +24,9 @@ declare namespace Models {
     user_id: number;
     bonfyre_id?: number | null;
     active_days: string;
+    is_checked: boolean;
+    last_checked_at?: string | null;
+    last_checked_at_prev?: string | null;
     created_at?: string | null;
     updated_at?: string | null;
   }

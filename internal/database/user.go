@@ -20,12 +20,12 @@ type CreateUserRequest struct {
 
 // request payload for updating user
 type UpdateUserRequest struct {
-	Name     *string `json:"name,omitempty"`
-	Password *string `json:"password,omitempty"`
-	Email    *string `json:"email,omitempty"`
-	ImgURL   *string `json:"img_url,omitempty"`
-	Bio      *string `json:"bio,omitempty"`
-	Timezone *string `json:"timezone,omitempty"`
+	Name     *string `json:"name"`
+	Password *string `json:"password"`
+	Email    *string `json:"email"`
+	ImgURL   *string `json:"img_url"`
+	Bio      *string `json:"bio"`
+	Timezone *string `json:"timezone"`
 }
 
 // query function to create new user in db
@@ -142,7 +142,7 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 	}
 
 	if req.Password != nil {
-		hashed, err := utils.HashPassword(req.Password)
+		hashed, err := utils.HashPassword(*req.Password)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to hash password: %w", err)
 		}
@@ -219,13 +219,4 @@ func (db *DB) DeleteUser(id int) error {
 	}
 
 	return nil
-}
-
-func (db *DB) GetUserTimezone(id int) (string, error) {
-	var timezone string
-	err := db.Get(&timezone, "SELECT timezone FROM user WHERE id = ?", id)
-	if err != nil {
-		return "", fmt.Errorf("Failed to get user timezone: %w", err)
-	}
-	return timezone, nil
 }

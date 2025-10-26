@@ -65,6 +65,7 @@ func (db *DB) createTables() error {
 		active_days TEXT DEFAULT '1111111',
 		is_checked INTEGER DEFAULT 0,
 		last_checked_at DATETIME,
+		last_checked_at_prev DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);

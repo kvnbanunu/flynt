@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"flynt/internal/database"
 	"flynt/internal/utils"
@@ -38,7 +37,7 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case strings.HasPrefix(path, "/"):
 		if path == "/check" || path == "/check/" {
-			h.checkFyre(w, r, timezone)
+			h.checkFyre(w, r)
 			return
 		}
 		idStr := strings.TrimPrefix(path, "/")
@@ -145,7 +144,7 @@ type CheckFyreRequest struct {
 }
 
 // Handles POST /fyre/check
-func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request, timezone string) {
+func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request) {
 	var req CheckFyreRequest
 	err := parseBody(w, r, &req)
 	if err != nil {
@@ -168,32 +167,19 @@ func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request, timezone
 		increment = false
 	}
 
-	// Check if a day has already passed
-	dayPassed := false
-	loc, _ := time.LoadLocation(timezone)
-	lastChecked := existingFyre.LastCheckedAt.In(loc)
-	if lastChecked.Day() < time.Now().Day() {
-		dayPassed = true
-	}
-
 	// if unchecking we need to set the last_checked date to yesterday
-
-	switch {
-	case increment && dayPassed:
-		existingFyre.StreakCount = req.StreakCount
-		writeSuccess(w, http.StatusOK, "Fyre updated successfully", existingFyre)
-	case !increment && existingFyre.IsChecked && !dayPassed:
-		existingFyre.StreakCount = req.StreakCount
-		writeSuccess(w, http.StatusOK, "Fyre updated successfully", existingFyre)
-	case increment && existingFyre.IsChecked && !dayPassed:
-		writeError(w, http.StatusBadRequest, "Already checked fyre today")
-	case !increment && !existingFyre.IsChecked:
-		writeError(w, http.StatusBadRequest, "Trying to uncheck fyre that isn't checked")
-	case !increment && dayPassed: // maybe impossible
-		writeError(w, http.StatusBadRequest, "Trying to uncheck fyre that isn't checked")
-	default:
-		writeError(w, http.StatusBadRequest, "Unknown Error")
+	if increment && existingFyre.IsChecked ||
+		!increment && !existingFyre.IsChecked {
+		writeError(w, http.StatusBadRequest, "Invalid request")
+		return
 	}
+
+	existingFyre, err = h.db.CheckFyre(existingFyre.ID, req.StreakCount, increment)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to check Fyre")
+		return
+	}
+	writeSuccess(w, http.StatusOK, "Fyre updated successfully", existingFyre)
 }
 
 // handles GET /fyre
@@ -228,9 +214,9 @@ func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id
 		writeError(w, http.StatusInternalServerError, "Failed to reset fyre checks")
 		return
 	}
-	
+
 	// remap fyres list
-	for i, _ := range updated {
+	for i := range updated {
 		fyres[indexes[i]] = updated[i]
 	}
 

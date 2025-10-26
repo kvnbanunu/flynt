@@ -46,7 +46,7 @@ func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !utils.ValidateFields(req.Username, req.Name, req.Password, req.Email) {
+	if !utils.ValidateFields(req.Username, req.Name, req.Password, req.Email, req.Timezone) {
 		writeError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
