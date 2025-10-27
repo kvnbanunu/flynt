@@ -7,7 +7,7 @@ import { LoginForm } from "./LoginForm";
 
 export const LoginCard: React.FC = () => {
   return (
-    <div className="flex w-full max-w-sm flex-col gap-6">
+    <div className="flex flex-col w-full h-full max-w-sm gap-6 justify-center">
       <Tabs defaultValue="login">
         <TabsList>
           <TabsTrigger value="login">Login</TabsTrigger>

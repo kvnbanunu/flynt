@@ -31,13 +31,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
           <SidebarProvider>
             <DesktopSidebar />
             <Toaster />
-            <div className="flex flex-col md:flex-row w-screen md:w-full h-full items-stretch">
+            <div className="flex flex-col md:flex-row w-screen md:w-full h-screen">
               <MainContainer>
                 {children}
               </MainContainer>
