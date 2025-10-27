@@ -31,7 +31,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.register(w, r)
 	case "/login", "/login/":
 		h.login(w, r)
-	case "logout", "/logout/":
+	case "/logout", "/logout/":
 		h.logout(w, r)
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
