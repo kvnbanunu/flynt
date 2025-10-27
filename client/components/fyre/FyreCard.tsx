@@ -24,6 +24,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
+  const [currentStreak, setCurrentStreak] = useState<number>(fyre.streak_count);
   const [activeDays, setActiveDays] = useState<string>(fyre.active_days);
   const [error, setError] = useState<string | null>(null);
   const [changes, setChanges] = useState<Set<string>>(new Set<string>());
@@ -46,6 +47,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     );
     if (res.success) {
       setCurrentFyre(res.data);
+      setCurrentStreak(res.data.streak_count); // set new count in case of inconsistency
       setError(null);
       toast("Fyre updated");
     } else {
@@ -56,6 +58,9 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
 
   const checkFyre = async (checked: boolean) => {
     const increment = checked;
+    // set new streak count prior to fetch for quicker update
+    const newStreak: number = checked ? currentStreak + 1 : currentStreak - 1;
+    setCurrentStreak(newStreak);
     const req: CheckFyreRequest = { id: fyre.id, increment: increment };
     await fetchFyre("/fyre/check", req);
   };
@@ -115,7 +120,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
               isOpen={isOpen}
               onChange={changeDays}
             />
-            <h4>Streak: {currentFyre.streak_count} 🔥</h4>
+            <h4>Streak: {currentStreak} 🔥</h4>
             <Checkbox
               className="mr-2 size-8 rounded-md"
               checked={isChecked}
