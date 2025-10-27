@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"flynt/internal/utils"
@@ -29,7 +28,7 @@ func Logger(next http.Handler) http.Handler {
 // cors, will need to change once we set prod domain
 func Cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", os.Getenv("CLIENT_URL"))
+		w.Header().Set("Access-Control-Allow-Origin", utils.CFG.Client)
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -45,7 +44,8 @@ func Cors(next http.Handler) http.Handler {
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(os.Getenv("JWT_CONTEXT"))
+		cfg := utils.GetConfig()
+		cookie, err := r.Cookie(cfg.Context)
 		if err != nil {
 			if err == http.ErrNoCookie {
 				fmt.Fprintf(w, "No auth cookie fount.\n")
@@ -55,7 +55,7 @@ func Auth(next http.Handler) http.Handler {
 		}
 
 		token, err := jwt.ParseWithClaims(cookie.Value, &utils.Claims{}, func(token *jwt.Token) (any, error) {
-			return []byte(os.Getenv("JWT_SECRET")), nil
+			return []byte(cfg.Secret), nil
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
@@ -65,6 +65,7 @@ func Auth(next http.Handler) http.Handler {
 		if claims, ok := token.Claims.(*utils.Claims); ok && token.Valid {
 			ctx := r.Context()
 			ctx = context.WithValue(ctx, "userID", claims.UserID)
+			ctx = context.WithValue(ctx, "timezone", claims.Timezone)
 			ctx = context.WithValue(ctx, "role", claims.Role)
 			r = r.WithContext(ctx)
 

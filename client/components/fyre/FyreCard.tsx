@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import {
   Card,
@@ -18,12 +17,12 @@ import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { ButtonGroup } from "../ui/button-group";
 import { Put } from "@/lib/api";
-import { UpdateFyreRequest } from "@/types/req";
+import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isChecked, setIsChecked] = useState<boolean>(false);
+  const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
   const [activeDays, setActiveDays] = useState<string>(fyre.active_days);
   const [error, setError] = useState<string | null>(null);
@@ -34,19 +33,15 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     const temp = changes;
     temp.clear();
     setChanges(temp);
+    setError(null);
   };
 
-  const checkFyre = async (checked: boolean) => {
-    const newCount = checked
-      ? currentFyre.streak_count + 1
-      : currentFyre.streak_count - 1;
-    const req: UpdateFyreRequest = { streak_count: newCount };
-    await fetchFyre(req);
-  };
-
-  const fetchFyre = async (req: UpdateFyreRequest) => {
-    const res = await Put<Models.Fyre, UpdateFyreRequest>(
-      `/fyre/${fyre.id}`,
+  const fetchFyre = async (
+    path: string,
+    req: UpdateFyreRequest | CheckFyreRequest,
+  ) => {
+    const res = await Put<Models.Fyre, UpdateFyreRequest | CheckFyreRequest>(
+      path,
       req,
     );
     if (res.success) {
@@ -56,6 +51,13 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     } else {
       setError(res.error.message);
     }
+    setIsOpen(false);
+  };
+
+  const checkFyre = async (checked: boolean) => {
+    const increment = checked;
+    const req: CheckFyreRequest = { id: fyre.id, increment: increment };
+    await fetchFyre("/fyre/check", req);
   };
 
   const changeDays = (index: number) => {
@@ -86,10 +88,10 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
           break;
       }
     }
-    await fetchFyre(req);
     const newChanges = changes;
     newChanges.clear();
     setChanges(newChanges);
+    await fetchFyre(`/fyre/${fyre.id}`, req);
   };
 
   return (
@@ -158,7 +160,7 @@ const ActiveDays: React.FC<ActiveDaysProps> = ({
 
   if (active === "1111111" && !isOpen) {
     return (
-      <Button className="w-44" disabled>
+      <Button className="w-39 sm:w-46 md:w-60" disabled>
         Everyday
       </Button>
     );
@@ -170,7 +172,7 @@ const ActiveDays: React.FC<ActiveDaysProps> = ({
         <Button
           key={index}
           variant={active[index] === "0" ? "secondary" : "default"}
-          className="px-2 border-1"
+          className="px-1.5 sm:px-2 md:px-3 border-1"
           disabled={!isOpen}
           onClick={() => onChange(index)}
         >

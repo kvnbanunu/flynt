@@ -9,12 +9,13 @@ import (
 )
 
 type Claims struct {
-	UserID int    `json:"user_id"`
-	Role   string `json:"role"`
+	UserID   int    `json:"user_id"`
+	Timezone string `json:"timezone"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func NewToken(id int) (string, error) {
+func NewToken(id int, timezone string) (string, error) {
 	role := "user"
 	idStr := strconv.Itoa(id)
 	if idStr == os.Getenv("ADMIN_ID") {
@@ -23,6 +24,7 @@ func NewToken(id int) (string, error) {
 
 	claims := Claims{
 		id,
+		timezone,
 		role,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),

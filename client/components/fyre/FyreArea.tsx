@@ -16,24 +16,6 @@ export const FyreArea: React.FC = () => {
             <FyreCard fyre={fyre} />
           </React.Fragment>
         ))}
-      {fyres &&
-        fyres.map((fyre) => (
-          <React.Fragment key={fyre.id}>
-            <FyreCard fyre={fyre} />
-          </React.Fragment>
-        ))}
-      {fyres &&
-        fyres.map((fyre) => (
-          <React.Fragment key={fyre.id}>
-            <FyreCard fyre={fyre} />
-          </React.Fragment>
-        ))}
-      {fyres &&
-        fyres.map((fyre) => (
-          <React.Fragment key={fyre.id}>
-            <FyreCard fyre={fyre} />
-          </React.Fragment>
-        ))}
       <Button size="lg" className="w-full">Add New Fyre</Button>
     </ScrollArea>
   );

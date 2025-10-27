@@ -10,7 +10,7 @@ type UpdateFriendRequest struct {
 type FriendsListItem struct {
 	ID       int          `db:"id" json:"id"`
 	Username string       `db:"username" json:"username"`
-	ImgURL   *string      `db:"img_url" json:"img_url"`
+	ImgURL   *string      `db:"img_url" json:"img_url,omitempty"`
 	Status   FriendStatus `db:"status" json:"status"`
 }
 

@@ -23,6 +23,7 @@ const registerSchema = z.object({
   name: z.string().min(5).max(50),
   password: z.string().trim().min(8).max(50),
   email: z.email().toLowerCase(),
+  timezone: z.string().trim().min(5).max(50),
 });
 
 export const RegisterForm: React.FC = () => {
@@ -36,6 +37,7 @@ export const RegisterForm: React.FC = () => {
       name: "",
       password: "",
       email: "",
+      timezone: "Canada/Pacific",
     },
   });
 
@@ -124,8 +126,28 @@ export const RegisterForm: React.FC = () => {
                   <Input
                     {...field}
                     id="form-register-email"
+                    type="email"
                     aria-invalid={fieldState.invalid}
                     placeholder="example@flyntapp.io"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="timezone"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-register-timezone">Timezone</FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-register-timezone"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Canada/Pacific"
                     autoComplete="off"
                   />
                   {fieldState.invalid && (

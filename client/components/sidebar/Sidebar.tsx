@@ -39,7 +39,7 @@ const items = [
 ];
 
 export const DesktopSidebar: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   if (!isAuthenticated) {
     return null;
@@ -62,6 +62,11 @@ export const DesktopSidebar: React.FC = () => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem key="logout">
+                <SidebarMenuButton onClick={logout}>
+                  Logout
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
