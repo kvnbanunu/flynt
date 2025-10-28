@@ -131,10 +131,9 @@ func (db *DB) ResetChecks(ids []int) ([]Fyre, error) {
 	WHERE %s
 	RETURNING *
 	`, strings.Join(params, " OR "))
-	fmt.Println(query)
 
 	var fyres []Fyre
-	err := db.Select(fyres, query)
+	err := db.Select(&fyres, query)
 	if err != nil {
 		fmt.Println(err)
 		return nil, fmt.Errorf("Failed to reset fyre checks: %w", err)
