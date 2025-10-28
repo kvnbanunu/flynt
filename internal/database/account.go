@@ -15,7 +15,7 @@ type AccountLoginRequest struct {
 
 // check if login details match in database
 func (db *DB) ValidateLogin(req AccountLoginRequest) (*User, error) {
-	query := fmt.Sprintf("SELECT * FROM user WHERE %s = ?", req.LoginType)
+	query := fmt.Sprintf("SELECT * FROM user WHERE %s = ? COLLATE NOCASE", req.LoginType)
 
 	qparam := req.Email
 	if req.LoginType == "username" {

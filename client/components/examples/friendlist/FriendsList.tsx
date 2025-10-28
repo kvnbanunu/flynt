@@ -14,9 +14,17 @@ interface FriendRequest {
   user_id_2: number;
 }
 
+interface UserListItem {
+  id: number;
+  username: string;
+  name: string;
+  img_url?: string;
+  bio?: string;
+}
+
 export const FriendsList: React.FC = () => {
   const [friends, setFriends] = useState<FriendsListItem[]>([]);
-  const [users, setUsers] = useState<Models.User[]>([]);
+  const [users, setUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [update, setUpdate] = useState<boolean>(false);
@@ -34,7 +42,7 @@ export const FriendsList: React.FC = () => {
   }, []);
 
   const fetchUsers = useCallback(async () => {
-    const res = await Get<Models.User[]>("/user/redacted");
+    const res = await Get<UserListItem[]>("/user/redacted");
     if (res.success) {
       setUsers(res.data);
     } else {
@@ -179,7 +187,7 @@ const FriendsListList: React.FC<{
 };
 
 const UsersList: React.FC<{
-  users: Models.User[];
+  users: UserListItem[];
   handler: () => void;
 }> = (props) => {
   const { users, handler } = props;

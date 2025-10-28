@@ -19,7 +19,7 @@ import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
 
 const registerSchema = z.object({
-  username: z.string().trim().min(5).max(50),
+  username: z.string().trim().min(4).max(50),
   name: z.string().min(5).max(50),
   password: z.string().trim().min(8).max(50),
   email: z.email().toLowerCase(),
