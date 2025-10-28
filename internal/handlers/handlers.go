@@ -72,14 +72,20 @@ func setCookie(w http.ResponseWriter, id int, timezone string) error {
 		return err
 	}
 
+	isProduction := cfg.Env == "production"
+
 	cookie := &http.Cookie{
 		Name:     cfg.Context,
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour),
 		Path:     "/",
-		Secure:   cfg.Env == "production",
+		Secure:   isProduction,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
+	}
+
+	if isProduction {
+		cookie.Domain = cfg.Domain
 	}
 
 	http.SetCookie(w, cookie)
@@ -89,16 +95,22 @@ func setCookie(w http.ResponseWriter, id int, timezone string) error {
 func setExpiredCookie(w http.ResponseWriter) {
 	cfg := utils.GetConfig()
 
+	isProduction := cfg.Env == "production"
+
 	cookie := &http.Cookie{
-		Name: cfg.Context,
-		Value: "",
-		MaxAge: -1,
-		Path: "/",
-		Secure:   cfg.Env == "production",
+		Name:     cfg.Context,
+		Value:    "",
+		MaxAge:   -1,
+		Path:     "/",
+		Secure:   isProduction,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
-	
+
+	if isProduction {
+		cookie.Domain = cfg.Domain
+	}
+
 	http.SetCookie(w, cookie)
 }
 

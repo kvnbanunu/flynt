@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Env     string
 	Client  string
+	Domain  string
 	DBPath  string
 	Port    string
 	Cost    int
@@ -29,6 +30,7 @@ func LoadConfig() error {
 
 	env := os.Getenv("ENVIRONMENT")
 	client := os.Getenv("CLIENT_URL")
+	domain := os.Getenv("DOMAIN")
 	path := os.Getenv("DB_PATH")
 	port := os.Getenv("PORT")
 	cost := os.Getenv("COST")
@@ -36,7 +38,7 @@ func LoadConfig() error {
 	context := os.Getenv("JWT_CONTEXT")
 	adminID := os.Getenv("ADMIN_ID")
 
-	if !ValidateFields(env, client, path, port, cost, secret, context, adminID) {
+	if !ValidateFields(env, client, domain, path, port, cost, secret, context, adminID) {
 		return fmt.Errorf("Missing environment variables")
 	}
 
@@ -53,6 +55,7 @@ func LoadConfig() error {
 
 	CFG.Env = env
 	CFG.Client = client
+	CFG.Domain = domain
 	CFG.DBPath = path
 	CFG.Port = port
 	CFG.Cost = costVal
