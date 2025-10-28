@@ -1,25 +1,20 @@
-import { ExampleHome } from "@/components/examples/examplehome";
-
-import { MainContainer } from "@/components/MainContainer";
-import { MobileNavbar } from "@/components/navbar/Navbar";
-import { DesktopSidebar } from "@/components/sidebar/Sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+"use client";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import FriendsList from "@/components/examples/friendlist/FriendsList";
+import { FyreList } from "@/components/examples/fyrelist";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Examples() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      
-      <SidebarProvider>
-        <DesktopSidebar />
-        {/* <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start"> */}
-        <MainContainer>
-          <ExampleHome />
-          
-        </MainContainer>
-        <MobileNavbar />
-        {/* </main> */}
-      </SidebarProvider>
-      
-    </div>
-  );
+  const { user, isAuthenticated } = useAuth();
+
+  if (user && isAuthenticated) {
+    return (
+      <AuthGuard redirectTo="/login">
+        <div className="flex">
+          <FriendsList />
+          <FyreList user={user} />
+        </div>
+      </AuthGuard>
+    );
+  }
 }
