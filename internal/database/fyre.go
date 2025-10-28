@@ -9,48 +9,31 @@ import (
 
 type CreateFyreRequest struct {
 	Title       string `json:"title"`
-	StreakCount int    `json:"streak_count,omitempty"`
-	UserID      int    `json:"user_id"`
-	ActiveDays  string `json:"active_days,omitempty"`
+	StreakCount int    `json:"streak_count"`
+	ActiveDays  string `json:"active_days"`
 }
 
-type UpdateFyreRequest struct{
-	Title       string `json:"title,omitempty"`
-	StreakCount int    `json:"streak_count"` // set to -1 if no change
-	BonfyreID   int    `json:"bonfyre_id"` // set to -1 if no change
-	ActiveDays  string `json:"active_days,omitempty"`
+type UpdateFyreRequest struct {
+	Title       *string `json:"title"`
+	StreakCount *int    `json:"streak_count"`
+	BonfyreID   *int    `json:"bonfyre_id"`
+	ActiveDays  *string `json:"active_days"`
 }
 
-func (db *DB) CreateFyre(req CreateFyreRequest) (*Fyre, error) {
-	err := db.Get(nil, `SELECT * FROM fyre WHERE title = ? AND user_id = ?`, req.Title, req.UserID)
-	if err == nil {
-		return nil, fmt.Errorf("Fyre already exists: %w", err)
-	}
+type CheckFyreRequest struct {
+	FyreID    int  `json:"id"`
+	Increment bool `json:"increment"`
+}
 
-	fields := []string{"title", "user_id"}
-	placeholders := []string{"?", "?"}
-	args := []any{req.Title, req.UserID}
-
-	if req.StreakCount != 0 {
-		fields = append(fields, "streak_count")
-		placeholders = append(placeholders, "?")
-		args = append(args, req.StreakCount)
-	}
-	
-	if req.ActiveDays != "" {
-		fields = append(fields, "active_days")
-		placeholders = append(placeholders, "?")
-		args = append(args, req.ActiveDays)
-	}
-
-	query := fmt.Sprintf(`
-	INSERT INTO fyre (%s)
-	VALUES (%s)
+func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
+	query := `
+	INSERT INTO fyre (title, user_id, streak_count, active_days)
+	VALUES (?, ?, ?, ?)
 	RETURNING *
-	`, strings.Join(fields, ", "), strings.Join(placeholders, ", "))
+	`
 
 	var fyre Fyre
-	err = db.Get(&fyre, query, args...)
+	err := db.Get(&fyre, query, req.Title, id, req.StreakCount, req.ActiveDays)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create fyre: %w", err)
 	}
@@ -92,25 +75,22 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 	fields := []string{}
 	args := []any{}
 
-	if req.Title != "" {
+	if req.Title != nil {
 		fields = append(fields, "title = ?")
 		args = append(args, req.Title)
 	}
 
-
-	if req.StreakCount > -1 {
+	if req.StreakCount != nil {
 		fields = append(fields, "streak_count = ?")
 		args = append(args, req.StreakCount)
 	}
 
-
-	if req.BonfyreID > -1 {
+	if req.BonfyreID != nil {
 		fields = append(fields, "bonfyre_id = ?")
 		args = append(args, req.BonfyreID)
 	}
 
-
-	if req.ActiveDays != "" {
+	if req.ActiveDays != nil {
 		fields = append(fields, "active_days = ?")
 		args = append(args, req.ActiveDays)
 	}
@@ -122,7 +102,7 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 	fields = append(fields, "updated_at = ?")
 	args = append(args, time.Now())
 	args = append(args, id)
-	
+
 	query := fmt.Sprintf(`
 		UPDATE fyre
 		SET %s
@@ -136,6 +116,62 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 		return nil, fmt.Errorf("Failed to update fyre: %w", err)
 	}
 
+	return &fyre, nil
+}
+
+// resets all fyre checks in list
+func (db *DB) ResetChecks(ids []int) ([]Fyre, error) {
+	var params []string
+	for _, r := range ids {
+		params = append(params, fmt.Sprintf("id = %d", r))
+	}
+	query := fmt.Sprintf(`
+	UPDATE fyre
+	SET is_checked = false
+	WHERE %s
+	RETURNING *
+	`, strings.Join(params, " OR "))
+
+	var fyres []Fyre
+	err := db.Select(&fyres, query)
+	if err != nil {
+		fmt.Println(err)
+		return nil, fmt.Errorf("Failed to reset fyre checks: %w", err)
+	}
+	return fyres, nil
+}
+
+// either increment or decrement streakcount and set last_checked
+func (db *DB) CheckFyre(req CheckFyreRequest) (*Fyre, error) {
+	query := `
+	UPDATE fyre
+	SET streak_count = streak_count %s
+	is_checked = ?
+	WHERE id = ?
+	RETURNING *
+	`
+	var fyre Fyre
+	var err error
+	updateLastChecked := `+ 1,
+	last_checked_at_prev = last_checked_at,
+	last_checked_at = ?,
+	`
+	isChecked := true
+	if req.Increment {
+		lastChecked := time.Now()
+		query = fmt.Sprintf(query, updateLastChecked)
+		err = db.Get(&fyre, query, lastChecked.UTC(), isChecked, req.FyreID)
+	} else {
+		updateLastChecked = `- 1,
+		last_checked_at = last_checked_at_prev,
+		`
+		isChecked = false
+		query = fmt.Sprintf(query, updateLastChecked)
+		err = db.Get(&fyre, query, isChecked, req.FyreID)
+	}
+	if err != nil {
+		return nil, err
+	}
 	return &fyre, nil
 }
 

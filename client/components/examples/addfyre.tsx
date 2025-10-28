@@ -1,21 +1,18 @@
 "use client";
 import { Post } from "@/lib/api";
-import { CS_ENV } from "@/lib/utils";
 import React, { useState } from "react";
 
 interface AddFyreProps {
   onSuccessHandler: () => void;
-  user_id: number;
 }
 
 interface AddFyreRequest {
   title: string;
   streak_count: number;
-  user_id: number;
 }
 
 export const AddFyre: React.FC<AddFyreProps> = (props) => {
-  const { onSuccessHandler, user_id } = props;
+  const { onSuccessHandler } = props;
   const [collapsed, setCollapsed] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [inputTitle, setInputTitle] = useState<string>("");
@@ -43,10 +40,9 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
     const fyre: AddFyreRequest = {
       title: inputTitle,
       streak_count: inputStreak,
-      user_id: user_id,
     };
     const res = await Post<Models.Fyre, AddFyreRequest>(
-      `${CS_ENV.api_url}/api/fyre`,
+      "/fyre",
       fyre,
     );
 

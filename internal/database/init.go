@@ -39,11 +39,13 @@ func (db *DB) createTables() error {
 	query := `
 	CREATE TABLE IF NOT EXISTS user (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT NOT NULL UNIQUE,
 		name TEXT NOT NULL,
 		password TEXT NOT NULL,
 		email TEXT UNIQUE NOT NULL,
 		img_url TEXT,
 		bio TEXT,
+		timezone TEXT DEFAULT 'Canada/Pacific',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
@@ -60,7 +62,10 @@ func (db *DB) createTables() error {
 		streak_count INTEGER DEFAULT 0,
 		user_id INTEGER NOT NULL REFERENCES user(id),
 		bonfyre_id INTEGER REFERENCES bonfyre(id),
-		active_days TEXT DEFAULT '10000000',
+		active_days TEXT DEFAULT '1111111',
+		is_checked INTEGER DEFAULT 0,
+		last_checked_at DATETIME,
+		last_checked_at_prev DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);

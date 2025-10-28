@@ -7,22 +7,28 @@
 declare namespace Models {
   export interface User {
     id: number;
+    username: string;
     name: string;
     email: string;
-    img_url?: string | null;
-    bio?: string | null;
-    created_at?: string | null;
-    updated_at?: string | null;
+    img_url?: string;
+    bio?: string;
+    timezone: string;
+    created_at?: string;
+    updated_at?: string;
   }
 
   export interface Fyre {
     id: number;
     title: string;
-    user_id: number;
     streak_count: number;
-    bonfyre_id?: number | null;
-    created_at?: string | null;
-    updated_at?: string | null;
+    user_id: number;
+    bonfyre_id?: number;
+    active_days: string;
+    is_checked: boolean;
+    last_checked_at?: string;
+    last_checked_at_prev?: string;
+    created_at?: string;
+    updated_at?: string;
   }
 
   export interface Goal {

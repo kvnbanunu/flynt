@@ -15,10 +15,11 @@ import (
 )
 
 func main() {
-	cfg, err := utils.LoadConfig()
+	err := utils.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	cfg := utils.GetConfig()
 
 	db, err := database.InitDB(cfg.DBPath)
 	if err != nil {
@@ -30,45 +31,13 @@ func main() {
 		}
 	}()
 
-	// init handlers
-	userHandler := handlers.NewUserHandler(db)
-	accountHandler := handlers.NewAccountHandler(db)
-	fyreHandler := handlers.NewFyreHandler(db)
-	friendHandler := handlers.NewFriendHandler(db)
-	healthHandler := handlers.NewHealthHandler(db)
-
 	// init server router
-	mux := http.NewServeMux()
-
-	// routes
-	mux.Handle("/api/user", userHandler)
-	mux.Handle("/api/user/", userHandler)
-	mux.Handle("/api/account/", accountHandler)
-	mux.Handle("/api/fyre", fyreHandler)
-	mux.Handle("/api/fyre/", fyreHandler)
-	mux.Handle("/api/fyre/user/", fyreHandler)
-	mux.Handle("/api/friend", friendHandler)
-	mux.Handle("/api/friend/", friendHandler)
-	mux.Handle("/health", healthHandler)
-
-	// root handler
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		// placeholder, will change later
-		msg := `{"message":"API Server is running","version":"1.0.0","endpoints":["/health","/api/users"]}`
-		w.Write([]byte(msg))
-	})
+	mux := handlers.SetupHandlers(db)
 
 	// setup server
 	server := &http.Server{
 		Addr:         ":" + cfg.Port,
-		Handler:      loggingMiddleware(corsMiddleware(mux)),
+		Handler:      mux,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
@@ -99,50 +68,4 @@ func main() {
 	}
 
 	log.Println("Server exited successfully")
-}
-
-// Middleware, may move elsewhere
-
-// log http requests
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		rw := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-
-		next.ServeHTTP(rw, r)
-
-		log.Printf("%s %s %d %v %s", r.Method, r.URL.Path, rw.statusCode, time.Since(start), r.RemoteAddr)
-	})
-}
-
-// cors, will need to change once we set prod domain
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if os.Getenv("ENV") == "production" {
-			w.Header().Set("Access-Control-Allow-Origin", os.Getenv("CLIENT_URL"))
-		} else {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		}
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-// wrap writer to get status code
-type responseWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (rw *responseWriter) WriteHeader(code int) {
-	rw.statusCode = code
-	rw.ResponseWriter.WriteHeader(code)
 }

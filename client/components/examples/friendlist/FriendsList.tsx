@@ -1,33 +1,37 @@
 "use client";
 import { DeleteBody, Get, Post, Put } from "@/lib/api";
-import { CS_ENV } from "@/lib/utils";
 import React, { useCallback, useEffect, useState } from "react";
 
 interface FriendsListItem {
   id: number;
-  name: string;
+  username: string;
+  img_url?: string | null;
   status: string;
 }
 
 interface FriendRequest {
   type: string;
-  user_id_1: number;
   user_id_2: number;
 }
 
-export const FriendsList: React.FC<{ id: number }> = (props) => {
-  const { id } = props;
+interface UserListItem {
+  id: number;
+  username: string;
+  name: string;
+  img_url?: string;
+  bio?: string;
+}
+
+export const FriendsList: React.FC = () => {
   const [friends, setFriends] = useState<FriendsListItem[]>([]);
-  const [users, setUsers] = useState<Models.User[]>([]);
+  const [users, setUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [update, setUpdate] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>("friendslist");
 
   const fetchFriends = useCallback(async () => {
-    const res = await Get<FriendsListItem[]>(
-      `${CS_ENV.api_url}/api/friend/${id}`,
-    );
+    const res = await Get<FriendsListItem[]>("/friend");
     if (res.success) {
       setFriends(res.data);
     } else {
@@ -35,10 +39,10 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
     }
     setLoading(false);
     setUpdate(false);
-  }, [id]);
+  }, []);
 
   const fetchUsers = useCallback(async () => {
-    const res = await Get<Models.User[]>(`${CS_ENV.api_url}/api/user`);
+    const res = await Get<UserListItem[]>("/user/redacted");
     if (res.success) {
       setUsers(res.data);
     } else {
@@ -81,7 +85,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
               All Users
             </button>
           </h1>
-          <FriendsListList friends={friends} id={id} handler={onUpdate} />
+          <FriendsListList friends={friends} handler={onUpdate} />
         </div>
       )}
 
@@ -96,7 +100,7 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
             </button>
             All Users
           </h1>
-          <UsersList users={users} id={id} handler={onUpdate} />
+          <UsersList users={users} handler={onUpdate} />
         </div>
       )}
     </div>
@@ -105,19 +109,17 @@ export const FriendsList: React.FC<{ id: number }> = (props) => {
 
 const FriendsListList: React.FC<{
   friends: FriendsListItem[];
-  id: number;
   handler: () => void;
 }> = (props) => {
-  const { friends, id, handler } = props;
+  const { friends, handler } = props;
   const [error, setError] = useState<string | null>(null);
 
   const handleRemove = async (friendID: number) => {
     const req: FriendRequest = {
       type: "deletefriend",
-      user_id_1: id,
       user_id_2: friendID,
     };
-    const res = await DeleteBody(`${CS_ENV.api_url}/api/friend`, req);
+    const res = await DeleteBody("/friend", req);
     if (res.success) {
       setError(null);
       handler();
@@ -129,10 +131,9 @@ const FriendsListList: React.FC<{
   const handleAccept = async (friendID: number) => {
     const req: FriendRequest = {
       type: "acceptfriend",
-      user_id_1: id,
       user_id_2: friendID,
     };
-    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/api/friend`, req);
+    const res = await Put<null, FriendRequest>("/friend", req);
     if (res.success) {
       setError(null);
       handler();
@@ -148,7 +149,7 @@ const FriendsListList: React.FC<{
         friends.map((f, index) => {
           return (
             <li className="flex gap-4 justify-between" key={index}>
-              <div className="w-32">{f.name}</div>
+              <div className="w-32">{f.username}</div>
               {f.status === "friends" && (
                 <div className="w-20 bg-green-300 text-sm font-semibold text-center rounded-lg px-1 py-1">
                   {f.status}
@@ -186,20 +187,18 @@ const FriendsListList: React.FC<{
 };
 
 const UsersList: React.FC<{
-  users: Models.User[];
-  id: number;
+  users: UserListItem[];
   handler: () => void;
 }> = (props) => {
-  const { users, id, handler } = props;
+  const { users, handler } = props;
   const [error, setError] = useState<string | null>(null);
 
   const handleAddFriend = async (friendID: number) => {
     const req: FriendRequest = {
       type: "addfriend",
-      user_id_1: id,
       user_id_2: friendID,
     };
-    const res = await Post(`${CS_ENV.api_url}/api/friend`, req);
+    const res = await Post("/friend", req);
     if (res.success) {
       setError(null);
       handler();
@@ -209,9 +208,8 @@ const UsersList: React.FC<{
   };
 
   const handleBlock = async (friendID: number) => {
-    const res = await Put<FriendRequest>(`${CS_ENV.api_url}/api/friend`, {
+    const res = await Put<null, FriendRequest>("/friend", {
       type: "blockfriend",
-      user_id_1: id,
       user_id_2: friendID,
     });
     if (res.success) {
@@ -227,25 +225,23 @@ const UsersList: React.FC<{
       {error && <div className="bg-red-300 rounded-sm">{error}</div>}
       {users &&
         users.map((user, index) => {
-          if (user.id !== id && user.name !== "Admin User") {
-            return (
-              <li className="flex gap-4 justify-between" key={index}>
-                <div className="w-32 content-center">{user.name}</div>
-                <button
-                  className="w-24 bg-green-300 text-sm font-semibold rounded-lg py-1 px-1 cursor-pointer"
-                  onClick={() => handleAddFriend(user.id)}
-                >
-                  Add Friend
-                </button>
-                <button
-                  className="w-16 bg-red-300 text-sm font-semibold rounded-lg py-1 px-1 cursor-pointer"
-                  onClick={() => handleBlock(user.id)}
-                >
-                  Block
-                </button>
-              </li>
-            );
-          }
+          return (
+            <li className="flex gap-4 justify-between" key={index}>
+              <div className="w-32 content-center">{user.name}</div>
+              <button
+                className="w-24 bg-green-300 text-sm font-semibold rounded-lg py-1 px-1 cursor-pointer"
+                onClick={() => handleAddFriend(user.id)}
+              >
+                Add Friend
+              </button>
+              <button
+                className="w-16 bg-red-300 text-sm font-semibold rounded-lg py-1 px-1 cursor-pointer"
+                onClick={() => handleBlock(user.id)}
+              >
+                Block
+              </button>
+            </li>
+          );
         })}
     </ul>
   );
