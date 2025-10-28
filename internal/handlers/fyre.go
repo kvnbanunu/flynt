@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -194,7 +195,7 @@ func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id
 		}
 		passed, err := utils.CheckDayPassed(*f.LastCheckedAt, timezone)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to check fyre dates")
+			writeError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to check fyre dates %v", err))
 			return
 		}
 		if passed {

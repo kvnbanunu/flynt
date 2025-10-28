@@ -60,6 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         fetchFyres();
       } else {
         setUser(null);
+        setFyres([]);
       }
       setLoading(false);
     };
