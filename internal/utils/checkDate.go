@@ -1,6 +1,9 @@
 package utils
 
-import "time"
+import (
+	"time"
+	_ "time/tzdata"
+)
 
 func CheckDayPassed(t time.Time, timezone string) (bool, error) {
 	loc, err := time.LoadLocation(timezone)
