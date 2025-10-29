@@ -45,7 +45,7 @@ func (db *DB) createTables() error {
 		email TEXT UNIQUE NOT NULL,
 		img_url TEXT,
 		bio TEXT,
-		timezone TEXT DEFAULT 'Canada/Pacific',
+		timezone TEXT DEFAULT 'Asia/Bangkok',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);

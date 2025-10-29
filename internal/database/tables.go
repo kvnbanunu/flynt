@@ -67,3 +67,9 @@ const (
 	Friends FriendStatus = "friends"
 	Blocked FriendStatus = "blocked"
 )
+
+type SocialPost struct {
+	ID     int    `db:"id" json:"id"`
+	UserID int    `db:"user_id" json:"user_id"`
+	Type   string `db:"type" json:"type"`
+}
