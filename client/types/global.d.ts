@@ -34,7 +34,13 @@ declare namespace Models {
   export interface Goal {
     fyre_id: number;
     description: string;
-    milestone: number;
+    goal_type_id: number;
+    data?: string;
+  }
+
+  export interface GoalType {
+    id: number;
+    name: string;
   }
 
   export interface Bonfyre {

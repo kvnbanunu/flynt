@@ -19,6 +19,7 @@ import { ButtonGroup } from "../ui/button-group";
 import { Put } from "@/lib/api";
 import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
+import { GoalSection } from "../goals/GoalSection";
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -133,6 +134,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
           </div>
           <CollapsibleContent>
             <div className="flex flex-col gap-4 mt-4">
+            <GoalSection fyreId={fyre.id} />
               <div className="grid grid-cols-2 justify-stretch gap-4">
                 <Button variant="destructive" size="lg">
                   Remove Fyre

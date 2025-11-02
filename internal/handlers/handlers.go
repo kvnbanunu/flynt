@@ -30,6 +30,7 @@ func SetupHandlers(db *database.DB) http.Handler {
 	fyreHandler := NewFyreHandler(db)
 	friendHandler := NewFriendHandler(db)
 	healthHandler := NewHealthHandler(db)
+	goalHandler := NewGoalHandler(db)
 
 	// alias for readability
 	auth := middleware.Auth
@@ -40,6 +41,7 @@ func SetupHandlers(db *database.DB) http.Handler {
 	mux.Handle("/user/", auth(userHandler))
 	mux.Handle("/account/", accountHandler)
 	mux.Handle("/fyre", auth(fyreHandler))
+	mux.Handle("/goal/", auth(goalHandler))
 	mux.Handle("/fyre/", auth(fyreHandler))
 	mux.Handle("/fyre/user/", auth(fyreHandler))
 	mux.Handle("/friend", auth(friendHandler))

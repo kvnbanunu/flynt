@@ -30,6 +30,15 @@ func InitDB(path string) (*DB, error) {
 		return nil, fmt.Errorf("Failed to create tables: %w", err)
 	}
 
+	_, err = db.Exec(`
+		INSERT OR IGNORE INTO goal_type (id, name) VALUES
+		(1, 'Until Date'),
+		(2, 'Number of Days');
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to seed goal_type: %w", err)
+	}
+
 	log.Println("Database initialized successfully")
 	return dbConn, nil
 }

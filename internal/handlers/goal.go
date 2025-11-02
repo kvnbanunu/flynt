@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,53 +22,42 @@ func NewGoalHandler(db *database.DB) *GoalHandler {
 func (h *GoalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	path := strings.TrimPrefix(r.URL.Path, "/api/goal")
+	path := r.URL.Path
+	fmt.Printf("REQUEST PATH: %q\n", path)
 
-	switch {
-	case path == "" || path == "/":
-		if r.Method == http.MethodPost {
-			h.createGoal(w,r)
-		} else {
-			h.writeError( w, http.StatusMethodNotAllowed, "Method not allowed")
-		}
-	case strings.HasPrefix(path, "/fyre/"):
-		if r.method == http.MethodGet {
-			idStr := strings.TrimPrefix(path, "/fyre/")
-			id, err := strconv.Atoi(idStr)
-			if err != nil {
-				h.writeError(w, http.StatusBadRequest, "Invalid Fyre ID")
-				return
-			}
-			h.getAllFyreGoals(w, r, id)
-		} else {
-			h.writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
-		}
-	case strings.HasPrefix(path, "/"):
-		idStr := strings.TrimPrefix(path, "/")
-		id, err := strconv.Atoi(idStr)
+	if strings.HasPrefix(path, "/goal/") {
+		idStr := strings.TrimPrefix(path, "/goal/")
+		fyreID, err := strconv.Atoi(idStr)
 		if err != nil {
-			h.writeError(w, http.StatusBadRequest, "Invalid goal ID")
+			h.writeError(w, http.StatusBadRequest, "Invalid fyre ID")
+			return
 		}
+
+		// Handle methods
 		switch r.Method {
 		case http.MethodGet:
-			h.getGoalsByFyre(w, r, id)
+			h.getGoalByFyre(w, r, fyreID)
+		case http.MethodPost:
+			h.createGoal(w, r)
 		case http.MethodPut:
-			h.updateGoal(w, r, id)
+			h.updateGoal(w, r, fyreID)
 		case http.MethodDelete:
-			h.deleteGoal(w, r, id)
-		default: 
+			h.deleteGoal(w, r, fyreID)
+		default:
 			h.writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
-	default:
-		h.writeError(w, http.StatusNotFound, "Endpoint not found")
+		return
 	}
+
+	// Path not found
+	h.writeError(w, http.StatusNotFound, "Endpoint not found")
 }
 
 // handles POST /api/goal
 func (h *GoalHandler) createGoal(w http.ResponseWriter, r *http.Request) {
 	var req database.CreateGoalRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.writeError(w, http.StatusBadRequest, "Invalid Json Payload")
+		h.writeError(w, http.StatusBadRequest, "Invalid JSON payload")
 		return
 	}
 
@@ -82,29 +72,58 @@ func (h *GoalHandler) createGoal(w http.ResponseWriter, r *http.Request) {
 		h.writeError(w, http.StatusInternalServerError, "Failed to create goal")
 		return
 	}
+
 	h.writeSuccess(w, http.StatusCreated, "Goal created successfully", goal)
 }
 
-func (h *GoalHandler) getAllFyreGoals(w http.ResponseWriter, _ *http.Request, id int) {
-	goals, err := h.db.GetGoalsByFyre(id)
+// GET /api/goal/fyre/{fyre_id}
+func (h *GoalHandler) getGoalByFyre(w http.ResponseWriter, _ *http.Request, fyreID int) {
+	goal, err := h.db.GetGoalByID(fyreID)
 	if err != nil {
-		if strings.Contains(err.Error(), "fyre not found") {
-			h.writeError(w, http.StatusNotFound, "Fyre not found")
-			return
-		}
-		if strings.Contains(err.Error(), "goals not found") {
-			h.writeError(w, http.StatusNotFound, "Goals not found")
-			return
-		}
-		log.Printf("Error getting fyre: %v", err)
-		h.writeError(w, http.StatusInternalServerError, "Failedto get fyre")
+		log.Printf("Error getting goal: %v", err)
+		h.writeError(w, http.StatusInternalServerError, "Failed to get goal")
 		return
 	}
-	h.writeSuccess(w, http.StatusOK, "Goals retreived successfully", goals)
+
+	if goal == nil {
+		h.writeError(w, http.StatusNotFound, "Goal not found for this fyre")
+		return
+	}
+
+	h.writeSuccess(w, http.StatusOK, "Goal retrieved successfully", goal)
 }
 
-func (h *GoalHandler) updateGoal(w http.ResponseWriter, r *http.Request, fyre_id int, type_id int) {
+// PUT /api/goal/{fyre_id}
+func (h *GoalHandler) updateGoal(w http.ResponseWriter, r *http.Request, fyreID int) {
+	var req database.UpdateGoalRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.writeError(w, http.StatusBadRequest, "Invalid JSON payload")
+		return
+	}
 
+	goal, err := h.db.UpdateGoal(fyreID, req)
+	if err != nil {
+		log.Printf("Error updating goal: %v", err)
+		h.writeError(w, http.StatusInternalServerError, "Failed to update goal")
+		return
+	}
+
+	h.writeSuccess(w, http.StatusOK, "Goal updated successfully", goal)
+}
+
+func (h *GoalHandler) deleteGoal(w http.ResponseWriter, _ *http.Request, fyreID int) {
+	err := h.db.DeleteGoal(fyreID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			h.writeError(w, http.StatusNotFound, "Goal not found for this fyre")
+			return
+		}
+		log.Printf("Error deleting goal: %v", err)
+		h.writeError(w, http.StatusInternalServerError, "Failed to delete goal")
+		return
+	}
+
+	h.writeSuccess(w, http.StatusOK, "Goal deleted successfully", nil)
 }
 
 // error response for GoalHandlers

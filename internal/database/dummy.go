@@ -18,6 +18,11 @@ func (db *DB) InsertDummyData() error {
 		return err
 	}
 
+	err = db.insertDummyGoals()
+	if err != nil {
+		return err
+	}
+
 	err = db.insertDummyFriends()
 	if err != nil {
 		return err
@@ -85,6 +90,20 @@ func (db *DB) insertDummyFyres() error {
 
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("Failed to insert dummy fyres: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) insertDummyGoals() error {
+	query := `
+	INSERT INTO goal (fyre_id, description, goal_type_id, data)
+	VALUES
+	(4, 'open 20 packs', 2, '20');
+	`
+
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to insert dummy goals: %w", err)
 	}
 
 	return nil

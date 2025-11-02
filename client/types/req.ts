@@ -41,3 +41,16 @@ export interface UpdateFyreRequest {
   bonfyre_id?: number;
   active_days?: string;
 }
+
+export interface CreateGoalRequest {
+  fyre_id: number;
+  description: string;
+  goal_type_id: number;
+  data: string;
+}
+
+export interface UpdateGoalRequest {
+  description?: string;
+  goal_type_id?: number;
+  data?: string;
+}
