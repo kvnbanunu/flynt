@@ -17,7 +17,7 @@ import { Button } from "../ui/button";
 
 export const Popup: React.FC<{
   description: string;
-  button: string;
+  button: React.ReactNode;
 }> = (props) => {
 
   const { description, button } = props
@@ -25,7 +25,7 @@ export const Popup: React.FC<{
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button>{button}</Button>
+        {button}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
