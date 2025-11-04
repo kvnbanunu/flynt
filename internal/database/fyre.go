@@ -160,11 +160,28 @@ func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 	if req.Increment {
 		lastChecked := time.Now()
 		query = fmt.Sprintf(query, updateLastChecked)
-		query = fmt.Sprintf(`%s
-	INSERT into social_post (user_id, fyre_id, type, content)
-	VALUES (?, ?, ?, ' just hit a streak of ')
-		`, query)
-		err = db.Get(&fyre, query, lastChecked.UTC(), isChecked, req.FyreID, id, req.FyreID, DailyCheck)
+		err = db.Get(&fyre, query, lastChecked.UTC(), isChecked, req.FyreID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Create the post for daily check
+		query = `INSERT into social_post (user_id, fyre_id, type, content)
+		VALUES (?, ?, ?, ' just hit a streak of ')
+		`
+		result, err := db.Exec(query, id, req.FyreID, DailyCheck)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create post: %w", err)
+		}
+
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return nil, fmt.Errorf("Failed to get rows affected: %w", err)
+		}
+
+		if rowsAffected == 0 {
+			return nil, fmt.Errorf("No post created")
+		}
 	} else {
 		updateLastChecked = `- 1,
 		last_checked_at = last_checked_at_prev,
