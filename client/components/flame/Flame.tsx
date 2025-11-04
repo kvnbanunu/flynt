@@ -19,8 +19,8 @@ export const FlameAnimation: React.FC = () => {
       ctx.translate(0, canvas.height);
       ctx.scale(23, -23);
 
-      let fps = 7;
-      let interval = 1000 / fps;
+      const fps = 7;
+      const interval = 1000 / fps;
       let prev = Date.now();
 
       const y = [2, 1, 0, 0, 0, 0, 1, 2];
