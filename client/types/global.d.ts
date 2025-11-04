@@ -45,4 +45,12 @@ declare namespace Models {
     user_id_1: number;
     user_id_2: number;
   }
+
+  export interface SocialPost {
+    id: number;
+    user_id: number;
+    fyre_id: number;
+    type: "dailycheck" | "milestone";
+    content: string;
+  }
 }

@@ -95,10 +95,18 @@ func (db *DB) createTables() error {
 	);
 
 	CREATE TABLE IF NOT EXISTS friend (
-		user_id_1 INTEGER NOT NULL,
-		user_id_2 INTEGER NOT NULL,
+		user_id_1 INTEGER NOT NULL REFERENCES user(id),
+		user_id_2 INTEGER NOT NULL REFERENCES user(id),
 		status TEXT DEFAULT 'pending',
 		PRIMARY KEY (user_id_1, user_id_2)
+	);
+
+	CREATE TABLE IF NOT EXISTS social_post (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL REFERENCES user(id),
+		fyre_id INTEGER NOT NULL REFERENCES fyre(id),
+		type TEXT NOT NULL,
+		content TEXT NOT NULL
 	);
 	`
 

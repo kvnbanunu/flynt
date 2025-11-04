@@ -4,7 +4,7 @@ import { FriendsProvider } from "@/contexts/FriendsContext";
 
 export default function Home() {
   return (
-    <AuthGuard redirectTo="/login">
+    <AuthGuard redirectTo="/landing">
       <FriendsProvider>
         <FriendsComponent />
       </FriendsProvider>

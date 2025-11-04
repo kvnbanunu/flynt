@@ -142,13 +142,13 @@ func (db *DB) ResetChecks(ids []int) ([]Fyre, error) {
 }
 
 // either increment or decrement streakcount and set last_checked
-func (db *DB) CheckFyre(req CheckFyreRequest) (*Fyre, error) {
+func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 	query := `
 	UPDATE fyre
 	SET streak_count = streak_count %s
 	is_checked = ?
 	WHERE id = ?
-	RETURNING *
+	RETURNING *;
 	`
 	var fyre Fyre
 	var err error
@@ -160,7 +160,11 @@ func (db *DB) CheckFyre(req CheckFyreRequest) (*Fyre, error) {
 	if req.Increment {
 		lastChecked := time.Now()
 		query = fmt.Sprintf(query, updateLastChecked)
-		err = db.Get(&fyre, query, lastChecked.UTC(), isChecked, req.FyreID)
+		query = fmt.Sprintf(`%s
+	INSERT into social_post (user_id, fyre_id, type, content)
+	VALUES (?, ?, ?, ' just hit a streak of ')
+		`, query)
+		err = db.Get(&fyre, query, lastChecked.UTC(), isChecked, req.FyreID, id, req.FyreID, DailyCheck)
 	} else {
 		updateLastChecked = `- 1,
 		last_checked_at = last_checked_at_prev,

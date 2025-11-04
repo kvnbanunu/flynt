@@ -1,10 +1,10 @@
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import { FyreArea } from "@/components/fyre/FyreArea";
+import { Feed } from "@/components/feed/Feed";
 
 export default function Home() {
   return (
-    <AuthGuard redirectTo="/login">
-      <FyreArea />
+    <AuthGuard redirectTo="/landing">
+      <Feed />
     </AuthGuard>
   );
 }

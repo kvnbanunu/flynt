@@ -61,3 +61,14 @@ export interface FriendsUserListItem {
   img_url?: string;
   bio?: string;
 }
+export interface FullPost {
+  id: number;
+  user_id: number;
+  fyre_id: number;
+  type: "dailycheck" | "milestone";
+  content: string;
+  username: string;
+  img_url?: string;
+  title: string;
+  streak_count: number;
+}
