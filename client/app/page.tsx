@@ -3,7 +3,7 @@ import { FyreArea } from "@/components/fyre/FyreArea";
 
 export default function Home() {
   return (
-    <AuthGuard redirectTo="/login">
+    <AuthGuard redirectTo="/landing">
       <FyreArea />
     </AuthGuard>
   );

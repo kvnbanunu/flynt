@@ -4,7 +4,6 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { RegisterForm } from "./RegisterForm";
 import { LoginForm } from "./LoginForm";
-import { usePathname } from "next/navigation";
 
 export const LoginCard: React.FC = () => {
   return (
