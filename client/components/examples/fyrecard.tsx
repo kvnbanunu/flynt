@@ -1,5 +1,6 @@
 "use client";
 import { Put } from "@/lib/api";
+import { UpdateFyreRequest } from "@/types/req";
 import React, { useState } from "react";
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
@@ -14,14 +15,11 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = (props) => {
     const checked = isChecked ? false : true
     setIsChecked(checked);
 
-    const copy: Models.Fyre = currentFyre;
+    const req: UpdateFyreRequest = {streak_count: checked ? streakCount + 1 : streakCount - 1}
 
-    copy.streak_count = checked ? streakCount + 1 : streakCount - 1;
-    copy.bonfyre_id = -1;
-
-    const res = await Put<Models.Fyre>(
+    const res = await Put<Models.Fyre, UpdateFyreRequest>(
       `/fyre/${currentFyre.id}`,
-      copy,
+      req,
     );
     if (res.success) {
       setCurrentFyre(res.data);

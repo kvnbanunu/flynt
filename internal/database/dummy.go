@@ -75,11 +75,12 @@ func (db *DB) insertDummyFyres() error {
 	query := `
 	INSERT INTO fyre (title, streak_count, user_id, active_days)
 	VALUES
-	('Win a game of Clash Royale', 100, 2, '10000000'),
-	('Drink water', 0, 3, '10000000'),
-	('Gacha', 99, 3, '10000000'),
-	('Open Pokemon TCG pack', 9, 4, '00000001'),
-	('Go for a run', 2, 5, '00101010');
+	('Win a game of Clash Royale', 100, 2, '1111111'),
+	('Drink water', 0, 3, '1111111'),
+	('Gacha', 99, 3, '1111111'),
+	('Open Pokemon TCG pack', 9, 4, '0000001'),
+	('Run a mile', 2, 5, '0101010'),
+	('Complete a leetcode question', 20, 5, '1111111');
 	`
 
 	if _, err := db.Exec(query); err != nil {

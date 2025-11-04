@@ -6,7 +6,7 @@ interface MainContainerProps {
 
 export const MainContainer: React.FC<MainContainerProps> = ({ children }) => {
   return (
-      <div className="flex justify-center items-center px-4 py-4 min-h-screen">
+      <div className="flex p-4 w-screen md:w-full h-full place-content-center">
         {children}
       </div>
   );

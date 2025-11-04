@@ -31,6 +31,8 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.register(w, r)
 	case "/login", "/login/":
 		h.login(w, r)
+	case "/logout", "/logout/":
+		h.logout(w, r)
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
@@ -44,7 +46,7 @@ func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !utils.ValidateFields(req.Username, req.Name, req.Password, req.Email) {
+	if !utils.ValidateFields(req.Username, req.Name, req.Password, req.Email, req.Timezone) {
 		writeError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
@@ -83,10 +85,16 @@ func (h *AccountHandler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = setCookie(w, user.ID)
+	err = setCookie(w, user.ID, user.Timezone)
 	if err != nil {
 		return
 	}
 
 	writeSuccess(w, http.StatusOK, "User logged in successfully", user)
+}
+
+// Handles POST /account/logout (just deletes auth cookie)
+func (h *AccountHandler) logout(w http.ResponseWriter, _ *http.Request) {
+	setExpiredCookie(w)
+	writeSuccess(w, http.StatusOK, "User logged out successfully", nil)
 }

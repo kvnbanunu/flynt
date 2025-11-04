@@ -18,23 +18,27 @@ export interface AuthContextType {
   loading: boolean;
   login: (credentials: LoginRequest) => Promise<Boolean>;
   register: (credentials: RegisterRequest) => Promise<Boolean>;
+  logout: () => Promise<Boolean>;
   fetchFyres: () => void;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
-    fyres: [],
-    loading: false,
-    login: function(_credentials: LoginRequest): Promise<Boolean> {
-        throw new Error("Function not implemented.");
-    },
-    register: function(_credentials: RegisterRequest): Promise<Boolean> {
-        throw new Error("Function not implemented.");
-    },
-    fetchFyres: function(): void {
-        throw new Error("Function not implemented.");
-    },
-    isAuthenticated: false
+  fyres: [],
+  loading: false,
+  login: function(_credentials: LoginRequest): Promise<Boolean> {
+    throw new Error("Function not implemented.");
+  },
+  register: function(_credentials: RegisterRequest): Promise<Boolean> {
+    throw new Error("Function not implemented.");
+  },
+  logout: function(): Promise<Boolean> {
+    throw new Error("Function not implemented.");
+  },
+  fetchFyres: function(): void {
+    throw new Error("Function not implemented.");
+  },
+  isAuthenticated: false,
 });
 
 interface AuthProviderProps {
@@ -56,6 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         fetchFyres();
       } else {
         setUser(null);
+        setFyres([]);
       }
       setLoading(false);
     };
@@ -97,14 +102,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return res.success;
   };
 
+  const logout = async (): Promise<Boolean> => {
+    setLoading(true);
+    const res = await Post<null, null>("/account/logout", null);
+    if (res.success) {
+      setUser(null);
+      setFyres([]);
+      setError(null);
+      router.push("/login");
+    } else {
+      setError(res.error.message);
+    }
+    setLoading(false);
+    return res.success;
+  };
+
   const fetchFyres = async () => {
-    const res = await Get<Models.Fyre[]>("/fyre")
+    const res = await Get<Models.Fyre[]>("/fyre");
     if (res.success) {
       setFyres(res.data);
     } else {
       setError(res.error.message);
     }
-  }
+  };
 
   const value: AuthContextType = {
     user,
@@ -113,6 +133,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
     login,
     register,
+    logout,
     fetchFyres,
     isAuthenticated: !!user,
   };

@@ -12,7 +12,7 @@ import (
 )
 
 type ErrorResponse struct {
-	Error   string `json:"statusCode"`
+	Error   string `json:"status_code"`
 	Message string `json:"message,omitempty"`
 }
 
@@ -66,27 +66,55 @@ func SetupHandlers(db *database.DB) http.Handler {
 	return middleware.Logger(middleware.Cors(mux))
 }
 
-func setCookie(w http.ResponseWriter, id int) error {
+func setCookie(w http.ResponseWriter, id int, timezone string) error {
 	cfg := utils.GetConfig()
-	token, err := utils.NewToken(id)
+	token, err := utils.NewToken(id, timezone)
 	if err != nil {
 		fmt.Println("Failed to create token")
 		writeError(w, http.StatusInternalServerError, "Failed to create token")
 		return err
 	}
 
+	isProduction := cfg.Env == "production"
+
 	cookie := &http.Cookie{
 		Name:     cfg.Context,
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour),
 		Path:     "/",
-		Secure:   cfg.Env == "production",
+		Secure:   isProduction,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
 
+	if isProduction {
+		cookie.Domain = cfg.Domain
+	}
+
 	http.SetCookie(w, cookie)
 	return nil
+}
+
+func setExpiredCookie(w http.ResponseWriter) {
+	cfg := utils.GetConfig()
+
+	isProduction := cfg.Env == "production"
+
+	cookie := &http.Cookie{
+		Name:     cfg.Context,
+		Value:    "",
+		MaxAge:   -1,
+		Path:     "/",
+		Secure:   isProduction,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	if isProduction {
+		cookie.Domain = cfg.Domain
+	}
+
+	http.SetCookie(w, cookie)
 }
 
 // Generic error response
