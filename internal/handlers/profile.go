@@ -3,7 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
-    "strings"
+	"strings"
 
 	"flynt/internal/database"
 )
@@ -20,30 +20,29 @@ func NewProfileHandler(db *database.DB) *ProfileHandler {
 func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-    path := strings.TrimPrefix(r.URL.Path, "/profile")
+	path := strings.TrimPrefix(r.URL.Path, "/profile")
 
-    userIDValue := r.Context().Value("userID")
-    userID, ok := userIDValue.(int)
+	userIDValue := r.Context().Value("userID")
+	userID, ok := userIDValue.(int)
 
-    if !ok {
-        writeError(w, http.StatusBadRequest, "Invalid or missing user ID in context")
-        return
-    }
+	if !ok {
+		writeError(w, http.StatusBadRequest, "Invalid or missing user ID in context")
+		return
+	}
 
-    switch{
-        case path == "" || path == "/":
-            switch r.Method{
-            case http.MethodGet:
-                h.getProfile(w, r, userID)
-            case http.MethodPost:
-                h.updateProfile(w, r, userID)
-            default:
-                writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
-            }
-        default:
-    		writeError(w, http.StatusNotFound, "Endpoint not found")
-    }
-
+	switch path {
+	case "", "/":
+		switch r.Method {
+		case http.MethodGet:
+			h.getProfile(w, r, userID)
+		case http.MethodPost:
+			h.updateProfile(w, r, userID)
+		default:
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		}
+	default:
+		writeError(w, http.StatusNotFound, "Endpoint not found")
+	}
 }
 
 // GET /api/profile
@@ -74,3 +73,4 @@ func (h *ProfileHandler) updateProfile(w http.ResponseWriter, r *http.Request, i
 
 	writeSuccess(w, http.StatusOK, "Profile updated successfully", user)
 }
+
