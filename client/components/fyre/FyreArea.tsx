@@ -5,6 +5,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { FyreCard } from "./FyreCard";
 import { Button } from "../ui/button";
+import { AddFyre } from "./AddFyre";
 
 export const FyreArea: React.FC = () => {
   const { fyres } = useAuth();
@@ -16,7 +17,8 @@ export const FyreArea: React.FC = () => {
             <FyreCard fyre={fyre} />
           </React.Fragment>
         ))}
-      <Button size="lg" className="w-full">Add New Fyre</Button>
+      {/* <Button size="lg" className="w-full">Add New Fyre</Button> */}
+      <AddFyre />
     </ScrollArea>
   );
 };
