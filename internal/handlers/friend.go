@@ -27,7 +27,7 @@ func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/friend")
 	id := r.Context().Value("userID").(int)
 
-	switch  path{
+	switch path {
 	case "", "/":
 		switch r.Method {
 		case http.MethodGet:

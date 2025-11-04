@@ -30,6 +30,7 @@ func SetupHandlers(db *database.DB) http.Handler {
 	fyreHandler := NewFyreHandler(db)
 	friendHandler := NewFriendHandler(db)
 	healthHandler := NewHealthHandler(db)
+	profileHandler := NewProfileHandler(db)
 
 	// alias for readability
 	auth := middleware.Auth
@@ -45,6 +46,8 @@ func SetupHandlers(db *database.DB) http.Handler {
 	mux.Handle("/friend", auth(friendHandler))
 	mux.Handle("/friend/", auth(friendHandler))
 	mux.Handle("/health", auth(admin(healthHandler)))
+	mux.Handle("/profile", auth(profileHandler))
+	mux.Handle("/profile/", auth(profileHandler))
 
 	// root handler
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
