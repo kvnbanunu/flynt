@@ -61,6 +61,13 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		default:
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
+    case strings.HasPrefix(path, "/missed/"):
+        if r.Method == http.MethodPut {
+            h.resolveMissedCheck(w, r)
+        } else {
+            writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+        }
+        return
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
@@ -199,8 +206,23 @@ func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id
 			return
 		}
 		if passed {
-			toUpdate = append(toUpdate, f.ID)
-			indexes = append(indexes, i)
+			daysSince, err := utils.DaysSince(*f.LastCheckedAt, timezone)
+			if err != nil {
+			    log.Printf("Failed to calculate days since last check for fyre %d: %v", f.ID, err)
+			}
+
+			if daysSince == 2 {
+				// mark as missed check (so frontend can prompt)
+				err := h.db.SetMissedCheck(f.ID, true)
+				if err != nil {
+					log.Printf("Failed to flag missed check: %v", err)
+				}
+//             } else if() {
+			} else {
+				// normal 1-day pass: uncheck
+				toUpdate = append(toUpdate, f.ID)
+				indexes = append(indexes, i)
+			}
 		}
 	}
 
@@ -217,4 +239,46 @@ func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id
 	}
 
 	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fyres)
+}
+
+// handles PUT /fyre/missed/{id}
+// body: { "keepStreak": true } or false
+func (h *FyreHandler) resolveMissedCheck(w http.ResponseWriter, r *http.Request) {
+    // Extract fyre ID
+    parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/fyre/missed/"), "/")
+    if len(parts) == 0 || parts[0] == "" {
+        writeError(w, http.StatusBadRequest, "Missing fyre ID")
+        return
+    }
+
+    id, err := strconv.Atoi(parts[0])
+    if err != nil {
+        writeError(w, http.StatusBadRequest, "Invalid fyre ID")
+        return
+    }
+
+    // Parse body
+    var req struct {
+        KeepStreak bool `json:"keepStreak"`
+    }
+    if err := parseBody(w, r, &req); err != nil {
+        return
+    }
+
+    // Apply logic based on user choice
+    if req.KeepStreak {
+        err = h.db.KeepStreak(id)
+        if err != nil {
+            writeError(w, http.StatusInternalServerError, "Failed to preserve streak")
+            return
+        }
+        writeSuccess(w, http.StatusOK, "Streak preserved", nil)
+    } else {
+        err = h.db.ResetStreak(id)
+        if err != nil {
+            writeError(w, http.StatusInternalServerError, "Failed to reset streak")
+            return
+        }
+        writeSuccess(w, http.StatusOK, "Streak reset", nil)
+    }
 }

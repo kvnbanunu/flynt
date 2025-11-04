@@ -27,6 +27,7 @@ declare namespace Models {
     is_checked: boolean;
     last_checked_at?: string;
     last_checked_at_prev?: string;
+    missed_check: boolean;
     created_at?: string;
     updated_at?: string;
   }

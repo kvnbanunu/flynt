@@ -198,3 +198,51 @@ func (db *DB) DeleteFyre(id int) error {
 
 	return nil
 }
+
+// Sets the missed_check field to a boolean value passed in.
+func (db *DB) SetMissedCheck(id int, missed bool) error {
+	query := `
+		UPDATE fyre
+		SET missed_check = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
+	`
+	_, err := db.Exec(query, missed, id)
+	if err != nil {
+		return fmt.Errorf("failed to update missed_check for fyre %d: %w", id, err)
+	}
+	return nil
+}
+
+// Keeps the streak by clearing missed_check flag without resetting counters or dates
+func (db *DB) KeepStreak(fyreID int) error {
+	query := `
+		UPDATE fyre
+		SET missed_check = false,
+		    updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
+	`
+	_, err := db.Exec(query, fyreID)
+	if err != nil {
+		return fmt.Errorf("failed to keep streak for fyre %d: %w", fyreID, err)
+	}
+	return nil
+}
+
+// Resets streak count and clears missed_check flag
+func (db *DB) ResetStreak(fyreID int) error {
+	query := `
+		UPDATE fyre
+		SET streak_count = 0,
+		    missed_check = false,
+		    last_checked_at = NULL,
+		    last_checked_at_prev = NULL,
+		    is_checked = false,
+		    updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
+	`
+	_, err := db.Exec(query, fyreID)
+	if err != nil {
+		return fmt.Errorf("failed to reset streak for fyre %d: %w", fyreID, err)
+	}
+	return nil
+}

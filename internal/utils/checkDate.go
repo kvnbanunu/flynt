@@ -15,3 +15,13 @@ func CheckDayPassed(t time.Time, timezone string) (bool, error) {
 	}
 	return false, nil
 }
+
+func DaysSince(t time.Time, timezone string) (int, error) {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return 0, err
+	}
+	now := time.Now().In(loc)
+	t = t.In(loc)
+	return int(now.Sub(t).Hours() / 24), nil
+}

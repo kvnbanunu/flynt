@@ -5,8 +5,8 @@ import { FyreCard } from "./fyrecard";
 import AddFyre from "./addfyre";
 import { RemoveFyre } from "./removefyre";
 
-export const FyreList: React.FC<{ user: Models.User }> = (props) => {
-  const { user } = props;
+export const FyreList: React.FC<{ user: Models.User; onMissedFyres?: (missed: Models.Fyre[]) => void; }> = ({ user, onMissedFyres}) => {
+  // const { user } = props;
   const [fyres, setFyres] = useState<Models.Fyre[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,12 +18,17 @@ export const FyreList: React.FC<{ user: Models.User }> = (props) => {
     );
     if (res.success) {
       setFyres(res.data);
+      // Find any missed Fyres
+      console.log(res.data) // Check what backend returned
+      const missed = res.data.filter(f => f.missed_check === true);
+      console.log("Missed Fyres: ", missed);
+      if (onMissedFyres) onMissedFyres(missed);
     } else {
       setError(res.error.message);
     }
     setLoading(false);
     setUpdate(false);
-  }, []);
+  }, [onMissedFyres]);
 
   const onUpdate = () => {
     setUpdate(true);

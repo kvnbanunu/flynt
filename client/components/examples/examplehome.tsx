@@ -1,10 +1,11 @@
 "use client";
-import { Post } from "@/lib/api";
+import {Get, Post} from "@/lib/api";
 import React, { useState } from "react";
 import SigninForm from "./signin";
 import { FyreList } from "./fyrelist";
 import FriendsList from "./friendlist/FriendsList";
 import { RegisterForm } from "./Register";
+import MissedCheckPopup  from "@/components/examples/missed-check-popup/missedCheckPopup";
 
 interface LoginData {
   type: string;
@@ -18,6 +19,8 @@ export const ExampleHome: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<Models.User | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>("login");
+  const [missedFyres, setMissedFyres] = useState<Models.Fyre[]>([]);
+  const [showPopup, setShowPopup] = useState(false);
 
   const onLogin = async (email: string, password: string) => {
     setLoading(true);
@@ -43,6 +46,8 @@ export const ExampleHome: React.FC = () => {
     setIsLoggedIn(true);
     setLoading(false);
   }
+
+
 
   if (loading) {
     return <div>Logging in...</div>;
@@ -90,9 +95,18 @@ export const ExampleHome: React.FC = () => {
   if (isloggedIn && currentUser) {
     return (
       <main>
+        <MissedCheckPopup
+            fyres={missedFyres}
+            onResolve={(id) => {
+              setMissedFyres((prev) => prev.filter((f) => f.id !== id));
+            }}
+        />
         <div className="flex">
           <FriendsList />
-          <FyreList user={currentUser} />
+          <FyreList
+              user={currentUser}
+              onMissedFyres={(missed) => setMissedFyres(missed)}
+          />
         </div>
       </main>
     );

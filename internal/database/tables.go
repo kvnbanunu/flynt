@@ -29,6 +29,7 @@ type Fyre struct {
 	IsChecked         bool       `db:"is_checked" json:"is_checked"`
 	LastCheckedAt     *time.Time `db:"last_checked_at" json:"last_checked_at,omitempty"`
 	LastCheckedAtPrev *time.Time `db:"last_checked_at_prev" json:"last_checked_at_prev,omitempty"`
+	MissedCheck       bool       `db:"missed_check" json:"missed_check"`
 	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
 }
