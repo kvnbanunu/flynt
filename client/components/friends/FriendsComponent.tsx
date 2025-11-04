@@ -10,11 +10,28 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Button } from "../ui/button";
-import { UserCheck, UserRoundSearch, Users } from "lucide-react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { UserCheck, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useState } from "react";
+import {
+  FriendRequest,
+  FriendsListItem,
+  FriendsUserListItem,
+} from "@/types/req";
+import { Item, ItemContent, ItemMedia, ItemTitle } from "../ui/item";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "../ui/command";
+import { Post } from "@/lib/api";
+import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
+import React from "react";
 
 export const FriendsComponent: React.FC = () => {
   const { friends, users, loading, error, fetchFriends, fetchUsers } =
@@ -25,6 +42,11 @@ export const FriendsComponent: React.FC = () => {
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  const onAddFriend = () => {
+    fetchFriends();
+    setSearch("");
+  };
 
   return (
     <Tabs defaultValue="friendslist" className="w-full">
@@ -64,26 +86,101 @@ export const FriendsComponent: React.FC = () => {
           </CardAction>
         </CardHeader>
         <CardContent className="grow">
-          <TabsContent value="friendslist">
-            {friends.map((f) => (
-              <div key={f.id}>{f.username}</div>
-            ))}
-          </TabsContent>
-          <TabsContent value="requests">Requests</TabsContent>
+          {!search && (
+            <React.Fragment>
+              <TabsContent value="friendslist">
+                {friends.map((f) => (
+                  <FriendCard key={f.id} friend={f} />
+                ))}
+              </TabsContent>
+              <TabsContent value="requests">Requests</TabsContent>
+            </React.Fragment>
+          )}
         </CardContent>
         <CardFooter className="relative justify-self-end">
-          <Label htmlFor="search" className="sr-only">
-            Search
-          </Label>
-          <Input
-            id="search"
-            placeholder="Add new friend"
-            className="pl-8"
-            type="search"
-          />
-          <UserRoundSearch className="pointer-events-none absolute left-8.5 bottom-0.5 size-4 -translate-y-1/2 opacity-50 select-none" />
+          <Command>
+            <CommandEmpty>{search && "No users found."}</CommandEmpty>
+            <CommandGroup>
+              {search &&
+                users.map((u) => (
+                  <CommandItem key={u.id} asChild value={u.username}>
+                    <FriendSearchCard user={u} callback={onAddFriend} />
+                  </CommandItem>
+                ))}
+            </CommandGroup>
+            <CommandInput
+              placeholder="Add new friend"
+              onValueChange={setSearch}
+            />
+          </Command>
         </CardFooter>
       </Card>
     </Tabs>
+  );
+};
+
+const FriendSearchCard: React.FC<{
+  user: FriendsUserListItem;
+  callback: () => void;
+}> = ({ user, callback }) => {
+  const img_url = user.img_url || "/default_profile.jpg";
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const addFriend = async () => {
+    setLoading(true);
+    const req: FriendRequest = {
+      type: "addfriend",
+      user_id_2: user.id,
+    };
+    const res = await Post<null, FriendRequest>("/friend", req);
+    if (res.success) {
+      toast("Friend request sent!");
+      setError(null);
+      if (callback) callback();
+    } else {
+      setError(res.error.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <Item className="bg-fcontainer2 rounded-xl mb-4">
+      <ItemMedia>
+        <Avatar className="rounded-full">
+          <AvatarImage src={img_url} alt={`@${user.username}`} />
+          <AvatarFallback>{user.username.slice(0, 2)}</AvatarFallback>
+        </Avatar>
+      </ItemMedia>
+      <ItemContent className="flex-row justify-between">
+        <ItemTitle>{user.username}</ItemTitle>
+        <Button onClick={addFriend}>
+          {error && error}
+          {loading && <Spinner />}
+          Add Friend
+        </Button>
+      </ItemContent>
+    </Item>
+  );
+};
+
+const FriendCard: React.FC<{
+  friend: FriendsListItem;
+}> = ({ friend }) => {
+  const img_url = friend.img_url || "/default_profile.jpg";
+
+  return (
+    <Item className="bg-fcontainer2 rounded-xl mb-4">
+      <ItemMedia>
+        <Avatar className="rounded-full">
+          <AvatarImage src={img_url} alt={`@${friend.username}`} />
+          <AvatarFallback>{friend.username.slice(0, 2)}</AvatarFallback>
+        </Avatar>
+      </ItemMedia>
+      <ItemContent className="flex-row justify-between">
+        <ItemTitle>{friend.username}</ItemTitle>
+        <Badge>{friend.status}</Badge>
+      </ItemContent>
+    </Item>
   );
 };
