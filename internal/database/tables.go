@@ -14,6 +14,7 @@ type User struct {
 	ImgURL    *string   `db:"img_url" json:"img_url,omitempty"`
 	Bio       *string   `db:"bio" json:"bio,omitempty"`
 	Timezone  string    `db:"timezone" json:"timezone,omitempty"`
+	FyreTotal int       `db:"fyre_total" json:"fyre_total"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }

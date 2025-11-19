@@ -26,7 +26,7 @@ export default function LandingPage() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        Flynt harder
+        Ignite your fyre today
       </motion.p>
 
       <motion.div

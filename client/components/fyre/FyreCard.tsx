@@ -120,7 +120,8 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
               isOpen={isOpen}
               onChange={changeDays}
             />
-            <h4>Streak: {currentStreak} 🔥</h4>
+            <div className="flex gap-4 items-center">
+            <h4>{currentStreak} 🔥</h4>
             <Checkbox
               className="mr-2 size-8 rounded-md"
               checked={isChecked}
@@ -130,6 +131,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
                 checkFyre(newValue);
               }}
             />
+            </div>
           </div>
           <CollapsibleContent>
             <div className="flex flex-col gap-4 mt-4">

@@ -13,6 +13,7 @@ declare namespace Models {
     img_url?: string;
     bio?: string;
     timezone: string;
+    fyre_total: number;
     created_at?: string;
     updated_at?: string;
   }

@@ -29,15 +29,15 @@ func (db *DB) InsertDummyData() error {
 func (db *DB) insertDummyUsers() error {
 	dummyUser := os.Getenv("DUMMY_USER")
 	dummypass := os.Getenv("DUMMY_PASSWORD")
-	adminID := os.Getenv("ADMIN_ID")
-	adminUser := os.Getenv("ADMIN_USER")
-	adminEmail := os.Getenv("ADMIN_EMAIL")
-	adminPass := os.Getenv("ADMIN_PASSWORD")
+	// adminID := os.Getenv("ADMIN_ID")
+	// adminUser := os.Getenv("ADMIN_USER")
+	// adminEmail := os.Getenv("ADMIN_EMAIL")
+	// adminPass := os.Getenv("ADMIN_PASSWORD")
 
-	adminPassHashed, err := utils.HashPassword(adminPass)
-	if err != nil {
-		return err
-	}
+	// adminPassHashed, err := utils.HashPassword(adminPass)
+	// if err != nil {
+	// 	return err
+	// }
 
 	hashed, err := utils.HashPassword(dummypass)
 	if err != nil {
@@ -45,28 +45,29 @@ func (db *DB) insertDummyUsers() error {
 	}
 
 	query := fmt.Sprintf(`
-	INSERT INTO user (username, name, email, password)
+	INSERT INTO user (username, name, email, password, fyre_total)
 	VALUES
-	('Test', 'Test User', '%s', '%s'),
-	('BrandonRada', 'Brandon Rada', 'brandon@gmail.com', '%s'),
-	('Tosen', 'Evin Gonzales', 'evin@gmail.com', '%s'),
-	('Lemon', 'Lucas Laviolette', 'lucas@gmail.com', '%s'),
-	('Banunu', 'Kevin Nguyen', 'kevin@gmail.com', '%s')
+	('Test', 'Test User', '%s', '%s', 0),
+	('BrandonRada', 'Brandon Rada', 'brandon@gmail.com', '%s', 100),
+	('Tosen', 'Evin Gonzales', 'evin@gmail.com', '%s', 99),
+	('Lemon', 'Lucas Laviolette', 'lucas@gmail.com', '%s', 9),
+	('Banunu', 'Kevin Nguyen', 'kevin@gmail.com', '%s', 22)
 	`, dummyUser, hashed, hashed, hashed, hashed, hashed)
 
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("Failed to insert dummy users: %w", err)
 	}
 
-	query = fmt.Sprintf(`
-	INSERT INTO user (id, username, name, email, password)
-	VALUES
-	(%s, '%s', 'Admin User', '%s', '%s')
-	`, adminID, adminUser, adminEmail, adminPassHashed)
-
-	if _, err := db.Exec(query); err != nil {
-		return fmt.Errorf("Failed to insert admin user: %w", err)
-	}
+	// Add this later
+	// query = fmt.Sprintf(`
+	// INSERT INTO user (id, username, name, email, password)
+	// VALUES
+	// (%s, '%s', 'Admin User', '%s', '%s')
+	// `, adminID, adminUser, adminEmail, adminPassHashed)
+	//
+	// if _, err := db.Exec(query); err != nil {
+	// 	return fmt.Errorf("Failed to insert admin user: %w", err)
+	// }
 
 	return nil
 }

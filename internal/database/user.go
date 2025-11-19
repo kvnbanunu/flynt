@@ -34,7 +34,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 	query := `
 	INSERT INTO user (username, name, password, email, timezone)
 	VALUES (?, ?, ?, ?, ?)
-	RETURNING id, username, name, email, timezone, created_at, updated_at
+	RETURNING id, username, name, email, timezone, fyre_total, created_at, updated_at
 	`
 
 	hashed, err := utils.HashPassword(req.Password)
@@ -74,7 +74,7 @@ func (db *DB) GetUserByID(id int) (*User, error) {
 // query function to fetch user matching email
 func (db *DB) GetUserByEmail(email string) (*User, error) {
 	query := `
-	SELECT id, username, name, email, img_url, bio, timezone, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, timezone, fyre_total, created_at, updated_at
 	FROM user
 	WHERE email = ?
 	`
@@ -94,7 +94,7 @@ func (db *DB) GetUserByEmail(email string) (*User, error) {
 // fetch all users from db
 func (db *DB) GetAllUsers() ([]User, error) {
 	query := `
-	SELECT id, username, name, email, img_url, bio, timezone, created_at, updated_at
+	SELECT id, username, name, email, img_url, bio, timezone, fyre_total, created_at, updated_at
 	FROM user
 	ORDER BY name ASC
 	`
@@ -199,7 +199,7 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		UPDATE user
 		SET %s
 		WHERE id = ?
-		RETURNING id, username, name, email, img_url, bio, timezone, created_at, updated_at
+		RETURNING id, username, name, email, img_url, bio, timezone, fyre_total, created_at, updated_at
 	`, strings.Join(setParts, ", "))
 
 	var user User
