@@ -16,6 +16,8 @@ export interface AuthContextType {
   error?: string | null;
   fyres: Models.Fyre[];
   loading: boolean;
+  checkUser: () => void;
+  setUser: (user: Models.User) => void;
   login: (credentials: LoginRequest) => Promise<Boolean>;
   register: (credentials: RegisterRequest) => Promise<Boolean>;
   logout: () => Promise<Boolean>;
@@ -26,6 +28,12 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   fyres: [],
   loading: false,
+  checkUser: function(): void {
+    throw new Error("Function not implemented.");
+  },
+  setUser: function(_user: Models.User): void {
+    throw new Error("Function not implemented.");
+  },
   login: function(_credentials: LoginRequest): Promise<Boolean> {
     throw new Error("Function not implemented.");
   },
@@ -53,19 +61,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const res = await Get<Models.User>("/user");
-      if (res.success) {
-        setUser(res.data);
-        fetchFyres();
-      } else {
-        setUser(null);
-        setFyres([]);
-      }
-      setLoading(false);
-    };
     checkUser();
   }, []);
+
+  const checkUser = async () => {
+    const res = await Get<Models.User>("/user");
+    if (res.success) {
+      setUser(res.data);
+      fetchFyres();
+    } else {
+      setUser(null);
+      setFyres([]);
+    }
+    setLoading(false);
+  };
 
   const login = async (credentials: LoginRequest): Promise<Boolean> => {
     setLoading(true);
@@ -131,6 +140,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     fyres,
     loading,
+    checkUser,
+    setUser,
     login,
     register,
     logout,

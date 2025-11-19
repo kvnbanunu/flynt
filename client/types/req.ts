@@ -16,8 +16,10 @@ export interface RegisterRequest {
 }
 
 export interface UpdateUserRequest {
+  username?: string;
   name?: string;
-  password?: string;
+  currentPassword?: string;
+  newPassword?: string;
   email?: string;
   img_url?: string;
   bio?: string;

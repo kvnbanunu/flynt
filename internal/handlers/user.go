@@ -117,6 +117,8 @@ func (h *UserHandler) getUserByID(w http.ResponseWriter, _ *http.Request, id int
 		return
 	}
 
+	user.Password = ""
+
 	writeSuccess(w, http.StatusOK, "User retrieved successfully", user)
 }
 

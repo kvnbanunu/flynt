@@ -20,12 +20,13 @@ type CreateUserRequest struct {
 
 // request payload for updating user
 type UpdateUserRequest struct {
-	Name     *string `json:"name"`
-	Password *string `json:"password"`
-	Email    *string `json:"email"`
-	ImgURL   *string `json:"img_url"`
-	Bio      *string `json:"bio"`
-	Timezone *string `json:"timezone"`
+	Name            *string `json:"name"`
+	CurrentPassword *string `json:"currentPassword"`
+	NewPassword     *string `json:"newPassword"`
+	Email           *string `json:"email"`
+	ImgURL          *string `json:"img_url"`
+	Bio             *string `json:"bio"`
+	Timezone        *string `json:"timezone"`
 }
 
 // query function to create new user in db
@@ -53,7 +54,7 @@ func (db *DB) CreateUser(req CreateUserRequest) (*User, error) {
 // query function to get user from db
 func (db *DB) GetUserByID(id int) (*User, error) {
 	query := `
-	SELECT id, username, name, email, img_url, bio, timezone, created_at, updated_at
+	SELECT *
 	FROM user
 	WHERE id = ?
 	`
@@ -141,8 +142,22 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 		args = append(args, req.Name)
 	}
 
-	if req.Password != nil {
-		hashed, err := utils.HashPassword(*req.Password)
+	if req.CurrentPassword != nil || req.NewPassword != nil {
+		// both need to be present if either of them are
+		if req.CurrentPassword == nil || req.NewPassword == nil {
+			return nil, fmt.Errorf("Both password fields need to be filled to change your password")
+		}
+
+		match, err := utils.CompareHash(existingUser.Password, *req.CurrentPassword)
+		if err != nil {
+			return nil, fmt.Errorf("Error checking password")
+		}
+
+		if !match {
+			return nil, fmt.Errorf("Incorrect password")
+		}
+
+		hashed, err := utils.HashPassword(*req.NewPassword)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to hash password: %w", err)
 		}
