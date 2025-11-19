@@ -25,6 +25,10 @@ type CheckFyreRequest struct {
 	Increment bool `json:"increment"`
 }
 
+type FyreTotalResponse struct {
+	FyreTotal int `db:"fyre_total" json:"fyre_total"`
+}
+
 func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
 	query := `
 	INSERT INTO fyre (title, user_id, streak_count, active_days)
@@ -37,6 +41,14 @@ func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create fyre: %w", err)
 	}
+
+	if req.StreakCount > 0 {
+		_, err = db.UpdateFyreTotal(id, req.StreakCount, true)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to add to fyre total")
+		}
+	}
+
 	return &fyre, nil
 }
 
@@ -193,7 +205,46 @@ func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = db.UpdateFyreTotal(fyre.UserID, 1, req.Increment)
+	if err != nil {
+		return nil, err
+	}
+
 	return &fyre, nil
+}
+
+func (db *DB) GetFyreTotal(id int) (*FyreTotalResponse, error) {
+	query := `SELECT fyre_total FROM user WHERE id = ?`
+
+	var total FyreTotalResponse
+	err := db.Get(&total, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &total, err
+}
+
+func (db *DB) UpdateFyreTotal(id, amount int, increment bool) (*FyreTotalResponse, error) {
+	operator := "+"
+	if !increment {
+		operator = "-"
+	}
+	query := fmt.Sprintf(`
+	UPDATE user
+	SET fyre_total = fyre_total %s ?
+	WHERE id = ?
+	RETURNING fyre_total
+	`, operator)
+
+	var total FyreTotalResponse
+	err := db.Get(&total, query, amount, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &total, err
 }
 
 func (db *DB) DeleteFyre(id int) error {

@@ -19,8 +19,10 @@ import { ButtonGroup } from "../ui/button-group";
 import { Put } from "@/lib/api";
 import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
+  const { checkUser } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
@@ -63,6 +65,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     setCurrentStreak(newStreak);
     const req: CheckFyreRequest = { id: fyre.id, increment: increment };
     await fetchFyre("/fyre/check", req);
+    checkUser();
   };
 
   const changeDays = (index: number) => {

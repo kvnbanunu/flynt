@@ -29,7 +29,7 @@ const addSchema = z.object({
 });
 
 export const AddFyre: React.FC = () => {
-  const { fetchFyres } = useAuth();
+  const { checkUser, fetchFyres } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +51,7 @@ export const AddFyre: React.FC = () => {
     );
     if (res.success) {
       setError(null);
+      checkUser();
       fetchFyres();
       setOpen(false);
     } else {
