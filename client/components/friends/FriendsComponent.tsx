@@ -18,7 +18,13 @@ import {
   FriendsListItem,
   FriendsUserListItem,
 } from "@/types/req";
-import { Item, ItemContent, ItemMedia, ItemTitle } from "../ui/item";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "../ui/item";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
@@ -28,10 +34,11 @@ import {
   CommandInput,
   CommandItem,
 } from "../ui/command";
-import { Post } from "@/lib/api";
+import { DeleteBody, Post, Put } from "@/lib/api";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import React from "react";
+import { ApiError, Result } from "@/types/api";
 
 export const FriendsComponent: React.FC = () => {
   const { friends, users, loading, error, fetchFriends, fetchUsers } =
@@ -44,11 +51,12 @@ export const FriendsComponent: React.FC = () => {
   }
 
   if (error) {
-    return <div>{error}</div>
+    return <div>{error}</div>;
   }
 
   const onAddFriend = () => {
     fetchFriends();
+    fetchUsers();
     setSearch("");
   };
 
@@ -93,9 +101,10 @@ export const FriendsComponent: React.FC = () => {
           {!search && (
             <React.Fragment>
               <TabsContent value="friendslist">
-                {friends.map((f) => (
-                  <FriendCard key={f.id} friend={f} />
-                ))}
+                {friends &&
+                  friends.map((f) => (
+                    <FriendCard key={f.id} friend={f} callback={onAddFriend} />
+                  ))}
               </TabsContent>
               <TabsContent value="requests">Requests</TabsContent>
             </React.Fragment>
@@ -106,6 +115,7 @@ export const FriendsComponent: React.FC = () => {
             <CommandEmpty>{search && "No users found."}</CommandEmpty>
             <CommandGroup>
               {search &&
+                users &&
                 users.map((u) => (
                   <CommandItem key={u.id} asChild value={u.username}>
                     <FriendSearchCard user={u} callback={onAddFriend} />
@@ -170,8 +180,39 @@ const FriendSearchCard: React.FC<{
 
 const FriendCard: React.FC<{
   friend: FriendsListItem;
-}> = ({ friend }) => {
+  callback: () => void;
+}> = ({ friend, callback }) => {
   const img_url = friend.img_url || "/default_profile.jpg";
+  const addFlag = friend.status === "pending";
+  const [error, setError] = useState<string | null>(null);
+
+  const friendRequest = async (type: string) => {
+    const req: FriendRequest = {
+      type: type,
+      user_id_2: friend.id,
+    };
+    let res: Result<null, ApiError>;
+    if (type === "deletefriend") {
+      res = await DeleteBody("/friend", req);
+    } else {
+      res = await Put<null, FriendRequest>("/friend", req);
+    }
+    if (res.success) {
+      if (type === "deletefriend") {
+        toast(`You have removed ${friend.username} as a friend.`);
+      } else {
+        toast(`You are now friends with ${friend.username}!`);
+      }
+      setError(null);
+      if (callback) callback();
+    } else {
+      setError(res.error.message);
+    }
+  };
+
+  if (error) {
+    return <div>{error}</div>
+  }
 
   return (
     <Item className="bg-fcontainer2 rounded-xl mb-4">
@@ -183,7 +224,28 @@ const FriendCard: React.FC<{
       </ItemMedia>
       <ItemContent className="flex-row justify-between">
         <ItemTitle>{friend.username}</ItemTitle>
-        <Badge>{friend.status}</Badge>
+        <ItemActions>
+          {addFlag && (
+            <Badge
+              className="cursor-pointer"
+              onClick={() => friendRequest("addfriend")}
+            >
+              Accept Friend Request
+            </Badge>
+          )}
+          {!addFlag && (
+            <Badge>
+              {`${friend.status.charAt(0).toUpperCase()}${friend.status.slice(1)}`}
+            </Badge>
+          )}
+          <Badge
+            className="cursor-pointer"
+            variant="destructive"
+            onClick={() => friendRequest("deletefriend")}
+          >
+            Remove
+          </Badge>
+        </ItemActions>
       </ItemContent>
     </Item>
   );

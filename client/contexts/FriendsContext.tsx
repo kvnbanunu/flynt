@@ -69,7 +69,9 @@ export const FriendsProvider: React.FC<FriendsProviderProps> = ({
   async function get<T>(url: string, callback: (t: T) => void) {
     const res = await Get<T>(url);
     if (res.success) {
-      callback(res.data);
+      if (res.data != null) {
+        callback(res.data);
+      }
       setError(null);
     } else {
       setError(res.error.message);
