@@ -25,7 +25,7 @@ func main() {
 		}
 	}()
 
-	err = db.InsertDummyData();
+	err = db.SeedData();
 	if err != nil {
 		log.Printf("Error inserting dummy data: %v", err)
 	}

@@ -43,6 +43,10 @@ export const FriendsComponent: React.FC = () => {
     return <div>Loading...</div>;
   }
 
+  if (error) {
+    return <div>{error}</div>
+  }
+
   const onAddFriend = () => {
     fetchFriends();
     setSearch("");

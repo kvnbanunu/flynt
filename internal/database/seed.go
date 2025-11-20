@@ -7,18 +7,18 @@ import (
 	"flynt/internal/utils"
 )
 
-func (db *DB) InsertDummyData() error {
-	err := db.insertDummyUsers()
+func (db *DB) SeedData() error {
+	err := db.seedUsers()
 	if err != nil {
 		return err
 	}
 
-	err = db.insertDummyFyres()
+	err = db.seedFyres()
 	if err != nil {
 		return err
 	}
 
-	err = db.insertDummyFriends()
+	err = db.seedFriends()
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (db *DB) InsertDummyData() error {
 	return nil
 }
 
-func (db *DB) insertDummyUsers() error {
+func (db *DB) seedUsers() error {
 	dummyUser := os.Getenv("DUMMY_USER")
 	dummypass := os.Getenv("DUMMY_PASSWORD")
 	// adminID := os.Getenv("ADMIN_ID")
@@ -72,7 +72,7 @@ func (db *DB) insertDummyUsers() error {
 	return nil
 }
 
-func (db *DB) insertDummyFyres() error {
+func (db *DB) seedFyres() error {
 	query := `
 	INSERT INTO fyre (title, streak_count, user_id, active_days)
 	VALUES
@@ -91,7 +91,7 @@ func (db *DB) insertDummyFyres() error {
 	return nil
 }
 
-func (db *DB) insertDummyFriends() error {
+func (db *DB) seedFriends() error {
 	query := `
 	INSERT INTO friend (user_id_1, user_id_2, status)
 	VALUES
