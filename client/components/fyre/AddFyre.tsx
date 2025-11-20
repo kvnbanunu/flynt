@@ -64,7 +64,7 @@ export const AddFyre: React.FC = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <form id="form-addfyre" onSubmit={form.handleSubmit(onSubmit)}>
         <DialogTrigger asChild>
-          <Button size="lg" className="w-full mb-4">
+          <Button size="lg" className="w-full">
             Add New Fyre
           </Button>
         </DialogTrigger>

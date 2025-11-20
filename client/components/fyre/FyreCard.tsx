@@ -104,7 +104,7 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="">
-      <Card className="mb-4 pt-0">
+      <Card className="pt-0">
         <CardHeader className="bg-primary text-primary-foreground rounded-t-xl">
           <CardTitle className="pt-3 pb-1">{fyre.title}</CardTitle>
           <CardAction className="pt-0.5">

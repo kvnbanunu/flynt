@@ -37,7 +37,7 @@ export default function RootLayout({
           <SidebarProvider>
             <DesktopSidebar />
             <Toaster />
-            <div className="flex flex-col md:flex-row w-screen md:w-full h-screen">
+            <div className="flex flex-col md:flex-row w-screen md:w-full min-h-screen">
               <MainContainer>
                 {children}
               </MainContainer>

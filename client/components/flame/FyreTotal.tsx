@@ -16,15 +16,16 @@ export const FyreTotal: React.FC = () => {
 
   if (user) {
     return (
-      <Card className="items-center">
+      <Card className="items-center justify-center">
         <CardHeader className="justify-center">
           <CardTitle className="text-5xl">Flynt</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex justify-center items-center">
           <FlameAnimation />
+          {/* <div className="bg-red-500 w-[360px] h-[360px]"></div> */}
         </CardContent>
         <CardFooter className="text-3xl font-bold">
-          {user && user.fyre_total}
+          {user.fyre_total}
         </CardFooter>
       </Card>
     );
