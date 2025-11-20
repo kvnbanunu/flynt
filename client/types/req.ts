@@ -41,3 +41,34 @@ export interface UpdateFyreRequest {
   bonfyre_id?: number;
   active_days?: string;
 }
+
+export interface FriendRequest {
+  type: string;
+  user_id_2: number;
+}
+
+export interface FriendsListItem {
+  id: number;
+  username: string;
+  img_url?: string;
+  status: string;
+}
+
+export interface FriendsUserListItem {
+  id: number;
+  username: string;
+  name: string;
+  img_url?: string;
+  bio?: string;
+}
+export interface FullPost {
+  id: number;
+  user_id: number;
+  fyre_id: number;
+  type: "dailycheck" | "milestone";
+  content: string;
+  username: string;
+  img_url?: string;
+  title: string;
+  streak_count: number;
+}

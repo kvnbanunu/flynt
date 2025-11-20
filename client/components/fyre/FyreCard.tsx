@@ -156,7 +156,7 @@ interface ActiveDaysProps {
   onChange: (index: number) => void;
 }
 
-const ActiveDays: React.FC<ActiveDaysProps> = ({
+export const ActiveDays: React.FC<ActiveDaysProps> = ({
   active,
   isOpen,
   onChange,

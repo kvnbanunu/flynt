@@ -15,22 +15,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const items = [
   {
     title: "HOME",
-    url: "#",
+    url: "/",
     icon: Home,
   },
   {
     title: "FEED",
-    url: "#",
+    url: "/feed",
     icon: Inbox,
   },
   {
     title: "FRIEND",
-    url: "#",
+    url: "/friends",
     icon: Users,
   },
   {
     title: "PROFILE",
-    url: "#",
+    url: "/profile",
     icon: Sticker,
   },
 ];

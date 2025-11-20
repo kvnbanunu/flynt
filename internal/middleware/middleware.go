@@ -48,7 +48,7 @@ func Auth(next http.Handler) http.Handler {
 		cookie, err := r.Cookie(cfg.Context)
 		if err != nil {
 			if err == http.ErrNoCookie {
-				fmt.Fprintf(w, "No auth cookie fount.\n")
+				fmt.Fprintf(w, "No auth cookie found.\n")
 				return
 			}
 			http.Error(w, "Error retrieving cookie", http.StatusInternalServerError)
