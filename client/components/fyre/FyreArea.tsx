@@ -9,7 +9,7 @@ import { AddFyre } from "./AddFyre";
 export const FyreArea: React.FC = () => {
   const { fyres } = useAuth();
   return (
-    <ScrollArea className="h-full w-full">
+    <ScrollArea className="w-full">
       {fyres &&
         fyres.map((fyre) => (
           <React.Fragment key={fyre.id}>

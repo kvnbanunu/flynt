@@ -29,7 +29,7 @@ export const Feed: React.FC = () => {
   }
 
   return (
-    <ScrollArea className="h-full w-full">
+    <ScrollArea className="w-full">
       {posts && posts.map((post) => (
         <React.Fragment key={post.id}>
           <PostCard post={post} />

@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import React from "react";
 import { ApiError, Result } from "@/types/api";
+import { ScrollArea } from "../ui/scroll-area";
 
 export const FriendsComponent: React.FC = () => {
   const { friends, users, loading, error, fetchFriends, fetchUsers } =
@@ -61,75 +62,84 @@ export const FriendsComponent: React.FC = () => {
   };
 
   return (
-    <Tabs defaultValue="friendslist" className="w-full">
-      <Card className="h-full w-full pt-0">
-        <CardHeader className="bg-primary text-primary-foreground rounded-t-xl">
-          <CardTitle className="pt-3 pb-1">Friends List</CardTitle>
-          <CardAction className="pt-0.5">
-            <TabsList className="bg-primary">
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full"
-                asChild
-                onClick={() => setTab("friendslist")}
-                hidden={tab === "friendslist"}
-              >
-                <TabsTrigger
-                  value="friendslist"
-                  className="dark:text-foreground"
+    <ScrollArea className="w-full">
+      <Tabs defaultValue="friendslist" className="w-full">
+        <Card className="w-full pt-0">
+          <CardHeader className="bg-primary text-primary-foreground rounded-t-xl">
+            <CardTitle className="pt-3 pb-1">Friends List</CardTitle>
+            <CardAction className="pt-0.5">
+              <TabsList className="bg-primary">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  asChild
+                  onClick={() => setTab("friendslist")}
+                  hidden={tab === "friendslist"}
                 >
-                  <Users />
-                </TabsTrigger>
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full"
-                asChild
-                onClick={() => setTab("requests")}
-                hidden={tab === "requests"}
-              >
-                <TabsTrigger value="requests" className="dark:text-foreground">
-                  <UserCheck />
-                </TabsTrigger>
-              </Button>
-            </TabsList>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="grow">
-          {!search && (
-            <React.Fragment>
-              <TabsContent value="friendslist">
-                {friends &&
-                  friends.map((f) => (
-                    <FriendCard key={f.id} friend={f} callback={onAddFriend} />
+                  <TabsTrigger
+                    value="friendslist"
+                    className="dark:text-foreground"
+                  >
+                    <Users />
+                  </TabsTrigger>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  asChild
+                  onClick={() => setTab("requests")}
+                  hidden={tab === "requests"}
+                >
+                  <TabsTrigger
+                    value="requests"
+                    className="dark:text-foreground"
+                  >
+                    <UserCheck />
+                  </TabsTrigger>
+                </Button>
+              </TabsList>
+            </CardAction>
+          </CardHeader>
+          <CardContent className="grow">
+            {!search && (
+              <React.Fragment>
+                <TabsContent value="friendslist">
+                  {friends &&
+                    friends.map((f) => (
+                      <FriendCard
+                        key={f.id}
+                        friend={f}
+                        callback={onAddFriend}
+                      />
+                    ))}
+                </TabsContent>
+                <TabsContent value="requests">Requests</TabsContent>
+              </React.Fragment>
+            )}
+          </CardContent>
+          <CardFooter className="relative justify-self-end">
+            <Command>
+              <CommandEmpty>{search && "No users found."}</CommandEmpty>
+              <CommandGroup>
+                {search &&
+                  users &&
+                  users.map((u) => (
+                    <CommandItem key={u.id} asChild value={u.username}>
+                      <FriendSearchCard user={u} callback={onAddFriend} />
+                    </CommandItem>
                   ))}
-              </TabsContent>
-              <TabsContent value="requests">Requests</TabsContent>
-            </React.Fragment>
-          )}
-        </CardContent>
-        <CardFooter className="relative justify-self-end">
-          <Command>
-            <CommandEmpty>{search && "No users found."}</CommandEmpty>
-            <CommandGroup>
-              {search &&
-                users &&
-                users.map((u) => (
-                  <CommandItem key={u.id} asChild value={u.username}>
-                    <FriendSearchCard user={u} callback={onAddFriend} />
-                  </CommandItem>
-                ))}
-            </CommandGroup>
-            <CommandInput
-              placeholder="Add new friend"
-              onValueChange={setSearch}
-            />
-          </Command>
-        </CardFooter>
-      </Card>
-    </Tabs>
+              </CommandGroup>
+              <CommandInput
+                placeholder="Add new friend"
+                onValueChange={setSearch}
+              />
+            </Command>
+          </CardFooter>
+        </Card>
+      </Tabs>
+    </ScrollArea>
   );
 };
 
@@ -211,7 +221,7 @@ const FriendCard: React.FC<{
   };
 
   if (error) {
-    return <div>{error}</div>
+    return <div>{error}</div>;
   }
 
   return (
@@ -230,7 +240,7 @@ const FriendCard: React.FC<{
               className="cursor-pointer"
               onClick={() => friendRequest("addfriend")}
             >
-              Accept Friend Request
+              Accept Friend
             </Badge>
           )}
           {!addFlag && (
