@@ -12,7 +12,7 @@ export default function LandingPage() {
   return (
     <div key={pathname} className="flex flex-col items-center justify-center">
       <motion.h1
-        className="text-5xl font-bold mb-4"
+        className="text-5xl font-bold mb-6"
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -21,12 +21,12 @@ export default function LandingPage() {
       </motion.h1>
 
       <motion.p
-        className="text-lg max-w-md"
+        className="text-md max-w-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        Ignite your fyre today
+        Ignite your Fyre<br/>Grow together
       </motion.p>
 
       <motion.div
