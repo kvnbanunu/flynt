@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardAction,
@@ -21,6 +21,38 @@ import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
 import { GoalSection } from "../goals/GoalSection";
 
+interface CategorySelectorProps {
+  allCategories: Models.Category[];
+  selectedId: number;
+  onChange: (id: number) => void;
+}
+
+const CategorySelector: React.FC<CategorySelectorProps> = ({
+  allCategories,
+  selectedId,
+  onChange,
+}) => {
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-muted-foreground">
+        Category
+      </label>
+      <select
+        className="border rounded-md p-2"
+        value={selectedId ?? ""}
+        onChange={(e) => onChange(Number(e.target.value))}
+      >
+        <option value="">Select a category</option>
+        {allCategories.map((cat) => (
+          <option key={cat.id} value={cat.id}>
+            {cat.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
@@ -29,6 +61,23 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [activeDays, setActiveDays] = useState<string>(fyre.active_days);
   const [error, setError] = useState<string | null>(null);
   const [changes, setChanges] = useState<Set<string>>(new Set<string>());
+  const [allCategories, setAllCategories] = useState<Models.Category[]>([]);
+  const [categoryId, setCategoryId] = useState<number>(fyre.category_id);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const req: CheckFyreRequest = { id: fyre.id, increment: false };
+        const res = await fetchFyre("/fyre/categories", req);
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const json = await res.json();
+        setAllCategories(json.data);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const reset = () => {
     setActiveDays(currentFyre.active_days);
@@ -92,6 +141,10 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
         case "active_days":
           req.active_days = activeDays;
           break;
+        
+        case "category_id":
+          req.category_id = categoryId;
+          break;
       }
     }
     const newChanges = changes;
@@ -135,6 +188,18 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
           <CollapsibleContent>
             <div className="flex flex-col gap-4 mt-4">
             <GoalSection fyreId={fyre.id} />
+
+            <CategorySelector
+              allCategories={allCategories}
+              selectedId={categoryId}
+              onChange={(id) => {
+                setCategoryId(id);
+                const newChanges = new Set(changes);
+                newChanges.add("category_id");
+                setChanges(newChanges);
+              }}
+            />
+
               <div className="grid grid-cols-2 justify-stretch gap-4">
                 <Button variant="destructive" size="lg">
                   Remove Fyre

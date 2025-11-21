@@ -29,6 +29,7 @@ declare namespace Models {
     last_checked_at_prev?: string;
     created_at?: string;
     updated_at?: string;
+    category_id: number;
   }
 
   export interface Goal {
@@ -39,6 +40,11 @@ declare namespace Models {
   }
 
   export interface GoalType {
+    id: number;
+    name: string;
+  }
+
+  export interface Category {
     id: number;
     name: string;
   }

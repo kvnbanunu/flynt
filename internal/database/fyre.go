@@ -11,6 +11,7 @@ type CreateFyreRequest struct {
 	Title       string `json:"title"`
 	StreakCount int    `json:"streak_count"`
 	ActiveDays  string `json:"active_days"`
+	CategoryID  int    `json:"category_id"`
 }
 
 type UpdateFyreRequest struct {
@@ -18,6 +19,7 @@ type UpdateFyreRequest struct {
 	StreakCount *int    `json:"streak_count"`
 	BonfyreID   *int    `json:"bonfyre_id"`
 	ActiveDays  *string `json:"active_days"`
+	CategoryID  *int    `json:"category_id"`
 }
 
 type CheckFyreRequest struct {
@@ -25,15 +27,25 @@ type CheckFyreRequest struct {
 	Increment bool `json:"increment"`
 }
 
+func (db *DB) GetAllCategories() ([]Category, error) {
+	query := `SELECT * FROM category ORDER BY name ASC`
+	var categories []Category
+	err := db.Select(&categories, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get categories: %w", err)
+	}
+	return categories, nil
+}
+
 func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
 	query := `
-	INSERT INTO fyre (title, user_id, streak_count, active_days)
-	VALUES (?, ?, ?, ?)
+	INSERT INTO fyre (title, user_id, streak_count, active_days, category_id)
+	VALUES (?, ?, ?, ?, ?)
 	RETURNING *
 	`
 
 	var fyre Fyre
-	err := db.Get(&fyre, query, req.Title, id, req.StreakCount, req.ActiveDays)
+	err := db.Get(&fyre, query, req.Title, id, req.StreakCount, req.ActiveDays, req.CategoryID)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create fyre: %w", err)
 	}
@@ -93,6 +105,11 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 	if req.ActiveDays != nil {
 		fields = append(fields, "active_days = ?")
 		args = append(args, req.ActiveDays)
+	}
+
+	if req.CategoryID != nil {
+		fields = append(fields, "category_id = ?")
+		args = append(args, req.CategoryID)
 	}
 
 	if len(fields) == 0 { // no change

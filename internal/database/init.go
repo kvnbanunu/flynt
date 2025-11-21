@@ -39,6 +39,17 @@ func InitDB(path string) (*DB, error) {
 		return nil, fmt.Errorf("Failed to seed goal_type: %w", err)
 	}
 
+	_, err = db.Exec(`
+		INSERT OR IGNORE INTO category (id, name) VALUES
+		(1, 'Health'),
+		(2, 'Fitness'),
+		(3, 'Work'),
+		(4, 'School');
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to seed category: %w", err)
+	}
+
 	log.Println("Database initialized successfully")
 	return dbConn, nil
 }
@@ -65,6 +76,11 @@ func (db *DB) createTables() error {
 		UPDATE user SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 	END;
 
+	CREATE TABLE IF NOT EXISTS category (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL
+	);
+
 	CREATE TABLE IF NOT EXISTS fyre (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT NOT NULL,
@@ -76,7 +92,8 @@ func (db *DB) createTables() error {
 		last_checked_at DATETIME,
 		last_checked_at_prev DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		category_id INTEGER NOT NULL DEFAULT 1 REFERENCES category(id) 
 	);
 
 	

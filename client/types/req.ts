@@ -28,6 +28,7 @@ export interface CreateFyreRequest {
   title: string;
   streak_count: number | 0;
   active_days: string | "1111111";
+  category_id: number | 0;
 }
 
 export interface CheckFyreRequest {
@@ -40,6 +41,7 @@ export interface UpdateFyreRequest {
   streak_count?: number;
   bonfyre_id?: number;
   active_days?: string;
+  category_id?: number;
 }
 
 export interface CreateGoalRequest {

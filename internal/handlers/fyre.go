@@ -23,6 +23,16 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	path := strings.TrimPrefix(r.URL.Path, "/fyre")
+
+	if path == "/categories" || path == "/categories/" {
+		if r.Method == http.MethodGet {
+			h.getAllCategories(w, r)
+		} else {
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		}
+		return
+	}
+
 	userID := r.Context().Value("userID").(int)
 	timezone := r.Context().Value("timezone").(string)
 
@@ -64,6 +74,15 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
+}
+
+func (h *FyreHandler) getAllCategories(w http.ResponseWriter, r *http.Request) {
+	categories, err := h.db.GetAllCategories()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to get categories")
+		return
+	}
+	writeSuccess(w, http.StatusOK, "Categories retrieved successfully", categories)
 }
 
 // handles POST /fyre

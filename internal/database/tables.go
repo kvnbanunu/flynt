@@ -31,6 +31,13 @@ type Fyre struct {
 	LastCheckedAtPrev *time.Time `db:"last_checked_at_prev" json:"last_checked_at_prev,omitempty"`
 	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
+	CategoryID	  int        `db:"category_id" json:"category_id"`
+}
+
+// Represents category table in db
+type Category struct {
+	ID int `db:"id" json:"id"`
+	Name string `db:"name" json:"name"`
 }
 
 // Represents goal_type table in db
