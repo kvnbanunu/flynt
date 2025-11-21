@@ -30,26 +30,6 @@ func InitDB(path string) (*DB, error) {
 		return nil, fmt.Errorf("Failed to create tables: %w", err)
 	}
 
-	_, err = db.Exec(`
-		INSERT OR IGNORE INTO goal_type (id, name) VALUES
-		(1, 'Until Date'),
-		(2, 'Number of Days');
-	`)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to seed goal_type: %w", err)
-	}
-
-	_, err = db.Exec(`
-		INSERT OR IGNORE INTO category (id, name) VALUES
-		(1, 'Health'),
-		(2, 'Fitness'),
-		(3, 'Work'),
-		(4, 'School');
-	`)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to seed category: %w", err)
-	}
-
 	log.Println("Database initialized successfully")
 	return dbConn, nil
 }
@@ -97,7 +77,7 @@ func (db *DB) createTables() error {
 		last_checked_at_prev DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		category_id INTEGER DEFAULT 0 REFERENCES category(id) 
+		category_id INTEGER DEFAULT 1 REFERENCES category(id) 
 	);
 
 	

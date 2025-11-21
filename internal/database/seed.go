@@ -13,7 +13,17 @@ func (db *DB) SeedData() error {
 		return err
 	}
 
+	err = db.seedCategories()
+	if err != nil {
+		return err
+	}
+
 	err = db.seedFyres()
+	if err != nil {
+		return err
+	}
+
+	err = db.seedGoalTypes()
 	if err != nil {
 		return err
 	}
@@ -60,7 +70,7 @@ func (db *DB) seedUsers() error {
 	`, dummyUser, hashed, hashed, hashed, hashed, hashed)
 
 	if _, err := db.Exec(query); err != nil {
-		return fmt.Errorf("Failed to insert dummy users: %w", err)
+		return fmt.Errorf("Failed to seed users: %w", err)
 	}
 
 	// Add this later
@@ -73,6 +83,35 @@ func (db *DB) seedUsers() error {
 	// if _, err := db.Exec(query); err != nil {
 	// 	return fmt.Errorf("Failed to insert admin user: %w", err)
 	// }
+
+	return nil
+}
+
+func (db *DB) seedGoalTypes() error {
+	query := `
+	INSERT OR IGNORE INTO goal_type (id, name) VALUES
+	(1, 'Until Date'),
+	(2, 'Number of Days');
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed goal types: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) seedCategories() error {
+	query := `
+	INSERT OR IGNORE INTO category (id, name) VALUES
+	(1, 'General'),
+	(2, 'Health'),
+	(3, 'Fitness'),
+	(4, 'Work'),
+	(5, 'School');
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed categories: %w", err)
+	}
 
 	return nil
 }
@@ -90,7 +129,7 @@ func (db *DB) seedFyres() error {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		return fmt.Errorf("Failed to insert dummy fyres: %w", err)
+		return fmt.Errorf("Failed to seed fyres: %w", err)
 	}
 
 	return nil
@@ -104,7 +143,7 @@ func (db *DB) seedGoals() error {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		return fmt.Errorf("Failed to insert dummy goals: %w", err)
+		return fmt.Errorf("Failed to seed goals: %w", err)
 	}
 
 	return nil
@@ -125,7 +164,7 @@ func (db *DB) seedFriends() error {
 	(5, 4, 'friends')
 	`
 	if _, err := db.Exec(query); err != nil {
-		return fmt.Errorf("Failed to insert dummy friends: %w", err)
+		return fmt.Errorf("Failed to seed friends: %w", err)
 	}
 
 	return nil
