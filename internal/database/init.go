@@ -66,6 +66,7 @@ func (db *DB) createTables() error {
 		img_url TEXT,
 		bio TEXT,
 		timezone TEXT DEFAULT 'Canada/Pacific',
+		fyre_total INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
@@ -88,12 +89,15 @@ func (db *DB) createTables() error {
 		user_id INTEGER NOT NULL REFERENCES user(id),
 		bonfyre_id INTEGER REFERENCES bonfyre(id),
 		active_days TEXT DEFAULT '1111111',
+		likes INTEGER DEFAULT 0,
+		is_private INTEGER DEFAULT 0,
 		is_checked INTEGER DEFAULT 0,
+		is_missed INTEGER DEFAULT 0,
 		last_checked_at DATETIME,
 		last_checked_at_prev DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		category_id INTEGER NOT NULL DEFAULT 1 REFERENCES category(id) 
+		category_id INTEGER DEFAULT 0 REFERENCES category(id) 
 	);
 
 	
@@ -121,10 +125,19 @@ func (db *DB) createTables() error {
 	);
 
 	CREATE TABLE IF NOT EXISTS friend (
-		user_id_1 INTEGER NOT NULL,
-		user_id_2 INTEGER NOT NULL,
+		user_id_1 INTEGER NOT NULL REFERENCES user(id),
+		user_id_2 INTEGER NOT NULL REFERENCES user(id),
 		status TEXT DEFAULT 'pending',
 		PRIMARY KEY (user_id_1, user_id_2)
+	);
+
+	CREATE TABLE IF NOT EXISTS social_post (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL REFERENCES user(id),
+		fyre_id INTEGER NOT NULL REFERENCES fyre(id),
+		type TEXT NOT NULL,
+		content TEXT NOT NULL,
+		likes INTEGER DEFAULT 0
 	);
 	`
 

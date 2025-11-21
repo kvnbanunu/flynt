@@ -13,6 +13,7 @@ declare namespace Models {
     img_url?: string;
     bio?: string;
     timezone: string;
+    fyre_total: number;
     created_at?: string;
     updated_at?: string;
   }
@@ -24,7 +25,10 @@ declare namespace Models {
     user_id: number;
     bonfyre_id?: number;
     active_days: string;
+    likes: number;
+    is_private: boolean;
     is_checked: boolean;
+    is_missed: boolean;
     last_checked_at?: string;
     last_checked_at_prev?: string;
     created_at?: string;
@@ -56,5 +60,14 @@ declare namespace Models {
   export interface Friend {
     user_id_1: number;
     user_id_2: number;
+  }
+
+  export interface SocialPost {
+    id: number;
+    user_id: number;
+    fyre_id: number;
+    type: "dailycheck" | "milestone";
+    content: string;
+    likes: number;
   }
 }

@@ -20,11 +20,16 @@ type UpdateFyreRequest struct {
 	BonfyreID   *int    `json:"bonfyre_id"`
 	ActiveDays  *string `json:"active_days"`
 	CategoryID  *int    `json:"category_id"`
+	IsPrivate   *bool   `json:"is_private"`
 }
 
 type CheckFyreRequest struct {
 	FyreID    int  `json:"id"`
 	Increment bool `json:"increment"`
+}
+
+type FyreTotalResponse struct {
+	FyreTotal int `db:"fyre_total" json:"fyre_total"`
 }
 
 func (db *DB) GetAllCategories() ([]Category, error) {
@@ -49,6 +54,14 @@ func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create fyre: %w", err)
 	}
+
+	if req.StreakCount > 0 {
+		_, err = db.UpdateFyreTotal(id, req.StreakCount, true)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to add to fyre total")
+		}
+	}
+
 	return &fyre, nil
 }
 
@@ -112,6 +125,11 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 		args = append(args, req.CategoryID)
 	}
 
+	if req.IsPrivate != nil {
+		fields = append(fields, "is_private = ?")
+		args = append(args, req.IsPrivate)
+	}
+
 	if len(fields) == 0 { // no change
 		return existingFyre, nil
 	}
@@ -159,13 +177,13 @@ func (db *DB) ResetChecks(ids []int) ([]Fyre, error) {
 }
 
 // either increment or decrement streakcount and set last_checked
-func (db *DB) CheckFyre(req CheckFyreRequest) (*Fyre, error) {
+func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 	query := `
 	UPDATE fyre
 	SET streak_count = streak_count %s
 	is_checked = ?
 	WHERE id = ?
-	RETURNING *
+	RETURNING *;
 	`
 	var fyre Fyre
 	var err error
@@ -178,6 +196,29 @@ func (db *DB) CheckFyre(req CheckFyreRequest) (*Fyre, error) {
 		lastChecked := time.Now()
 		query = fmt.Sprintf(query, updateLastChecked)
 		err = db.Get(&fyre, query, lastChecked.UTC(), isChecked, req.FyreID)
+		if err != nil {
+			return nil, err
+		}
+
+		if !fyre.IsPrivate {
+			// Create the post for daily check
+			query = `INSERT into social_post (user_id, fyre_id, type, content)
+			VALUES (?, ?, ?, ' just hit a streak of ')
+			`
+			result, err := db.Exec(query, id, req.FyreID, DailyCheck)
+			if err != nil {
+				return nil, fmt.Errorf("Failed to create post: %w", err)
+			}
+
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				return nil, fmt.Errorf("Failed to get rows affected: %w", err)
+			}
+
+			if rowsAffected == 0 {
+				return nil, fmt.Errorf("No post created")
+			}
+		}
 	} else {
 		updateLastChecked = `- 1,
 		last_checked_at = last_checked_at_prev,
@@ -189,7 +230,46 @@ func (db *DB) CheckFyre(req CheckFyreRequest) (*Fyre, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = db.UpdateFyreTotal(fyre.UserID, 1, req.Increment)
+	if err != nil {
+		return nil, err
+	}
+
 	return &fyre, nil
+}
+
+func (db *DB) GetFyreTotal(id int) (*FyreTotalResponse, error) {
+	query := `SELECT fyre_total FROM user WHERE id = ?`
+
+	var total FyreTotalResponse
+	err := db.Get(&total, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &total, err
+}
+
+func (db *DB) UpdateFyreTotal(id, amount int, increment bool) (*FyreTotalResponse, error) {
+	operator := "+"
+	if !increment {
+		operator = "-"
+	}
+	query := fmt.Sprintf(`
+	UPDATE user
+	SET fyre_total = fyre_total %s ?
+	WHERE id = ?
+	RETURNING fyre_total
+	`, operator)
+
+	var total FyreTotalResponse
+	err := db.Get(&total, query, amount, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &total, err
 }
 
 func (db *DB) DeleteFyre(id int) error {

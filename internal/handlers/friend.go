@@ -27,11 +27,9 @@ func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/friend")
 	id := r.Context().Value("userID").(int)
 
-	switch  path{
+	switch path {
 	case "", "/":
 		switch r.Method {
-		case http.MethodGet:
-			h.getFriendsList(w, r, id)
 		case http.MethodPut:
 			h.updateFriend(w, r, id)
 		case http.MethodPost:
@@ -41,6 +39,20 @@ func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		default:
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
+	case "/all", "/all/":
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			return
+		}
+		
+		h.getFriendsList(w, r, id)
+	case "/non", "/non/":
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			return
+		}
+
+		h.getNonFriendsList(w, r, id)
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
@@ -121,9 +133,20 @@ func (h *FriendHandler) deleteFriend(w http.ResponseWriter, r *http.Request, id 
 	writeSuccess(w, http.StatusOK, "Friend successfully removed", nil)
 }
 
-// handles GET /friend
+// handles GET /friend/all
 func (h *FriendHandler) getFriendsList(w http.ResponseWriter, _ *http.Request, id int) {
 	friendsList, err := h.db.GetFriendsList(id)
+	if err != nil {
+		log.Printf("Error getting friendslist: %v", err)
+		writeError(w, http.StatusInternalServerError, "Failed to get friendslist")
+		return
+	}
+	writeSuccess(w, http.StatusOK, "FriendsList retrieved successfully", friendsList)
+}
+
+// handles GET /friend/non
+func (h *FriendHandler) getNonFriendsList(w http.ResponseWriter, _ *http.Request, id int) {
+	friendsList, err := h.db.GetNonFriendsList(id)
 	if err != nil {
 		log.Printf("Error getting friendslist: %v", err)
 		writeError(w, http.StatusInternalServerError, "Failed to get friendslist")

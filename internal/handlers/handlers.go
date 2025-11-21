@@ -31,6 +31,7 @@ func SetupHandlers(db *database.DB) http.Handler {
 	friendHandler := NewFriendHandler(db)
 	healthHandler := NewHealthHandler(db)
 	goalHandler := NewGoalHandler(db)
+	socialPostHandler := NewSocialPostHandler(db)
 
 	// alias for readability
 	auth := middleware.Auth
@@ -49,6 +50,8 @@ func SetupHandlers(db *database.DB) http.Handler {
 	mux.Handle("/friend", auth(friendHandler))
 	mux.Handle("/friend/", auth(friendHandler))
 	mux.Handle("/health", auth(admin(healthHandler)))
+	mux.Handle("/socialpost", auth(socialPostHandler))
+	mux.Handle("/socialpost/", auth(socialPostHandler))
 
 	// root handler
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

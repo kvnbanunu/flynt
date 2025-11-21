@@ -4,19 +4,23 @@ import React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { FyreCard } from "./FyreCard";
-import { Button } from "../ui/button";
+import { AddFyre } from "./AddFyre";
+import { FyreTotal } from "../flame/FyreTotal";
 
 export const FyreArea: React.FC = () => {
   const { fyres } = useAuth();
   return (
-    <ScrollArea className="h-full w-full">
+    <ScrollArea className="w-full">
+      <div className="flex flex-col gap-4 w-full">
+      <FyreTotal />
       {fyres &&
         fyres.map((fyre) => (
           <React.Fragment key={fyre.id}>
             <FyreCard fyre={fyre} />
           </React.Fragment>
         ))}
-      <Button size="lg" className="w-full">Add New Fyre</Button>
+      <AddFyre />
+      </div>
     </ScrollArea>
   );
 };

@@ -49,7 +49,7 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case strings.HasPrefix(path, "/"):
 		if path == "/check" || path == "/check/" {
 			if r.Method == http.MethodPut {
-				h.checkFyre(w, r)
+				h.checkFyre(w, r, userID)
 			} else {
 				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			}
@@ -163,7 +163,7 @@ func (h *FyreHandler) deleteFyre(w http.ResponseWriter, _ *http.Request, id int)
 }
 
 // Handles PUT /fyre/check
-func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request) {
+func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request, id int) {
 	var req database.CheckFyreRequest
 	err := parseBody(w, r, &req)
 	if err != nil {
@@ -188,7 +188,7 @@ func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingFyre, err = h.db.CheckFyre(req)
+	existingFyre, err = h.db.CheckFyre(req, id)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "Failed to check Fyre")
 		return
