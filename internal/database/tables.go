@@ -27,7 +27,9 @@ type Fyre struct {
 	UserID            int        `db:"user_id" json:"user_id"`
 	BonfyreID         *int       `db:"bonfyre_id" json:"bonfyre_id"`
 	ActiveDays        string     `db:"active_days" json:"active_days"`
+	IsPrivate         bool       `db:"is_private" json:"is_private"`
 	IsChecked         bool       `db:"is_checked" json:"is_checked"`
+	IsMissed          bool       `db:"is_missed" json:"is_missed"`
 	LastCheckedAt     *time.Time `db:"last_checked_at" json:"last_checked_at,omitempty"`
 	LastCheckedAtPrev *time.Time `db:"last_checked_at_prev" json:"last_checked_at_prev,omitempty"`
 	CreatedAt         time.Time  `db:"created_at" json:"created_at"`

@@ -20,6 +20,7 @@ import { Put } from "@/lib/api";
 import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { Item, ItemActions, ItemContent, ItemTitle } from "../ui/item";
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const { checkUser } = useAuth();
@@ -28,11 +29,13 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
   const [currentStreak, setCurrentStreak] = useState<number>(fyre.streak_count);
   const [activeDays, setActiveDays] = useState<string>(fyre.active_days);
+  const [isPrivate, setIsPrivate] = useState<boolean>(fyre.is_private);
   const [error, setError] = useState<string | null>(null);
   const [changes, setChanges] = useState<Set<string>>(new Set<string>());
 
   const reset = () => {
     setActiveDays(currentFyre.active_days);
+    setIsPrivate(currentFyre.is_private);
     const temp = changes;
     temp.clear();
     setChanges(temp);
@@ -68,6 +71,12 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     checkUser();
   };
 
+  const changePrivate = () => {
+    const newChanges = changes;
+    newChanges.add("is_private");
+    setChanges(newChanges);
+  };
+
   const changeDays = (index: number) => {
     const temp: string = activeDays[index] === "1" ? "0" : "1";
     const result =
@@ -93,6 +102,9 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
         //   req.bonfyre_id = currentFyre.bonfyre_id;
         case "active_days":
           req.active_days = activeDays;
+          break;
+        case "is_private":
+          req.is_private = isPrivate;
           break;
       }
     }
@@ -124,20 +136,35 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
               onChange={changeDays}
             />
             <div className="flex gap-4 items-center">
-            <h4>{currentStreak} 🔥</h4>
-            <Checkbox
-              className="mr-2 size-8 rounded-md"
-              checked={isChecked}
-              onCheckedChange={(value) => {
-                const newValue = !!value;
-                setIsChecked(newValue);
-                checkFyre(newValue);
-              }}
-            />
+              <h4>{currentStreak} 🔥</h4>
+              <Checkbox
+                className="mr-2 size-8 rounded-md"
+                disabled={isOpen}
+                checked={isChecked}
+                onCheckedChange={(value) => {
+                  const newValue = !!value;
+                  setIsChecked(newValue);
+                  checkFyre(newValue);
+                }}
+              />
             </div>
           </div>
           <CollapsibleContent>
             <div className="flex flex-col gap-4 mt-4">
+              <Item className="justify-stretch">
+                <ItemContent className="flex-row justify-between">
+                  <ItemTitle>Private</ItemTitle>
+                  <ItemActions>
+                    <Checkbox
+                      checked={isPrivate}
+                      onCheckedChange={(value) => {
+                        setIsPrivate(!!value);
+                        changePrivate();
+                      }}
+                    />
+                  </ItemActions>
+                </ItemContent>
+              </Item>
               <div className="grid grid-cols-2 justify-stretch gap-4">
                 <Button variant="destructive" size="lg">
                   Remove Fyre

@@ -25,8 +25,8 @@ import { ScrollArea } from "../ui/scroll-area";
 
 const editSchema = z.object({
   name: z.string().min(5).max(50).optional(),
-  currentPassword: z.string().trim().min(8).max(50).optional(),
-  newPassword: z.string().trim().min(8).max(50).optional(),
+  current_password: z.string().trim().min(8).max(50).optional(),
+  new_password: z.string().trim().min(8).max(50).optional(),
   email: z.email().toLowerCase().optional(),
   bio: z.string().min(0).max(500).optional(),
   timezone: z.string().trim().min(5).max(50).optional(),
@@ -108,7 +108,7 @@ export const Profile: React.FC = () => {
                   )}
                 />
                 <Controller
-                  name="currentPassword"
+                  name="current_password"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
@@ -130,7 +130,7 @@ export const Profile: React.FC = () => {
                   )}
                 />
                 <Controller
-                  name="newPassword"
+                  name="new_password"
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>

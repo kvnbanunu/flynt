@@ -21,8 +21,8 @@ type CreateUserRequest struct {
 // request payload for updating user
 type UpdateUserRequest struct {
 	Name            *string `json:"name"`
-	CurrentPassword *string `json:"currentPassword"`
-	NewPassword     *string `json:"newPassword"`
+	CurrentPassword *string `json:"current_password"`
+	NewPassword     *string `json:"new_password"`
 	Email           *string `json:"email"`
 	ImgURL          *string `json:"img_url"`
 	Bio             *string `json:"bio"`

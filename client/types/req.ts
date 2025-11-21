@@ -18,8 +18,8 @@ export interface RegisterRequest {
 export interface UpdateUserRequest {
   username?: string;
   name?: string;
-  currentPassword?: string;
-  newPassword?: string;
+  current_password?: string;
+  new_password?: string;
   email?: string;
   img_url?: string;
   bio?: string;
@@ -42,6 +42,7 @@ export interface UpdateFyreRequest {
   streak_count?: number;
   bonfyre_id?: number;
   active_days?: string;
+  is_private?: boolean;
 }
 
 export interface FriendRequest {

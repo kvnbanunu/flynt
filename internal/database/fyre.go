@@ -18,6 +18,7 @@ type UpdateFyreRequest struct {
 	StreakCount *int    `json:"streak_count"`
 	BonfyreID   *int    `json:"bonfyre_id"`
 	ActiveDays  *string `json:"active_days"`
+	IsPrivate   *bool   `json:"is_private"`
 }
 
 type CheckFyreRequest struct {
@@ -107,6 +108,11 @@ func (db *DB) UpdateFyre(id int, req UpdateFyreRequest) (*Fyre, error) {
 		args = append(args, req.ActiveDays)
 	}
 
+	if req.IsPrivate != nil {
+		fields = append(fields, "is_private = ?")
+		args = append(args, req.IsPrivate)
+	}
+
 	if len(fields) == 0 { // no change
 		return existingFyre, nil
 	}
@@ -177,22 +183,24 @@ func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 			return nil, err
 		}
 
-		// Create the post for daily check
-		query = `INSERT into social_post (user_id, fyre_id, type, content)
-		VALUES (?, ?, ?, ' just hit a streak of ')
-		`
-		result, err := db.Exec(query, id, req.FyreID, DailyCheck)
-		if err != nil {
-			return nil, fmt.Errorf("Failed to create post: %w", err)
-		}
+		if !fyre.IsPrivate {
+			// Create the post for daily check
+			query = `INSERT into social_post (user_id, fyre_id, type, content)
+			VALUES (?, ?, ?, ' just hit a streak of ')
+			`
+			result, err := db.Exec(query, id, req.FyreID, DailyCheck)
+			if err != nil {
+				return nil, fmt.Errorf("Failed to create post: %w", err)
+			}
 
-		rowsAffected, err := result.RowsAffected()
-		if err != nil {
-			return nil, fmt.Errorf("Failed to get rows affected: %w", err)
-		}
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				return nil, fmt.Errorf("Failed to get rows affected: %w", err)
+			}
 
-		if rowsAffected == 0 {
-			return nil, fmt.Errorf("No post created")
+			if rowsAffected == 0 {
+				return nil, fmt.Errorf("No post created")
+			}
 		}
 	} else {
 		updateLastChecked = `- 1,

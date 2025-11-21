@@ -25,7 +25,9 @@ declare namespace Models {
     user_id: number;
     bonfyre_id?: number;
     active_days: string;
+    is_private: boolean;
     is_checked: boolean;
+    is_missed: boolean;
     last_checked_at?: string;
     last_checked_at_prev?: string;
     created_at?: string;
