@@ -16,7 +16,7 @@ import {
 import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { ButtonGroup } from "../ui/button-group";
-import { Put } from "@/lib/api";
+import { Get, Put } from "@/lib/api";
 import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
 import { GoalSection } from "../goals/GoalSection";
@@ -66,14 +66,11 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const req: CheckFyreRequest = { id: fyre.id, increment: false };
-        const res = await fetchFyre("/fyre/categories", req);
-        if (!res.ok) throw new Error("Failed to fetch categories");
-        const json = await res.json();
-        setAllCategories(json.data);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
+      const res = await Get<Models.Category[]>("/fyre/categories")
+      if (res.success) {
+        setAllCategories(res.data);
+      } else {
+        setError(res.error.message);
       }
     };
     fetchCategories();
