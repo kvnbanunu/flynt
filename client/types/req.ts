@@ -74,4 +74,5 @@ export interface FullPost {
   img_url?: string;
   title: string;
   streak_count: number;
+  likes: number;
 }

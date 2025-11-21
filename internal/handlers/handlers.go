@@ -47,6 +47,7 @@ func SetupHandlers(db *database.DB) http.Handler {
 	mux.Handle("/friend/", auth(friendHandler))
 	mux.Handle("/health", auth(admin(healthHandler)))
 	mux.Handle("/socialpost", auth(socialPostHandler))
+	mux.Handle("/socialpost/", auth(socialPostHandler))
 
 	// root handler
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

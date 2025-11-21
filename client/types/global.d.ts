@@ -25,6 +25,7 @@ declare namespace Models {
     user_id: number;
     bonfyre_id?: number;
     active_days: string;
+    likes: number;
     is_private: boolean;
     is_checked: boolean;
     is_missed: boolean;
@@ -55,5 +56,6 @@ declare namespace Models {
     fyre_id: number;
     type: "dailycheck" | "milestone";
     content: string;
+    likes: number;
   }
 }

@@ -27,6 +27,7 @@ type Fyre struct {
 	UserID            int        `db:"user_id" json:"user_id"`
 	BonfyreID         *int       `db:"bonfyre_id" json:"bonfyre_id"`
 	ActiveDays        string     `db:"active_days" json:"active_days"`
+	Likes             int        `db:"likes" json:"likes"`
 	IsPrivate         bool       `db:"is_private" json:"is_private"`
 	IsChecked         bool       `db:"is_checked" json:"is_checked"`
 	IsMissed          bool       `db:"is_missed" json:"is_missed"`
@@ -77,6 +78,7 @@ type SocialPost struct {
 	FyreID  int    `db:"fyre_id" json:"fyre_id"`
 	Type    string `db:"type" json:"type"`
 	Content string `db:"content" json:"content"`
+	Likes   int    `db:"likes" json:"likes"`
 }
 
 type PostType string

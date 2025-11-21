@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"flynt/internal/database"
@@ -21,13 +22,23 @@ func (h *SocialPostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.TrimPrefix(r.URL.Path, "/socialpost")
 
-	switch path {
-	case "/", "":
-		if r.Method != http.MethodGet {
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+	// may change
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	switch {
+	case path == "/" || path == "":
+		h.GetAllPosts(w, r)
+	case strings.HasPrefix(path, "/like"):
+		postIDStr := strings.TrimPrefix(path, "/like/")
+		postID, err := strconv.Atoi(postIDStr)
+		if err != nil {
+			writeError(w, http.StatusNotAcceptable, "Invalid or missing id")
 			return
 		}
-		h.GetAllPosts(w, r)
+		h.LikePost(w, r, postID)
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")
 	}
@@ -41,4 +52,14 @@ func (h *SocialPostHandler) GetAllPosts(w http.ResponseWriter, r *http.Request) 
 	}
 
 	writeSuccess(w, http.StatusOK, "Posts retreived successfully", posts)
+}
+
+func (h *SocialPostHandler) LikePost(w http.ResponseWriter, r *http.Request, id int) {
+	err := h.db.LikePost(id)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to like post: %v", err))
+		return
+	}
+
+	writeSuccess(w, http.StatusOK, "Posts liked successfully", nil)
 }

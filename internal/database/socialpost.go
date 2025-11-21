@@ -10,11 +10,12 @@ type FullPost struct {
 	ImgURL      *string  `db:"img_url" json:"img_url,omitempty"`
 	Title       string   `db:"title" json:"title"`
 	StreakCount int      `db:"streak_count" json:"streak_count"`
+	Likes       int      `db:"likes" json:"likes"`
 }
 
 func (db *DB) GetAllPosts() ([]FullPost, error) {
 	query := `SELECT s.id, s.user_id, s.fyre_id, s.type, s.content,
-	u.username, u.img_url, f.title, f.streak_count FROM social_post s
+	u.username, u.img_url, f.title, f.streak_count, f.likes FROM social_post s
 	JOIN user u ON s.user_id = u.id
 	JOIN fyre f ON s.fyre_id = f.id
 	ORDER BY s.id ASC
@@ -27,4 +28,32 @@ func (db *DB) GetAllPosts() ([]FullPost, error) {
 	}
 
 	return posts, nil
+}
+
+func (db *DB) LikePost(id int) (error) {
+	query := `UPDATE social_post
+	SET likes = likes + 1
+	WHERE id = ?
+	RETURNING *
+	`
+
+	var post SocialPost
+	err := db.Get(&post, query, id)
+	if err != nil {
+		return err
+	}
+
+	query = `UPDATE fyre
+	SET likes = ?
+	WHERE id = ?
+	RETURNING *
+	`
+
+	var fyre Fyre
+	err = db.Get(&fyre, query, post.Likes, post.FyreID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
