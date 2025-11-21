@@ -7,16 +7,16 @@ import (
 )
 
 type CreateGoalRequest struct {
-	FyreID int `json:"fyre_id"`
-	Description string `json:"description"`
-	GoalTypeID int `json:"goal_type_id"`
-	Data *string `json:"data"`
+	FyreID      int     `json:"fyre_id"`
+	Description string  `json:"description"`
+	GoalTypeID  int     `json:"goal_type_id"`
+	Data        *string `json:"data"`
 }
 
 type UpdateGoalRequest struct {
-	Description string `json:"description"`
-	GoalTypeID int `json:"goal_type_id"`
-	Data *string `json:"data"`
+	Description string  `json:"description"`
+	GoalTypeID  int     `json:"goal_type_id"`
+	Data        *string `json:"data"`
 }
 
 func (db *DB) CreateGoal(req CreateGoalRequest) (*Goal, error) {
@@ -24,7 +24,7 @@ func (db *DB) CreateGoal(req CreateGoalRequest) (*Goal, error) {
 	INSERT INTO goal (fyre_id, description, goal_type_id, data)
 	VALUES (?, ?, ?, ?)
 	RETURNING *
-	`	
+	`
 
 	var goal Goal
 	err := db.Get(&goal, query, req.FyreID, req.Description, req.GoalTypeID, req.Data)
@@ -40,7 +40,7 @@ func (db *DB) GetGoalByID(fyreID int) (*Goal, error) {
 
 	var goal Goal
 	err := db.Get(&goal, query, fyreID)
-	if err!= nil {
+	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -113,7 +113,3 @@ func (db *DB) DeleteGoal(fyreID int) error {
 
 	return nil
 }
-
-
-
-

@@ -42,6 +42,7 @@ func SetupHandlers(db *database.DB) http.Handler {
 	mux.Handle("/user/", auth(userHandler))
 	mux.Handle("/account/", accountHandler)
 	mux.Handle("/fyre", auth(fyreHandler))
+	mux.Handle("/goal", auth(goalHandler))
 	mux.Handle("/goal/", auth(goalHandler))
 	mux.Handle("/fyre/", auth(fyreHandler))
 	mux.Handle("/fyre/user/", auth(fyreHandler))

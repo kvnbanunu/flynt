@@ -7,7 +7,7 @@ import { Input } from "../ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
 import { Get, Post, Delete } from "@/lib/api";
 import { toast } from "sonner";
-import type { CreateGoalRequest, DeleteGoalRequest } from "@/types/req";
+import type { CreateGoalRequest } from "@/types/req";
 
 export const GoalSection: React.FC<{ fyreId: number }> = ({ fyreId }) => {
   const [goal, setGoal] = useState<Models.Goal | null>(null);
@@ -52,7 +52,7 @@ export const GoalSection: React.FC<{ fyreId: number }> = ({ fyreId }) => {
       data: goalData,
     };
 
-    const res = await Post<Models.Goal, any>(`/goal/${fyreId}`, req);
+    const res = await Post<Models.Goal, CreateGoalRequest>("/goal", req);
     if (res.success) {
       toast.success("Goal saved!");
       setGoal(res.data);

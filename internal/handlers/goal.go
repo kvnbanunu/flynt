@@ -23,11 +23,12 @@ func (h *GoalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.TrimPrefix(r.URL.Path, "/goal")
 	switch {
-	case path == "", path == "/":
+	case path == "" || path == "/":
 		if r.Method == http.MethodPost {
 			h.createGoal(w, r)
 			return
 		}
+		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 	case strings.HasPrefix(path, "/"):
 		idStr := strings.TrimPrefix(path, "/")
 		fyreID, err := strconv.Atoi(idStr)
@@ -50,11 +51,10 @@ func (h *GoalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handles POST /api/goal
+// handles POST /goal
 func (h *GoalHandler) createGoal(w http.ResponseWriter, r *http.Request) {
 	var req database.CreateGoalRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "Invalid JSON payload")
+	if err := parseBody(w, r, &req); err != nil {
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *GoalHandler) createGoal(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w, http.StatusCreated, "Goal created successfully", goal)
 }
 
-// GET /api/goal/fyre/{fyre_id}
+// GET /goal/{fyre_id}
 func (h *GoalHandler) getGoalByFyre(w http.ResponseWriter, _ *http.Request, fyreID int) {
 	goal, err := h.db.GetGoalByID(fyreID)
 	if err != nil {
@@ -90,7 +90,7 @@ func (h *GoalHandler) getGoalByFyre(w http.ResponseWriter, _ *http.Request, fyre
 	writeSuccess(w, http.StatusOK, "Goal retrieved successfully", goal)
 }
 
-// PUT /api/goal/{fyre_id}
+// PUT /goal/{fyre_id}
 func (h *GoalHandler) updateGoal(w http.ResponseWriter, r *http.Request, fyreID int) {
 	var req database.UpdateGoalRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
