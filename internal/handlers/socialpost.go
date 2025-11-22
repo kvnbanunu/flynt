@@ -28,9 +28,11 @@ func (h *SocialPostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Context().Value("userID").(int)
+
 	switch {
 	case path == "/" || path == "":
-		h.GetAllPosts(w, r)
+		h.GetAllPosts(w, r, userID)
 	case strings.HasPrefix(path, "/like"):
 		postIDStr := strings.TrimPrefix(path, "/like/")
 		postID, err := strconv.Atoi(postIDStr)
@@ -44,8 +46,8 @@ func (h *SocialPostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *SocialPostHandler) GetAllPosts(w http.ResponseWriter, r *http.Request) {
-	posts, err := h.db.GetAllPosts()
+func (h *SocialPostHandler) GetAllPosts(w http.ResponseWriter, r *http.Request, id int) {
+	posts, err := h.db.GetAllPosts(id)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to get posts: %v", err))
 		return
