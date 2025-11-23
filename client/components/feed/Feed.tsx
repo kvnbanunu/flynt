@@ -57,11 +57,14 @@ export const Feed: React.FC = () => {
   return (
     <ScrollArea className="w-full">
       {posts &&
-        posts.map((post) => (
-          <React.Fragment key={post.id}>
-            <PostCard post={post} fetchPosts={fetchPosts} />
-          </React.Fragment>
-        ))}
+        posts.map((post) => {
+          if (post.status !== "blocked")
+            return (
+              <React.Fragment key={post.id}>
+                <PostCard post={post} fetchPosts={fetchPosts} />
+              </React.Fragment>
+            );
+        })}
     </ScrollArea>
   );
 };
@@ -83,6 +86,10 @@ const PostCard: React.FC<{
   };
 
   const addFriend = async () => {
+    if (post.status === "friends") {
+      toast(`You are already friends with ${post.username}!`);
+      return;
+    }
     const req: FriendRequest = {
       type: "addfriend",
       user_id_2: post.user_id,

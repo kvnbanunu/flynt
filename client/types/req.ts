@@ -90,4 +90,5 @@ export interface FullPost {
   title: string;
   streak_count: number;
   likes: number;
+  status?: string;
 }

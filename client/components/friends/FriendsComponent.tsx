@@ -40,6 +40,7 @@ import { Spinner } from "../ui/spinner";
 import React from "react";
 import { ApiError, Result } from "@/types/api";
 import { ScrollArea } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
 
 export const FriendsComponent: React.FC = () => {
   const { friends, users, loading, error, fetchFriends, fetchUsers } =
@@ -55,7 +56,7 @@ export const FriendsComponent: React.FC = () => {
     return <div>{error}</div>;
   }
 
-  const onAddFriend = () => {
+  const onFriendRequest = () => {
     fetchFriends();
     fetchUsers();
     setSearch("");
@@ -107,15 +108,32 @@ export const FriendsComponent: React.FC = () => {
               <React.Fragment>
                 <TabsContent value="friendslist">
                   {friends &&
-                    friends.map((f) => (
-                      <FriendCard
-                        key={f.id}
-                        friend={f}
-                        callback={onAddFriend}
-                      />
-                    ))}
+                    friends.map((f) => {
+                      if (f.status === "friends")
+                        return (
+                          <FriendCard
+                            key={f.id}
+                            friend={f}
+                            callback={onFriendRequest}
+                          />
+                        );
+                    })}
                 </TabsContent>
-                <TabsContent value="requests">Requests</TabsContent>
+                <TabsContent value="requests">
+                  Requests
+                  <Separator className="mb-4 mt-2" />
+                  {friends &&
+                    friends.map((f) => {
+                      if (f.status !== "friends")
+                        return (
+                          <FriendCard
+                            key={f.id}
+                            friend={f}
+                            callback={onFriendRequest}
+                          />
+                        );
+                    })}
+                </TabsContent>
               </React.Fragment>
             )}
           </CardContent>
@@ -127,7 +145,7 @@ export const FriendsComponent: React.FC = () => {
                   users &&
                   users.map((u) => (
                     <CommandItem key={u.id} asChild value={u.username}>
-                      <FriendSearchCard user={u} callback={onAddFriend} />
+                      <FriendSearchCard user={u} callback={onFriendRequest} />
                     </CommandItem>
                   ))}
               </CommandGroup>
@@ -238,7 +256,7 @@ const FriendCard: React.FC<{
           {addFlag && (
             <Badge
               className="cursor-pointer"
-              onClick={() => friendRequest("addfriend")}
+              onClick={() => friendRequest("acceptfriend")}
             >
               Accept Friend
             </Badge>
