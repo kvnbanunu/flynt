@@ -1,7 +1,7 @@
 "use client";
 
 import { Get, Post, Put } from "@/lib/api";
-import { FriendRequest, FullPost } from "@/types/req";
+import { FriendRequest, FullPost, JoinBonfyreRequest } from "@/types/req";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
   Card,
@@ -73,7 +73,7 @@ const PostCard: React.FC<{
   post: FullPost;
   fetchPosts: () => void;
 }> = ({ post, fetchPosts }) => {
-  const { user } = useAuth();
+  const { user, fetchFyres } = useAuth();
   const img_url = post.img_url || "/default_profile.jpg";
 
   const likePost = async (id: number) => {
@@ -82,7 +82,14 @@ const PostCard: React.FC<{
   };
 
   const joinBonfyre = async () => {
-    // callback();
+    const req: JoinBonfyreRequest = { fyre_id: post.fyre_id };
+    const res = await Post<null, JoinBonfyreRequest>("/fyre/bonfyre", req);
+    if (res.success) {
+      toast("Successfully joined bonfyre!");
+      fetchFyres();
+    } else {
+      toast(res.error.message);
+    }
   };
 
   const addFriend = async () => {
@@ -110,6 +117,7 @@ const PostCard: React.FC<{
     const res = await Put<null, FriendRequest>("/friend", req);
     if (res.success) {
       toast(`${post.username} is now blocked.`);
+      fetchPosts();
     } else {
       toast(res.error.message);
     }
@@ -137,8 +145,7 @@ const PostCard: React.FC<{
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
                   <PostDialog
-                    trigger={"Join Fyre"}
-                    formID={"form-bonfyre"}
+                    trigger={"Join BonFyre"}
                     title={"Join this BonFyre?"}
                     callback={joinBonfyre}
                   >
@@ -148,13 +155,11 @@ const PostCard: React.FC<{
                   </PostDialog>
                   <PostDialog
                     trigger={"Add friend"}
-                    formID={"form-friend"}
                     title={`Add ${post.username} as a friend?`}
                     callback={addFriend}
                   ></PostDialog>
                   <PostDialog
                     trigger={"Block user"}
-                    formID={"form-block"}
                     title={`Are you sure you want to block ${post.username}?`}
                     callback={blockUser}
                   ></PostDialog>
@@ -217,16 +222,15 @@ const LikerAvatars: React.FC<{ likes: number }> = ({ likes }) => {
 
 const PostDialog: React.FC<{
   trigger: string;
-  formID: string;
   title: string;
   callback: () => void;
   children?: ReactNode;
-}> = ({ trigger, formID, title, callback, children }) => {
+}> = ({ trigger, title, callback, children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <form id={formID} onSubmit={callback}>
+      <form>
         <DialogTrigger asChild>
           <Button variant="ghost">{trigger}</Button>
         </DialogTrigger>
@@ -241,9 +245,11 @@ const PostDialog: React.FC<{
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" form={formID}>
-              Confirm
-            </Button>
+            <DialogClose asChild>
+              <Button type="submit" onClick={callback}>
+                Confirm
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </form>

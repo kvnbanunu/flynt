@@ -47,6 +47,10 @@ export interface UpdateFyreRequest {
   category_id?: number;
 }
 
+export interface JoinBonfyreRequest {
+  fyre_id: number;
+}
+
 export interface CreateGoalRequest {
   fyre_id: number;
   description: string;

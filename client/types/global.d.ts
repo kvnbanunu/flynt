@@ -55,6 +55,7 @@ declare namespace Models {
 
   export interface Bonfyre {
     id: number;
+    total: number;
   }
 
   export interface Friend {

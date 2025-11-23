@@ -47,29 +47,39 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
 	case strings.HasPrefix(path, "/"):
-		if path == "/check" || path == "/check/" {
-			if r.Method == http.MethodPut {
-				h.checkFyre(w, r, userID)
-			} else {
+		switch path {
+		case "/check", "/check/":
+			if r.Method != http.MethodPut {
+				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				return
+			}
+			h.checkFyre(w, r, userID)
+		case "/bonfyre", "/bonfyre/":
+			switch r.Method {
+			case http.MethodGet:
+				h.getBonfyre(w, r)
+			case http.MethodPost:
+				h.joinBonfyre(w, r, userID)
+			default:
 				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			}
-			return
-		}
-		idStr := strings.TrimPrefix(path, "/")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid fyre ID")
-			return
-		}
-		switch r.Method {
-		case http.MethodGet:
-			h.getFyreById(w, r, id)
-		case http.MethodPut:
-			h.updateFyre(w, r, id)
-		case http.MethodDelete:
-			h.deleteFyre(w, r, id)
 		default:
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			idStr := strings.TrimPrefix(path, "/")
+			id, err := strconv.Atoi(idStr)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, "Invalid fyre ID")
+				return
+			}
+			switch r.Method {
+			case http.MethodGet:
+				h.getFyreById(w, r, id)
+			case http.MethodPut:
+				h.updateFyre(w, r, id)
+			case http.MethodDelete:
+				h.deleteFyre(w, r, id)
+			default:
+				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			}
 		}
 	default:
 		writeError(w, http.StatusNotFound, "Endpoint not found")

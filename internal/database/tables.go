@@ -60,7 +60,8 @@ type Goal struct {
 
 // Represents bonfyre table in db
 type Bonfyre struct {
-	ID int `db:"id" json:"id"`
+	ID    int `db:"id" json:"id"`
+	Total int `db:"total" json:"total"`
 }
 
 // Represents friend table in db
