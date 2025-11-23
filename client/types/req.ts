@@ -51,6 +51,15 @@ export interface JoinBonfyreRequest {
   fyre_id: number;
 }
 
+export interface FriendFyre {
+    id: number;
+    title: string;
+    streak_count: number;
+    bonfyre_id?: number;
+    is_checked: boolean;
+    category_id: number;
+}
+
 export interface CreateGoalRequest {
   fyre_id: number;
   description: string;

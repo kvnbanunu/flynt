@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"flynt/internal/database"
 	"fmt"
 	"net/http"
@@ -20,7 +21,11 @@ func (h *FyreHandler) joinBonfyre(w http.ResponseWriter, r *http.Request, id int
 
 	err := h.db.JoinBonfyre(req, id)
 	if err != nil {
-		fmt.Printf("Error: %v", err)
+		fmt.Println("Error: ", err)
+		if errors.Is(err, database.ErrAlreadyJoinedBonfyre) {
+			writeError(w, http.StatusBadRequest, "Already joined BonFyre")
+			return
+		}
 		writeError(w, http.StatusBadRequest, "Failed to join bonfyre")
 		return
 	}

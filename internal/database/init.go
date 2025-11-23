@@ -69,7 +69,6 @@ func (db *DB) createTables() error {
 		user_id INTEGER NOT NULL REFERENCES user(id),
 		bonfyre_id INTEGER REFERENCES bonfyre(id),
 		active_days TEXT DEFAULT '1111111',
-		likes INTEGER DEFAULT 0,
 		is_private INTEGER DEFAULT 0,
 		is_checked INTEGER DEFAULT 0,
 		is_missed INTEGER DEFAULT 0,

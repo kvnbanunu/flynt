@@ -1,10 +1,15 @@
 package database
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type JoinBonfyreRequest struct {
 	FyreID int `json:"fyre_id"`
 }
+
+var ErrAlreadyJoinedBonfyre = errors.New("Already joined BonFyre")
 
 func (db *DB) GetBonfyre(id int) (*Bonfyre, error) {
 	query := `SELECT * FROM bonfyre WHERE id = ?`
@@ -29,11 +34,22 @@ func (db *DB) JoinBonfyre(req JoinBonfyreRequest, userID int) error {
 
 	// check if bonfyre exists or create new one
 	if fyre.BonfyreID != nil {
-		_, err := db.GetBonfyre(*fyre.BonfyreID)
+		_, err = db.GetBonfyre(*fyre.BonfyreID)
 		if err != nil {
 			return err
 		}
+
 		bonfyreID = *fyre.BonfyreID
+
+		// check if user already joined the bonfyre
+		var existing Fyre
+		err := db.Get(&existing, `
+			SELECT * FROM fyre
+			WHERE user_id = ? AND bonfyre_id = ?
+			`, userID, bonfyreID)
+		if err == nil {
+			return ErrAlreadyJoinedBonfyre
+		}
 	} else {
 		var bonfyre Bonfyre
 		// new bonfyre based on existing fyre

@@ -86,7 +86,23 @@ func (db *DB) GetAllUserFyres(id int) ([]Fyre, error) {
 	var fyres []Fyre
 	err := db.Select(&fyres, query, id)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get fyres: %w", err)
+		return fyres, fmt.Errorf("Failed to get fyres: %w", err)
+	}
+	return fyres, nil
+}
+
+// only get relevant fields
+func (db *DB) GetAllFriendsFyres(id int) ([]Fyre, error) {
+	query := `SELECT id, title, streak_count, bonfyre_id, is_checked, category_id
+	FROM fyre
+	WHERE user_id = ? AND is_private = false
+	ORDER BY streak_count DESC
+	`
+
+	var fyres []Fyre
+	err := db.Select(&fyres, query, id)
+	if err != nil {
+		return fyres, fmt.Errorf("Failed to get fyres: %w", err)
 	}
 	return fyres, nil
 }

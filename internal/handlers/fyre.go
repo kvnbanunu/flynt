@@ -47,14 +47,14 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		}
 	case strings.HasPrefix(path, "/"):
-		switch path {
-		case "/check", "/check/":
+		switch {
+		case path == "/check" || path == "/check/":
 			if r.Method != http.MethodPut {
 				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 				return
 			}
 			h.checkFyre(w, r, userID)
-		case "/bonfyre", "/bonfyre/":
+		case path == "/bonfyre" || path == "/bonfyre/":
 			switch r.Method {
 			case http.MethodGet:
 				h.getBonfyre(w, r)
@@ -63,6 +63,18 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			default:
 				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			}
+		case strings.HasPrefix(path, "/user/"):
+			idStr := strings.TrimPrefix(path, "/user/")
+			id, err := strconv.Atoi(idStr)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, "Invalid user ID")
+				return
+			}
+			if r.Method != http.MethodGet {
+				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				return
+			}
+			h.getAllFriendsFyres(w, r, id)
 		default:
 			idStr := strings.TrimPrefix(path, "/")
 			id, err := strconv.Atoi(idStr)
@@ -243,6 +255,18 @@ func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id
 		for i := range updated {
 			fyres[indexes[i]] = updated[i]
 		}
+	}
+
+	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fyres)
+}
+
+// Get /fyre/user/{id} shallow get no updates
+func (h *FyreHandler) getAllFriendsFyres(w http.ResponseWriter, _ *http.Request, id int) {
+	fyres, err := h.db.GetAllFriendsFyres(id)
+	if err != nil {
+		log.Printf("Error getting fyres: %v", err)
+		writeError(w, http.StatusInternalServerError, "Failed to get fyres")
+		return
 	}
 
 	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fyres)
