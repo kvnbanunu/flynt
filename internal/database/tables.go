@@ -14,6 +14,7 @@ type User struct {
 	ImgURL    *string   `db:"img_url" json:"img_url,omitempty"`
 	Bio       *string   `db:"bio" json:"bio,omitempty"`
 	Timezone  string    `db:"timezone" json:"timezone,omitempty"`
+	FyreTotal int       `db:"fyre_total" json:"fyre_total"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
@@ -24,13 +25,23 @@ type Fyre struct {
 	Title             string     `db:"title" json:"title"`
 	StreakCount       int        `db:"streak_count" json:"streak_count"`
 	UserID            int        `db:"user_id" json:"user_id"`
-	BonfyreID         *int       `db:"bonfyre_id" json:"bonfyre_id"`
+	BonfyreID         *int       `db:"bonfyre_id" json:"bonfyre_id,omitempty"`
+	BonfyreTotal      *int       `db:"bonfyre_total" json:"bonfyre_total,omitempty"` // joined field
 	ActiveDays        string     `db:"active_days" json:"active_days"`
+	IsPrivate         bool       `db:"is_private" json:"is_private"`
 	IsChecked         bool       `db:"is_checked" json:"is_checked"`
+	IsMissed          bool       `db:"is_missed" json:"is_missed"`
 	LastCheckedAt     *time.Time `db:"last_checked_at" json:"last_checked_at,omitempty"`
 	LastCheckedAtPrev *time.Time `db:"last_checked_at_prev" json:"last_checked_at_prev,omitempty"`
 	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
+	CategoryID        int        `db:"category_id" json:"category_id"`
+}
+
+// Represents category table in db
+type Category struct {
+	ID   int    `db:"id" json:"id"`
+	Name string `db:"name" json:"name"`
 }
 
 // Represents goal_type table in db
@@ -42,14 +53,15 @@ type GoalType struct {
 // Represents goal table in db
 type Goal struct {
 	FyreID      int     `db:"fyre_id" json:"fyre_id"`
-	Description string  `db:"description" json:"description"`
-	GoalTypeID  int     `db:"goal_type_id" json:"goal_type_id"`
+	Description string `db:"description" json:"description"`
+	GoalTypeID  int    `db:"goal_type_id" json:"goal_type_id"`
 	Data        *string `db:"data" json:"data"`
 }
 
 // Represents bonfyre table in db
 type Bonfyre struct {
-	ID int `db:"id" json:"id"`
+	ID    int `db:"id" json:"id"`
+	Total int `db:"total" json:"total"`
 }
 
 // Represents friend table in db
@@ -74,6 +86,7 @@ type SocialPost struct {
 	FyreID  int    `db:"fyre_id" json:"fyre_id"`
 	Type    string `db:"type" json:"type"`
 	Content string `db:"content" json:"content"`
+	Likes   int    `db:"likes" json:"likes"`
 }
 
 type PostType string

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -30,7 +31,7 @@ func SetupHandlers(db *database.DB) http.Handler {
 	fyreHandler := NewFyreHandler(db)
 	friendHandler := NewFriendHandler(db)
 	healthHandler := NewHealthHandler(db)
-	profileHandler := NewProfileHandler(db)
+	goalHandler := NewGoalHandler(db)
 	socialPostHandler := NewSocialPostHandler(db)
 
 	// alias for readability
@@ -41,15 +42,15 @@ func SetupHandlers(db *database.DB) http.Handler {
 	mux.Handle("/user", auth(userHandler))
 	mux.Handle("/user/", auth(userHandler))
 	mux.Handle("/account/", accountHandler)
+	mux.Handle("/goal", auth(goalHandler))
+	mux.Handle("/goal/", auth(goalHandler))
 	mux.Handle("/fyre", auth(fyreHandler))
 	mux.Handle("/fyre/", auth(fyreHandler))
-	mux.Handle("/fyre/user/", auth(fyreHandler))
 	mux.Handle("/friend", auth(friendHandler))
 	mux.Handle("/friend/", auth(friendHandler))
 	mux.Handle("/health", auth(admin(healthHandler)))
-	mux.Handle("/profile", auth(profileHandler))
-	mux.Handle("/profile/", auth(profileHandler))
 	mux.Handle("/socialpost", auth(socialPostHandler))
+	mux.Handle("/socialpost/", auth(socialPostHandler))
 
 	// root handler
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -120,7 +121,10 @@ func setExpiredCookie(w http.ResponseWriter) {
 }
 
 // Generic error response
-func writeError(w http.ResponseWriter, statusCode int, message string) {
+func writeError(w http.ResponseWriter, statusCode int, message string, err ...error) {
+	if len(err) > 0 {
+		log.Println("Error:", err)
+	}
 	w.WriteHeader(statusCode)
 	res := ErrorResponse{
 		Error:   http.StatusText(statusCode),

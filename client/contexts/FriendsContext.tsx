@@ -48,28 +48,30 @@ export const FriendsProvider: React.FC<FriendsProviderProps> = ({
   useEffect(() => {
     if (isAuthenticated) {
       setLoading(true);
-      get<FriendsListItem[]>("/friend", setFriends);
-      get<FriendsUserListItem[]>("/user/redacted", setUsers);
+      get<FriendsListItem[]>("/friend/all", setFriends);
+      get<FriendsUserListItem[]>("/friend/non", setUsers);
       setLoading(false);
     }
   }, []);
 
   const fetchFriends = async () => {
     setLoading(true);
-    await get<FriendsListItem[]>("/friend", setFriends);
+    await get<FriendsListItem[]>("/friend/all", setFriends);
     setLoading(false);
   };
 
   const fetchUsers = async () => {
     setLoading(true);
-    await get<FriendsUserListItem[]>("/user/redacted", setUsers);
+    await get<FriendsUserListItem[]>("/friend/non", setUsers);
     setLoading(false);
   };
 
   async function get<T>(url: string, callback: (t: T) => void) {
     const res = await Get<T>(url);
     if (res.success) {
-      callback(res.data);
+      if (res.data != null) {
+        callback(res.data);
+      }
       setError(null);
     } else {
       setError(res.error.message);

@@ -46,6 +46,7 @@ func (db *DB) createTables() error {
 		img_url TEXT,
 		bio TEXT,
 		timezone TEXT DEFAULT 'Canada/Pacific',
+		fyre_total INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
@@ -56,6 +57,11 @@ func (db *DB) createTables() error {
 		UPDATE user SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 	END;
 
+	CREATE TABLE IF NOT EXISTS category (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL
+	);
+
 	CREATE TABLE IF NOT EXISTS fyre (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT NOT NULL,
@@ -63,11 +69,14 @@ func (db *DB) createTables() error {
 		user_id INTEGER NOT NULL REFERENCES user(id),
 		bonfyre_id INTEGER REFERENCES bonfyre(id),
 		active_days TEXT DEFAULT '1111111',
+		is_private INTEGER DEFAULT 0,
 		is_checked INTEGER DEFAULT 0,
+		is_missed INTEGER DEFAULT 0,
 		last_checked_at DATETIME,
 		last_checked_at_prev DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		category_id INTEGER DEFAULT 1 REFERENCES category(id) 
 	);
 
 	
@@ -91,7 +100,8 @@ func (db *DB) createTables() error {
 	);
 
 	CREATE TABLE IF NOT EXISTS bonfyre (
-		id INTEGER PRIMARY KEY AUTOINCREMENT
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		total INTEGER DEFAULT 0
 	);
 
 	CREATE TABLE IF NOT EXISTS friend (
@@ -106,7 +116,8 @@ func (db *DB) createTables() error {
 		user_id INTEGER NOT NULL REFERENCES user(id),
 		fyre_id INTEGER NOT NULL REFERENCES fyre(id),
 		type TEXT NOT NULL,
-		content TEXT NOT NULL
+		content TEXT NOT NULL,
+		likes INTEGER DEFAULT 0
 	);
 	`
 

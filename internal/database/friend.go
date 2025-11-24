@@ -1,6 +1,10 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+
+	"flynt/internal/utils"
+)
 
 type UpdateFriendRequest struct {
 	ID1 int `db:"user_id_1" json:"user_id_1"`
@@ -119,7 +123,7 @@ func (db *DB) GetFriendsList(id int) ([]FriendsListItem, error) {
 	SELECT u.id, u.username, u.img_url, f.status FROM friend f
 	JOIN user u ON u.id = f.user_id_2
 	WHERE f.user_id_1 = ?
-	ORDER BY u.name ASC
+	ORDER BY u.username ASC
 	`
 
 	var friends []FriendsListItem
@@ -129,4 +133,24 @@ func (db *DB) GetFriendsList(id int) ([]FriendsListItem, error) {
 	}
 
 	return friends, nil
+}
+
+// Get all users that you have not interacted with yet
+func (db *DB) GetNonFriendsList(id int) ([]User, error) {
+	query := `
+	SELECT u.id, u.username, u.name, u.img_url, u.bio
+	FROM user u LEFT JOIN friend f
+	ON u.id = f.user_id_2 AND f.user_id_1 = ?
+	WHERE u.id != ? AND u.id != ?
+	AND f.status IS NULL
+	ORDER BY u.username ASC
+	`
+
+	var users []User
+	err := db.Select(&users, query, id, id, utils.CFG.AdminID)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get friends list: %w", err)
+	}
+
+	return users, nil
 }

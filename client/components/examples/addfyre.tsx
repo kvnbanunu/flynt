@@ -9,6 +9,7 @@ interface AddFyreProps {
 interface AddFyreRequest {
   title: string;
   streak_count: number;
+  active_days: string;
 }
 
 export const AddFyre: React.FC<AddFyreProps> = (props) => {
@@ -40,6 +41,7 @@ export const AddFyre: React.FC<AddFyreProps> = (props) => {
     const fyre: AddFyreRequest = {
       title: inputTitle,
       streak_count: inputStreak,
+      active_days: "1111111",
     };
     const res = await Post<Models.Fyre, AddFyreRequest>(
       "/fyre",

@@ -13,6 +13,7 @@ declare namespace Models {
     img_url?: string;
     bio?: string;
     timezone: string;
+    fyre_total: number;
     created_at?: string;
     updated_at?: string;
   }
@@ -23,22 +24,38 @@ declare namespace Models {
     streak_count: number;
     user_id: number;
     bonfyre_id?: number;
+    bonfyre_total?: number;
     active_days: string;
+    is_private: boolean;
     is_checked: boolean;
+    is_missed: boolean;
     last_checked_at?: string;
     last_checked_at_prev?: string;
     created_at?: string;
     updated_at?: string;
+    category_id: number;
   }
 
   export interface Goal {
     fyre_id: number;
     description: string;
-    milestone: number;
+    goal_type_id: number;
+    data?: string;
+  }
+
+  export interface GoalType {
+    id: number;
+    name: string;
+  }
+
+  export interface Category {
+    id: number;
+    name: string;
   }
 
   export interface Bonfyre {
     id: number;
+    total: number;
   }
 
   export interface Friend {
@@ -52,5 +69,6 @@ declare namespace Models {
     fyre_id: number;
     type: "dailycheck" | "milestone";
     content: string;
+    likes: number;
   }
 }

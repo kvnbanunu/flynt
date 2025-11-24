@@ -1,13 +1,13 @@
-run-server:
+server:
 	go run main.go
 
-run-client:
+next:
 	cd client/ && npm run dev
 
-insert-dummy: clean
-	go run scripts/dummy/main.go
+seed: clean
+	go run scripts/seed/main.go
 
-docker-deploy:
+docker:
 	git pull origin main
 	docker compose down
 	docker compose build --no-cache

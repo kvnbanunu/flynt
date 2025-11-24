@@ -89,7 +89,7 @@ export const FlameAnimation: React.FC = () => {
       id="flame-canvas"
       width={360}
       height={360}
-      className="w-55 h-55"
+      className="w-56 h-56"
     />
   );
 };

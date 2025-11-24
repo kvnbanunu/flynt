@@ -16,8 +16,10 @@ export interface RegisterRequest {
 }
 
 export interface UpdateUserRequest {
+  username?: string;
   name?: string;
-  password?: string;
+  current_password?: string;
+  new_password?: string;
   email?: string;
   img_url?: string;
   bio?: string;
@@ -28,6 +30,7 @@ export interface CreateFyreRequest {
   title: string;
   streak_count: number | 0;
   active_days: string | "1111111";
+  category_id: number | 0;
 }
 
 export interface CheckFyreRequest {
@@ -40,6 +43,35 @@ export interface UpdateFyreRequest {
   streak_count?: number;
   bonfyre_id?: number;
   active_days?: string;
+  is_private?: boolean;
+  category_id?: number;
+}
+
+export interface BonfyreRequest {
+  fyre_id: number;
+  bonfyre_id?: number;
+}
+
+export interface FriendFyre {
+  id: number;
+  title: string;
+  streak_count: number;
+  bonfyre_id?: number;
+  is_checked: boolean;
+  category_id: number;
+}
+
+export interface CreateGoalRequest {
+  fyre_id: number;
+  description: string;
+  goal_type_id: number;
+  data: string;
+}
+
+export interface UpdateGoalRequest {
+  description?: string;
+  goal_type_id?: number;
+  data?: string;
 }
 
 export interface FriendRequest {
@@ -61,14 +93,28 @@ export interface FriendsUserListItem {
   img_url?: string;
   bio?: string;
 }
+
 export interface FullPost {
   id: number;
   user_id: number;
   fyre_id: number;
+  bonfyre_id?: number;
   type: "dailycheck" | "milestone";
   content: string;
   username: string;
   img_url?: string;
   title: string;
+  streak_count: number;
+  likes: number;
+  status?: string;
+}
+
+export interface FullFyre {
+  fyre: Models.Fyre;
+  goals?: Models.Goal[];
+}
+
+export interface BonfyreMember {
+  username: string;
   streak_count: number;
 }

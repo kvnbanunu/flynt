@@ -46,7 +46,7 @@ export const MobileNavbar: React.FC = () => {
   return (
     <NavigationMenu
       viewport={isMobile}
-      className="md:hidden sticky bottom-0 bg-background"
+      className="md:hidden fixed bottom-0 bg-background"
     >
       <NavigationMenuList className="bg-background w-screen">
         <div className="flex gap-8 rounded-2xl px-6 py-4 my-4 mx-4 bg-sidebar justify-evenly w-full">

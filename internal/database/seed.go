@@ -1,0 +1,171 @@
+package database
+
+import (
+	"fmt"
+	"os"
+
+	"flynt/internal/utils"
+)
+
+func (db *DB) SeedData() error {
+	err := db.seedUsers()
+	if err != nil {
+		return err
+	}
+
+	err = db.seedCategories()
+	if err != nil {
+		return err
+	}
+
+	err = db.seedFyres()
+	if err != nil {
+		return err
+	}
+
+	err = db.seedGoalTypes()
+	if err != nil {
+		return err
+	}
+
+	err = db.seedGoals()
+	if err != nil {
+		return err
+	}
+
+	err = db.seedFriends()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) seedUsers() error {
+	dummyUser := os.Getenv("DUMMY_USER")
+	dummypass := os.Getenv("DUMMY_PASSWORD")
+	// adminID := os.Getenv("ADMIN_ID")
+	// adminUser := os.Getenv("ADMIN_USER")
+	// adminEmail := os.Getenv("ADMIN_EMAIL")
+	// adminPass := os.Getenv("ADMIN_PASSWORD")
+
+	// adminPassHashed, err := utils.HashPassword(adminPass)
+	// if err != nil {
+	// 	return err
+	// }
+
+	hashed, err := utils.HashPassword(dummypass)
+	if err != nil {
+		return err
+	}
+
+	query := fmt.Sprintf(`
+	INSERT INTO user (username, name, email, password, fyre_total)
+	VALUES
+	('Test', 'Test User', '%s', '%s', 0),
+	('BrandonRada', 'Brandon Rada', 'brandon@gmail.com', '%s', 100),
+	('Tosen', 'Evin Gonzales', 'evin@gmail.com', '%s', 99),
+	('Lemon', 'Lucas Laviolette', 'lucas@gmail.com', '%s', 9),
+	('Banunu', 'Kevin Nguyen', 'kevin@gmail.com', '%s', 22)
+	`, dummyUser, hashed, hashed, hashed, hashed, hashed)
+
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed users: %w", err)
+	}
+
+	// Add this later
+	// query = fmt.Sprintf(`
+	// INSERT INTO user (id, username, name, email, password)
+	// VALUES
+	// (%s, '%s', 'Admin User', '%s', '%s')
+	// `, adminID, adminUser, adminEmail, adminPassHashed)
+	//
+	// if _, err := db.Exec(query); err != nil {
+	// 	return fmt.Errorf("Failed to insert admin user: %w", err)
+	// }
+
+	return nil
+}
+
+func (db *DB) seedGoalTypes() error {
+	query := `
+	INSERT OR IGNORE INTO goal_type (id, name) VALUES
+	(1, 'Until Date'),
+	(2, 'Number of Days');
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed goal types: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) seedCategories() error {
+	query := `
+	INSERT OR IGNORE INTO category (id, name) VALUES
+	(1, 'General'),
+	(2, 'Health'),
+	(3, 'Fitness'),
+	(4, 'Work'),
+	(5, 'School');
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed categories: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) seedFyres() error {
+	query := `
+	INSERT INTO fyre (title, streak_count, user_id, active_days)
+	VALUES
+	('Win a game of Clash Royale', 100, 2, '1111111'),
+	('Drink water', 0, 3, '1111111'),
+	('Gacha', 99, 3, '1111111'),
+	('Open Pokemon TCG pack', 9, 4, '0000001'),
+	('Run a mile', 2, 5, '0101010'),
+	('Complete a leetcode question', 20, 5, '1111111');
+	`
+
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed fyres: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) seedGoals() error {
+	query := `
+	INSERT INTO goal (fyre_id, description, goal_type_id, data)
+	VALUES
+	(4, 'open 20 packs', 2, '20');
+	`
+
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed goals: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) seedFriends() error {
+	query := `
+	INSERT INTO friend (user_id_1, user_id_2, status)
+	VALUES
+	(2, 3, 'friends'),
+	(2, 5, 'pending'),
+	(3, 2, 'friends'),
+	(3, 4, 'friends'),
+	(4, 3, 'friends'),
+	(4, 5, 'friends'),
+	(5, 3, 'blocked'),
+	(5, 2, 'sent'),
+	(5, 4, 'friends')
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("Failed to seed friends: %w", err)
+	}
+
+	return nil
+}
