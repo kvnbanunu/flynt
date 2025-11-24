@@ -338,6 +338,7 @@ const DaysRemaining: React.FC<DaysRemainingProps> = ({
   onRemoveGoal,
 }) => {
   const [goal, setGoal] = useState<Models.Goal>();
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const FyreBadge: React.FC<{ children: ReactNode }> = ({ children }) => {
     return <Badge className="rounded-full aspect-square">{children}</Badge>;
