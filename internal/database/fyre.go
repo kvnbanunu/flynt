@@ -313,7 +313,33 @@ func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 		return nil, err
 	}
 
+	if fyre.BonfyreID != nil {
+		err = db.incrementBonfyreTotal(*fyre.BonfyreID, req.Increment)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &fyre, nil
+}
+
+func (db *DB) incrementBonfyreTotal(bonfyreID int, increment bool) error {
+	var bonfyre Bonfyre
+	update := "+ 1"
+	if !increment {
+		update = "- 1"
+	}
+	query := fmt.Sprintf(`
+		UPDATE bonfyre SET
+		total = total %s
+		WHERE id = ?
+		RETURNING *
+		`, update)
+	err := db.Get(&bonfyre, query, bonfyreID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (db *DB) GetFyreTotal(id int) (*FyreTotalResponse, error) {
