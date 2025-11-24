@@ -16,12 +16,16 @@ import {
 import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { ButtonGroup } from "../ui/button-group";
-import { Get, Put } from "@/lib/api";
+import { Get, Put, Delete } from "@/lib/api";
 import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
 import { toast } from "sonner";
 import { GoalSection } from "../goals/GoalSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { Item, ItemActions, ItemContent, ItemTitle } from "../ui/item";
+import { Hourglass, Cake } from 'lucide-react';
+import { Badge } from "../ui/badge";
+import { Button as FyreButton } from "../ui/button";
+
 
 export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const { checkUser } = useAuth();
@@ -152,6 +156,21 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
               isOpen={isOpen}
               onChange={changeDays}
             />
+
+            <DaysRemaining
+              streak={currentStreak}
+              fyreId={fyre.id}
+              onOpen={() => setIsOpen(true)}
+              onRemoveGoal={ async () => {
+                  const res = await Delete(`/goal/${currentFyre.id}`);
+                  if (res.success) {
+                    toast.success("Goal removed"); 
+                  } else {
+                    toast.error(res.error.message);
+                  }
+                }}
+            />      
+
             <div className="flex gap-4 items-center">
               <h4>{currentStreak} 🔥</h4>
               <Checkbox
@@ -279,5 +298,95 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         ))}
       </select>
     </div>
+  );
+};
+
+function getDaysRemaining(goal: Models.Goal, streak: number): number {
+  if (!goal || !goal.data) return 0;
+
+  // DATE GOAL
+  if (goal.goal_type_id === 1) {
+    const today = new Date();
+    const target = new Date(goal.data);
+
+    const diff = target.getTime() - today.getTime();
+    return Math.max(Math.ceil(diff / (1000 * 60 * 60 * 24)), 0);
+  }
+
+  // DAYS GOAL
+  if (goal.goal_type_id === 2) {
+    const goalDays = parseInt(goal.data, 10);
+    return Math.max(goalDays - streak, 0);
+  }
+
+  console.log(goal.data);
+
+  return 0;
+}
+
+interface DaysRemainingProps {
+  streak: number;
+  fyreId: number; 
+  onOpen: () => void;
+  onRemoveGoal: () => void;
+}
+
+const DaysRemaining: React.FC<DaysRemainingProps> = ({
+  streak,
+  fyreId,
+  onOpen,
+  onRemoveGoal,
+}) => {
+  const [goal, setGoal] = useState<Models.Goal>();
+  const [loading, setLoading] = useState(true);
+  const FyreBadge: React.FC<{ children: ReactNode }> = ({ children }) => {
+    return <Badge className="rounded-full aspect-square">{children}</Badge>;
+  };
+
+  useEffect(() => {
+    async function fetchGoal() {
+      const res = await Get<Models.Goal>(`/goal/${fyreId}`);
+      if (res.success) {
+        setGoal(res.data);
+      } else {
+        setError(res.error.message);
+      }
+
+      setLoading(false);
+    };
+    fetchGoal();
+  }, [fyreId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!goal) return <div>No goal found.</div>;
+  
+  const daysLeft = getDaysRemaining(goal, streak);
+  return (
+    <div>
+      {daysLeft !== 0 && (
+        <div>         
+          <FyreBadge key={null}>
+            <Hourglass /> {daysLeft} Days Left
+          </FyreBadge>
+        </div>
+      )}
+
+      {daysLeft === 0 && (
+        <div className="mt-2 text-red-500 font-semibold">
+          <FyreBadge key={null}>
+            <Cake />
+          </FyreBadge>
+          <FyreButton
+            variant="link"
+            onClick={() => {
+              onOpen()
+              onRemoveGoal()
+            }}
+          >
+            Create a new goal?
+          </FyreButton>
+        </div>
+      )}
+    </div> 
   );
 };
