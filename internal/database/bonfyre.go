@@ -5,8 +5,14 @@ import (
 	"fmt"
 )
 
-type JoinBonfyreRequest struct {
-	FyreID int `json:"fyre_id"`
+type BonfyreRequest struct {
+	FyreID    int `json:"fyre_id"`
+	BonfyreID int `json:"bonfyre_id"`
+}
+
+type BonfyreMember struct {
+	Username    string `db:"username" json:"username"`
+	StreakCount string `db:"streak_count" json:"streak_count"`
 }
 
 var ErrAlreadyJoinedBonfyre = errors.New("Already joined BonFyre")
@@ -23,7 +29,25 @@ func (db *DB) GetBonfyre(id int) (*Bonfyre, error) {
 	return &bonfyre, nil
 }
 
-func (db *DB) JoinBonfyre(req JoinBonfyreRequest, userID int) error {
+func (db *DB) GetBonfyreMembers(bonfyreID int) ([]BonfyreMember, error) {
+	var members []BonfyreMember
+
+	query := `
+	SELECT u.username, f.streak_count FROM fyre f
+	JOIN user u ON f.user_id = u.id
+	WHERE f.bonfyre_id = ?
+	ORDER BY f.streak_count DESC
+	`
+
+	err := db.Select(&members, query, bonfyreID)
+	if err != nil {
+		return members, err
+	}
+
+	return members, nil
+}
+
+func (db *DB) JoinBonfyre(req BonfyreRequest, userID int) error {
 	// get second users fyre
 	fyre, err := db.GetFyreByID(req.FyreID)
 	if err != nil {

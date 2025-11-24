@@ -4,6 +4,7 @@ type FullPost struct {
 	ID          int      `db:"id" json:"id"`
 	UserID      int      `db:"user_id" json:"user_id"`
 	FyreID      int      `db:"fyre_id" json:"fyre_id"`
+	BonfyreID   *int     `db:"bonfyre_id" json:"bonfyre_id"`
 	Type        PostType `db:"type" json:"type"`
 	Content     string   `db:"content" json:"content"`
 	Username    string   `db:"username" json:"username"`
@@ -15,7 +16,7 @@ type FullPost struct {
 }
 
 func (db *DB) GetAllPosts(id int) ([]FullPost, error) {
-	query := `SELECT s.id, s.user_id, s.fyre_id, s.type, s.content, s.likes,
+	query := `SELECT s.id, s.user_id, s.fyre_id, f.bonfyre_id, s.type, s.content, s.likes,
 	u.username, u.img_url, f.title, f.streak_count, friend.status
 	FROM social_post s
 	JOIN user u ON s.user_id = u.id

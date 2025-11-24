@@ -32,6 +32,19 @@ type FyreTotalResponse struct {
 	FyreTotal int `db:"fyre_total" json:"fyre_total"`
 }
 
+// used for left joins when no goals are found
+type GoalJoin struct {
+	FyreID      int     `db:"fyre_id" json:"fyre_id"`
+	Description *string `db:"description" json:"description"`
+	GoalTypeID  *int    `db:"goal_type_id" json:"goal_type_id"`
+	Data        *string `db:"data" json:"data"`
+}
+
+type FullFyre struct {
+	Fyre  Fyre       `json:"fyre"`
+	Goals []GoalJoin `json:"goals,omitempty"`
+}
+
 func (db *DB) GetAllCategories() ([]Category, error) {
 	query := `SELECT * FROM category ORDER BY name ASC`
 	var categories []Category
@@ -66,7 +79,11 @@ func (db *DB) CreateFyre(req CreateFyreRequest, id int) (*Fyre, error) {
 }
 
 func (db *DB) GetFyreByID(id int) (*Fyre, error) {
-	query := `SELECT * FROM fyre WHERE id = ?`
+	query := `
+	SELECT fyre.*, bonfyre.total AS bonfyre_total
+	FROM fyre
+	LEFT JOIN bonfyre ON fyre.bonfyre_id = bonfyre.id
+	WHERE fyre.id = ?`
 
 	var fyre Fyre
 	err := db.Get(&fyre, query, id)
@@ -79,9 +96,53 @@ func (db *DB) GetFyreByID(id int) (*Fyre, error) {
 	return &fyre, nil
 }
 
+// Gets and maps goals to the full fyre array
+func (db *DB) MapFyreGoals(fyres []Fyre, userID int) ([]FullFyre, error) {
+	var fullFyres []FullFyre
+	var goals []GoalJoin
+
+	query := `
+	SELECT fyre.id AS fyre_id, goal.description, goal.goal_type_id, goal.data
+	FROM fyre
+	LEFT JOIN goal
+	ON fyre.id = goal.fyre_id
+	WHERE fyre.user_id = ?
+	ORDER BY fyre.id DESC
+	`
+
+	err := db.Select(&goals, query, userID)
+	if err != nil {
+		return fullFyres, err
+	}
+
+	var collapsed [][]GoalJoin
+	for i, v := range goals {
+		// check if this goal is connected to prev fyre
+		if i == 0 || goals[i-1].FyreID != v.FyreID {
+			collapsed = append(collapsed, []GoalJoin{v})
+			continue
+		}
+		collapsed[i-1] = append(collapsed[i-1], v)
+	}
+
+	// map each goal array to proper fyre
+	for i := range fyres {
+		fullFyres = append(fullFyres, FullFyre{Fyre: fyres[i]})
+		if collapsed[i][0].Description != nil {
+			fullFyres[i].Goals = collapsed[i]
+		}
+	}
+	return fullFyres, nil
+}
+
 // Get all fyres for just this user, returns empty array if none
 func (db *DB) GetAllUserFyres(id int) ([]Fyre, error) {
-	query := `SELECT * FROM fyre WHERE user_id = ? ORDER BY created_at DESC`
+	query := `
+	SELECT fyre.*, bonfyre.total AS bonfyre_total
+	FROM fyre
+	LEFT JOIN bonfyre ON fyre.bonfyre_id = bonfyre.id
+	WHERE user_id = ?
+	ORDER BY fyre.id DESC`
 
 	var fyres []Fyre
 	err := db.Select(&fyres, query, id)

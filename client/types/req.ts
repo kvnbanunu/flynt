@@ -47,17 +47,18 @@ export interface UpdateFyreRequest {
   category_id?: number;
 }
 
-export interface JoinBonfyreRequest {
+export interface BonfyreRequest {
   fyre_id: number;
+  bonfyre_id?: number;
 }
 
 export interface FriendFyre {
-    id: number;
-    title: string;
-    streak_count: number;
-    bonfyre_id?: number;
-    is_checked: boolean;
-    category_id: number;
+  id: number;
+  title: string;
+  streak_count: number;
+  bonfyre_id?: number;
+  is_checked: boolean;
+  category_id: number;
 }
 
 export interface CreateGoalRequest {
@@ -92,10 +93,12 @@ export interface FriendsUserListItem {
   img_url?: string;
   bio?: string;
 }
+
 export interface FullPost {
   id: number;
   user_id: number;
   fyre_id: number;
+  bonfyre_id?: number;
   type: "dailycheck" | "milestone";
   content: string;
   username: string;
@@ -104,4 +107,14 @@ export interface FullPost {
   streak_count: number;
   likes: number;
   status?: string;
+}
+
+export interface FullFyre {
+  fyre: Models.Fyre;
+  goals?: Models.Goal[];
+}
+
+export interface BonfyreMember {
+  username: string;
+  streak_count: number;
 }

@@ -18,7 +18,7 @@ import {
   FriendRequest,
   FriendsListItem,
   FriendsUserListItem,
-  JoinBonfyreRequest,
+  BonfyreRequest,
 } from "@/types/req";
 import {
   Item,
@@ -43,8 +43,21 @@ import React from "react";
 import { ApiError, Result } from "@/types/api";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 import { Checkbox } from "../ui/checkbox";
 
 export const FriendsComponent: React.FC = () => {
@@ -248,12 +261,12 @@ const FriendCard: React.FC<{
     if (fyres.length > 0) {
       return;
     }
-    const res = await Get<FriendFyre[]>(`/fyre/user/${friend.id}`)
+    const res = await Get<FriendFyre[]>(`/fyre/user/${friend.id}`);
     if (res.success) {
-      setFyres(res.data)
-      setError(null)
+      setFyres(res.data);
+      setError(null);
     } else {
-      setError(res.error.message)
+      setError(res.error.message);
     }
   };
 
@@ -292,7 +305,11 @@ const FriendCard: React.FC<{
           >
             Remove
           </Badge>
-          <FriendsFyreList friend={friend} fyres={fyres} fetchFyres={fetchFyres} />
+          <FriendsFyreList
+            friend={friend}
+            fyres={fyres}
+            fetchFyres={fetchFyres}
+          />
         </ItemActions>
       </ItemContent>
     </Item>
@@ -303,7 +320,7 @@ const FriendsFyreList: React.FC<{
   friend: FriendsListItem;
   fyres: FriendFyre[];
   fetchFyres: () => void;
-}> = ({friend, fyres, fetchFyres}) => {
+}> = ({ friend, fyres, fetchFyres }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -311,17 +328,16 @@ const FriendsFyreList: React.FC<{
     if (isOpen) {
       setIsOpen(false);
       return;
-    } else {
-      setIsOpen(true);
-      setLoading(true);
-      fetchFyres();
-      setLoading(false);
     }
-  }
+    setIsOpen(true);
+    setLoading(true);
+    fetchFyres();
+    setLoading(false);
+  };
 
-  const joinBonfyre = async (id: number) => {
-    const req: JoinBonfyreRequest = {fyre_id: id}
-    const res = await Post<null, JoinBonfyreRequest>("/fyre/bonfyre", req);
+  const joinBonfyre = async (fyreID: number, bonfyreID?: number) => {
+    const req: BonfyreRequest = { fyre_id: fyreID, bonfyre_id: bonfyreID };
+    const res = await Post<null, BonfyreRequest>("/fyre/bonfyre", req);
     if (res.success) {
       toast("Successfully joined bonfyre!");
     } else {
@@ -332,12 +348,15 @@ const FriendsFyreList: React.FC<{
   return (
     <Dialog open={isOpen} onOpenChange={onOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon-sm" className="rounded-full"><MenuIcon /></Button>
+        <Button variant="ghost" size="icon-sm" className="rounded-full">
+          <MenuIcon />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {friend.username}{`'s Fyre List`}
+            {friend.username}
+            {`'s Fyre List`}
           </DialogTitle>
         </DialogHeader>
         <Table>
@@ -351,17 +370,27 @@ const FriendsFyreList: React.FC<{
           </TableHeader>
           <TableBody>
             {loading && <Spinner />}
-            {!loading && fyres && fyres.map((fyre) => (
-              <TableRow key={fyre.id}>
-                <TableCell>{fyre.title}</TableCell>
-                <TableCell>{fyre.streak_count}</TableCell>
-                <TableCell><Checkbox disabled checked={fyre.is_checked} /></TableCell>
-                <TableCell><Button onClick={()=>joinBonfyre(fyre.id)}>Join BonFyre</Button></TableCell>
-              </TableRow>
-            ))}
+            {!loading &&
+              fyres &&
+              fyres.map((fyre) => (
+                <TableRow key={fyre.id}>
+                  <TableCell>{fyre.title}</TableCell>
+                  <TableCell>{fyre.streak_count}</TableCell>
+                  <TableCell>
+                    <Checkbox disabled checked={fyre.is_checked} />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => joinBonfyre(fyre.id, fyre.bonfyre_id)}
+                    >
+                      Join BonFyre
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};

@@ -1,7 +1,7 @@
 "use client";
 
 import { Get, Post, Put } from "@/lib/api";
-import { FriendRequest, FullPost, JoinBonfyreRequest } from "@/types/req";
+import { FriendRequest, FullPost, BonfyreRequest } from "@/types/req";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
   Card,
@@ -82,8 +82,8 @@ const PostCard: React.FC<{
   };
 
   const joinBonfyre = async () => {
-    const req: JoinBonfyreRequest = { fyre_id: post.fyre_id };
-    const res = await Post<null, JoinBonfyreRequest>("/fyre/bonfyre", req);
+    const req: BonfyreRequest = { fyre_id: post.fyre_id, bonfyre_id: post.bonfyre_id };
+    const res = await Post<null, BonfyreRequest>("/fyre/bonfyre", req);
     if (res.success) {
       toast("Successfully joined bonfyre!");
       fetchFyres();

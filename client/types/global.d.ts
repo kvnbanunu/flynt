@@ -24,6 +24,7 @@ declare namespace Models {
     streak_count: number;
     user_id: number;
     bonfyre_id?: number;
+    bonfyre_total?: number;
     active_days: string;
     is_private: boolean;
     is_checked: boolean;

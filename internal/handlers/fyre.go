@@ -54,7 +54,17 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			h.checkFyre(w, r, userID)
-		case path == "/bonfyre" || path == "/bonfyre/":
+		case strings.HasPrefix(path, "/bonfyre"):
+			if strings.HasPrefix(path, "/bonfyre/") && r.Method == http.MethodGet {
+				bonfyreIDStr := strings.TrimPrefix(path, "/bonfyre/")
+				bonfyreID, err := strconv.Atoi(bonfyreIDStr)
+				if err != nil {
+					writeError(w, http.StatusBadRequest, "Bonfyre id missing or invalid", err)
+					return
+				}
+				h.getBonfyreMembers(w, r, bonfyreID)
+				return
+			}
 			switch r.Method {
 			case http.MethodGet:
 				h.getBonfyre(w, r)
@@ -63,6 +73,12 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			default:
 				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
 			}
+		case path == "/full" || path == "full/":
+			if r.Method != http.MethodGet {
+				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				return
+			}
+			h.getAllUserFullFyres(w, r, userID)
 		case strings.HasPrefix(path, "/user/"):
 			idStr := strings.TrimPrefix(path, "/user/")
 			id, err := strconv.Atoi(idStr)
@@ -98,7 +114,7 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *FyreHandler) getAllCategories(w http.ResponseWriter, r *http.Request) {
+func (h *FyreHandler) getAllCategories(w http.ResponseWriter, _ *http.Request) {
 	categories, err := h.db.GetAllCategories()
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "Failed to get categories")
@@ -210,21 +226,42 @@ func (h *FyreHandler) checkFyre(w http.ResponseWriter, r *http.Request, id int) 
 		return
 	}
 
-	existingFyre, err = h.db.CheckFyre(req, id)
+	checkedFyre, err := h.db.CheckFyre(req, id)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "Failed to check Fyre")
 		return
 	}
+
+	existingFyre.IsChecked = checkedFyre.IsChecked
+	existingFyre.StreakCount = checkedFyre.StreakCount
+	existingFyre.LastCheckedAt = checkedFyre.LastCheckedAt
+	existingFyre.LastCheckedAtPrev = checkedFyre.LastCheckedAtPrev
+
 	writeSuccess(w, http.StatusOK, "Fyre updated successfully", existingFyre)
+}
+
+func (h *FyreHandler) getAllUserFullFyres(w http.ResponseWriter, _ *http.Request, id int) {
+	fyres, err := h.db.GetAllUserFyres(id)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to get fyres", err)
+		return
+	}
+
+	fullFyres, err := h.db.MapFyreGoals(fyres, id)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to reset fyre checks", err)
+		return
+	}
+	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fullFyres)
 }
 
 // handles GET /fyre
 // Finds all fyres that belong to this user id
+// You only want to do this once per day / login ***
 func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id int, timezone string) {
 	fyres, err := h.db.GetAllUserFyres(id)
 	if err != nil {
-		log.Printf("Error getting fyres: %v", err)
-		writeError(w, http.StatusInternalServerError, "Failed to get fyres")
+		writeError(w, http.StatusInternalServerError, "Failed to get fyres", err)
 		return
 	}
 
@@ -253,11 +290,16 @@ func (h *FyreHandler) getAllUserFyres(w http.ResponseWriter, _ *http.Request, id
 		}
 		// remap fyres list
 		for i := range updated {
-			fyres[indexes[i]] = updated[i]
+			fyres[indexes[i]].IsChecked = updated[i].IsChecked
 		}
 	}
 
-	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fyres)
+	fullFyres, err := h.db.MapFyreGoals(fyres, id)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to reset fyre checks", err)
+		return
+	}
+	writeSuccess(w, http.StatusOK, "Fyres retrieved successfully", fullFyres)
 }
 
 // Get /fyre/user/{id} shallow get no updates

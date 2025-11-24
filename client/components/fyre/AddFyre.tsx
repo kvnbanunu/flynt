@@ -26,6 +26,7 @@ const addSchema = z.object({
   title: z.string().trim().min(5).max(50),
   streak_count: z.number().int().nonnegative(),
   active_days: z.string().length(7),
+  category_id: z.number().int().nonnegative(),
 });
 
 export const AddFyre: React.FC = () => {
@@ -40,6 +41,7 @@ export const AddFyre: React.FC = () => {
       title: "",
       streak_count: 0,
       active_days: "1111111",
+      category_id: 1,
     },
   });
 

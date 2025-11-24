@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -120,7 +121,10 @@ func setExpiredCookie(w http.ResponseWriter) {
 }
 
 // Generic error response
-func writeError(w http.ResponseWriter, statusCode int, message string) {
+func writeError(w http.ResponseWriter, statusCode int, message string, err ...error) {
+	if len(err) > 0 {
+		log.Println("Error:", err)
+	}
 	w.WriteHeader(statusCode)
 	res := ErrorResponse{
 		Error:   http.StatusText(statusCode),
