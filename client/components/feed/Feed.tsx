@@ -32,10 +32,10 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
 
 export const Feed: React.FC = () => {
   const [posts, setPosts] = useState<FullPost[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -46,16 +46,16 @@ export const Feed: React.FC = () => {
     setLoading(true);
     const res = await Get<FullPost[]>("/socialpost");
     if (res.success) {
-      setError(null);
       setPosts(res.data);
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setLoading(false);
   };
 
   return (
     <ScrollArea className="w-full">
+      {loading && <Spinner />}
       {posts &&
         posts.map((post) => {
           if (post.status !== "blocked")
@@ -82,7 +82,10 @@ const PostCard: React.FC<{
   };
 
   const joinBonfyre = async () => {
-    const req: BonfyreRequest = { fyre_id: post.fyre_id, bonfyre_id: post.bonfyre_id };
+    const req: BonfyreRequest = {
+      fyre_id: post.fyre_id,
+      bonfyre_id: post.bonfyre_id,
+    };
     const res = await Post<null, BonfyreRequest>("/fyre/bonfyre", req);
     if (res.success) {
       toast("Successfully joined bonfyre!");

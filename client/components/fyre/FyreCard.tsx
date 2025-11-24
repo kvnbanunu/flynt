@@ -205,8 +205,13 @@ export const FyreCard: React.FC<{
           <CollapsibleContent>
             <div className="flex flex-col mt-4">
               <GoalSection fyreId={fyre.id} goal={goals && goals[0]} />
-              
-              {bonfyreMembers.length > 0 && <BonfyreCard members={bonfyreMembers} />}
+
+              {fyre.bonfyre_total && (
+                <BonfyreCard
+                  total={fyre.bonfyre_total}
+                  members={bonfyreMembers}
+                />
+              )}
 
               <FyreEditField title="Category">
                 <CategorySelector
@@ -326,18 +331,32 @@ const FyreEditField: React.FC<{ title: string; children?: ReactNode }> = ({
   );
 };
 
-const BonfyreCard: React.FC<{ members: BonfyreMember[] }> = ({ members }) => {
+const BonfyreCard: React.FC<{ total: number; members: BonfyreMember[] }> = ({
+  total,
+  members,
+}) => {
   return (
     <Item variant="outline" className="mt-4">
       <ItemContent>
-        <ItemTitle className="text-lg">Bonfyre Members</ItemTitle>
+        <div className="flex flex-row justify-between">
+          <ItemTitle className="text-lg">Bonfyre Members</ItemTitle>
+        </div>
         <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Rank</TableHead>
+              <TableHead>Username</TableHead>
+              <TableHead className="text-right">Total: {total} 🔥</TableHead>
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {members.map((m, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{m.username}</TableCell>
-                <TableCell className="text-right">{m.streak_count} 🔥</TableCell>
+                <TableCell className="text-right">
+                  {m.streak_count} 🔥
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
