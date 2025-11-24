@@ -11,7 +11,7 @@ COPY . .
 
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
-RUN CGO_ENABLED=1 GOOS=linux go build -o insert-dummy ./scripts/dummy/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -o seed ./scripts/seed/main.go
 
 FROM alpine:latest
 
@@ -22,7 +22,7 @@ WORKDIR /root/
 RUN mkdir -p /data
 
 COPY --from=builder /app/main .
-COPY --from=builder /app/insert-dummy .
+COPY --from=builder /app/seed .
 
 COPY --from=builder /app/docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh
