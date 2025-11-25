@@ -13,9 +13,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { Calendar, ChevronsUpDown, FlameKindling, Tally5 } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
-import { ButtonGroup } from "../ui/button-group";
 import { Get, Put } from "@/lib/api";
 import {
   BonfyreMember,
@@ -26,14 +25,6 @@ import { toast } from "sonner";
 import { GoalSection } from "../goals/GoalSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { Item, ItemActions, ItemContent, ItemTitle } from "../ui/item";
-import { Badge } from "../ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import {
   Table,
   TableBody,
@@ -42,12 +33,15 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { ActiveDays } from "./ActiveDays";
+import { FyreBadges } from "./FyreBadges";
+import { CategorySelector } from "./CategorySelector";
 
 export const FyreCard: React.FC<{
   fyre: Models.Fyre;
   goals?: Models.Goal[];
 }> = ({ fyre, goals }) => {
-  const { checkUser, categories } = useAuth();
+  const { fetchFyres, categories } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
@@ -107,7 +101,7 @@ export const FyreCard: React.FC<{
     setCurrentStreak(newStreak);
     const req: CheckFyreRequest = { id: fyre.id, increment: increment };
     await fetchFyre("/fyre/check", req);
-    checkUser();
+    fetchFyres();
   };
 
   const changePrivate = () => {
@@ -179,16 +173,16 @@ export const FyreCard: React.FC<{
           </CardAction>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex gap-4 items-center">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-wrap gap-4 items-center">
               <ActiveDays
                 active={activeDays}
                 isOpen={isOpen}
                 onChange={changeDays}
               />
-              <FyreBadges fyre={fyre} goals={goals} />
+              <FyreBadges fyre={fyre} goals={goals} onOpen={onOpen} />
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-wrap gap-4 items-center">
               <h4>{currentStreak} 🔥</h4>
               <Checkbox
                 className="mr-2 size-8 rounded-md"
@@ -252,71 +246,6 @@ export const FyreCard: React.FC<{
   );
 };
 
-interface ActiveDaysProps {
-  active: string;
-  isOpen: boolean;
-  onChange: (index: number) => void;
-}
-
-export const ActiveDays: React.FC<ActiveDaysProps> = ({
-  active,
-  isOpen,
-  onChange,
-}) => {
-  const days = ["S", "M", "T", "W", "T", "F", "S"];
-
-  if (active === "1111111" && !isOpen) {
-    return (
-      <Button className="w-39 sm:w-46 md:w-60" disabled>
-        Everyday
-      </Button>
-    );
-  }
-
-  return (
-    <ButtonGroup>
-      {days.map((day, index) => (
-        <Button
-          key={index}
-          variant={active[index] === "0" ? "secondary" : "default"}
-          className="px-1.5 sm:px-2 md:px-3 border-1"
-          disabled={!isOpen}
-          onClick={() => onChange(index)}
-        >
-          {day}
-        </Button>
-      ))}
-    </ButtonGroup>
-  );
-};
-
-interface CategorySelectorProps {
-  allCategories: Models.Category[];
-  selectedId: number;
-  onChange: (id: number) => void;
-}
-
-const CategorySelector: React.FC<CategorySelectorProps> = ({
-  allCategories,
-  selectedId,
-  onChange,
-}) => {
-  return (
-    <Select value={`${selectedId}`} onValueChange={(e) => onChange(Number(e))}>
-      <SelectTrigger>
-        <SelectValue placeholder="Select a category" />
-      </SelectTrigger>
-      <SelectContent>
-        {allCategories.map((cat) => (
-          <SelectItem key={cat.id} value={`${cat.id}`}>
-            {cat.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-};
-
 const FyreEditField: React.FC<{ title: string; children?: ReactNode }> = ({
   title,
   children,
@@ -363,30 +292,5 @@ const BonfyreCard: React.FC<{ total: number; members: BonfyreMember[] }> = ({
         </Table>
       </ItemContent>
     </Item>
-  );
-};
-
-const FyreBadges: React.FC<{ fyre: Models.Fyre; goals?: Models.Goal[] }> = ({
-  fyre,
-  goals,
-}) => {
-  const FyreBadge: React.FC<{ children: ReactNode }> = ({ children }) => {
-    return <Badge className="rounded-full aspect-square">{children}</Badge>;
-  };
-
-  return (
-    <div className="flex gap-1 justify-start items-center">
-      {fyre.bonfyre_id && (
-        <FyreBadge key={fyre.bonfyre_id}>
-          <FlameKindling />
-        </FyreBadge>
-      )}
-      {goals &&
-        goals.map((goal) => (
-          <FyreBadge key={goal.goal_type_id}>
-            {goal.goal_type_id === 1 ? <Calendar /> : <Tally5 />}
-          </FyreBadge>
-        ))}
-    </div>
   );
 };

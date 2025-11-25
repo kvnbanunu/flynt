@@ -7,6 +7,13 @@ next:
 seed: clean
 	go run scripts/seed/main.go
 
+dependencies:
+	cd client/ && npm i
+
+environment:
+	cp .env.example .env
+	cp client/.env.example client/.env
+
 docker:
 	git pull origin main
 	docker compose down
