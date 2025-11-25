@@ -65,4 +65,4 @@ make server
 make next
 ```
 
-Open [localhost:<port>](http://localhost:3000)
+Open [localhost:port](http://localhost:3000)
