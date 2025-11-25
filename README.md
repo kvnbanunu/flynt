@@ -1,6 +1,6 @@
 # Flynt
 
-Check it out live at (flyntapp.io)[flyntapp.io]
+Check it out live at [flyntapp.io](https://flyntapp.io)
 
 Use Flynt to start your Fyre streak!
 
@@ -10,13 +10,13 @@ This app was developed for BCIT COMP 7082
 
 ## Contributors
 
-Kevin Van Nguyen | DevOps, FullStack, Owner | [https://github.com/kvnbanunu]
+Kevin Van Nguyen | DevOps, FullStack, Owner | [github](https://github.com/kvnbanunu)
 
-Evin Gonzales | Frontend QA | [https://github.com/evin-gg]
+Evin Gonzales | Frontend QA | [github](https://github.com/evin-gg)
 
-Lucas Laviolette | Database QA | [https://github.com/lucaslav05]
+Lucas Laviolette | Database QA | [github](https://github.com/lucaslav05)
 
-Brandon Rada | Backend QA | [https://github.com/BrandonRada]
+Brandon Rada | Backend QA | [github](https://github.com/BrandonRada)
 
 ---
 
@@ -65,4 +65,4 @@ make server
 make next
 ```
 
-Open [http://localhost:3000]
+Open [localhost:<port>](http://localhost:3000)
