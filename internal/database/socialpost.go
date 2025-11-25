@@ -22,8 +22,8 @@ func (db *DB) GetAllPosts(id int) ([]FullPost, error) {
 	JOIN user u ON s.user_id = u.id
 	JOIN fyre f ON s.fyre_id = f.id
 	LEFT JOIN friend ON friend.user_id_2 = u.id AND friend.user_id_1 = ?
-	LIMIT 10
 	ORDER BY s.id DESC
+	LIMIT 10
 	`
 
 	var posts []FullPost
