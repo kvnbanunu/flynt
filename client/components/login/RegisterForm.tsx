@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { RegisterRequest } from "@/types/req";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
+import { TimezoneSelector } from "../timezone/TimezoneSelector";
 
 const registerSchema = z.object({
   username: z.string().trim().min(4).max(50),
@@ -37,7 +38,7 @@ export const RegisterForm: React.FC = () => {
       name: "",
       password: "",
       email: "",
-      timezone: "Canada/Pacific",
+      timezone: "America/Vancouver",
     },
   });
 
@@ -143,12 +144,9 @@ export const RegisterForm: React.FC = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="form-register-timezone">Timezone</FieldLabel>
-                  <Input
-                    {...field}
-                    id="form-register-timezone"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Canada/Pacific"
-                    autoComplete="off"
+                  <TimezoneSelector
+                    value={field.value}
+                    onValueChange={field.onChange}
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

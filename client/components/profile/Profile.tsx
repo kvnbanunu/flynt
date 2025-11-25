@@ -22,6 +22,7 @@ import { Put } from "@/lib/api";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import { ScrollArea } from "../ui/scroll-area";
+import { TimezoneSelector } from "../timezone/TimezoneSelector";
 
 const editSchema = z.object({
   name: z.string().min(5).max(50).optional(),
@@ -200,12 +201,10 @@ export const Profile: React.FC = () => {
                       <FieldLabel htmlFor="form-profile-timezone">
                         Timezone
                       </FieldLabel>
-                      <Input
-                        {...field}
-                        id="form-profile-timezone"
-                        aria-invalid={fieldState.invalid}
+                      <TimezoneSelector
+                        value={field.value}
+                        onValueChange={field.onChange}
                         placeholder={user.timezone}
-                        autoComplete="off"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
