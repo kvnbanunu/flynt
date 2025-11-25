@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, ReactNode } from "react";
 import {
   Card,
   CardAction,
@@ -13,22 +13,42 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { ChevronsUpDown } from "lucide-react";
+import { Calendar, ChevronsUpDown, FlameKindling, Tally5 } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { ButtonGroup } from "../ui/button-group";
 import { Get, Put, Delete } from "@/lib/api";
-import { CheckFyreRequest, UpdateFyreRequest } from "@/types/req";
+import {
+  BonfyreMember,
+  CheckFyreRequest,
+  UpdateFyreRequest,
+} from "@/types/req";
 import { toast } from "sonner";
 import { GoalSection } from "../goals/GoalSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { Item, ItemActions, ItemContent, ItemTitle } from "../ui/item";
-import { Hourglass, Cake } from 'lucide-react';
+import { Hourglass, Cake } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { Button as FyreButton } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
-
-export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
-  const { checkUser } = useAuth();
+export const FyreCard: React.FC<{
+  fyre: Models.Fyre;
+  goals?: Models.Goal[];
+}> = ({ fyre, goals }) => {
+  const { checkUser, categories } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
@@ -37,20 +57,8 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
   const [isPrivate, setIsPrivate] = useState<boolean>(fyre.is_private);
   const [error, setError] = useState<string | null>(null);
   const [changes, setChanges] = useState<Set<string>>(new Set<string>());
-  const [allCategories, setAllCategories] = useState<Models.Category[]>([]);
   const [categoryId, setCategoryId] = useState<number>(fyre.category_id);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const res = await Get<Models.Category[]>("/fyre/categories")
-      if (res.success) {
-        setAllCategories(res.data);
-      } else {
-        setError(res.error.message);
-      }
-    };
-    fetchCategories();
-  }, []);
+  const [bonfyreMembers, setBonfyreMembers] = useState<BonfyreMember[]>([]);
 
   const reset = () => {
     setActiveDays(currentFyre.active_days);
@@ -59,6 +67,19 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     temp.clear();
     setChanges(temp);
     setError(null);
+  };
+
+  const fetchBonfyreMembers = async () => {
+    if (fyre.bonfyre_id) {
+      const res = await Get<BonfyreMember[]>(
+        `/fyre/bonfyre/${fyre.bonfyre_id}`,
+      );
+      if (res.success) {
+        setBonfyreMembers(res.data);
+      } else {
+        toast(res.error.message);
+      }
+    }
   };
 
   const fetchFyre = async (
@@ -135,8 +156,17 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
     await fetchFyre(`/fyre/${fyre.id}`, req);
   };
 
+  const onOpen = async () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+    await fetchBonfyreMembers();
+    setIsOpen(true);
+  };
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="">
+    <Collapsible open={isOpen} onOpenChange={onOpen} className="">
       <Card className="pt-0">
         <CardHeader className="bg-primary text-primary-foreground rounded-t-xl">
           <CardTitle className="pt-3 pb-1">{fyre.title}</CardTitle>
@@ -151,26 +181,29 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between gap-4">
-            <ActiveDays
-              active={activeDays}
-              isOpen={isOpen}
-              onChange={changeDays}
-            />
-
-            <DaysRemaining
-              streak={currentStreak}
-              fyreId={fyre.id}
-              onOpen={() => setIsOpen(true)}
-              onRemoveGoal={ async () => {
-                  const res = await Delete(`/goal/${currentFyre.id}`);
-                  if (res.success) {
-                    toast.success("Goal removed"); 
-                  } else {
-                    toast.error(res.error.message);
-                  }
-                }}
-            />      
-
+            <div className="flex gap-4 items-center">
+              <ActiveDays
+                active={activeDays}
+                isOpen={isOpen}
+                onChange={changeDays}
+              />
+              <FyreBadges fyre={fyre} goals={goals} />
+              {goals && goals.length > 0 && (
+                <DaysRemaining
+                  fyre={fyre}
+                  goal={goals[0]}
+                  onOpen={() => setIsOpen(true)}
+                  onRemoveGoal={async () => {
+                    const res = await Delete(`/goal/${currentFyre.id}`);
+                    if (res.success) {
+                      toast.success("Goal removed");
+                    } else {
+                      toast.error(res.error.message);
+                    }
+                  }}
+                />
+              )}
+            </div>
             <div className="flex gap-4 items-center">
               <h4>{currentStreak} 🔥</h4>
               <Checkbox
@@ -186,34 +219,38 @@ export const FyreCard: React.FC<{ fyre: Models.Fyre }> = ({ fyre }) => {
             </div>
           </div>
           <CollapsibleContent>
-            <div className="flex flex-col gap-4 mt-4">
-              <GoalSection fyreId={fyre.id} />
+            <div className="flex flex-col mt-4">
+              <GoalSection fyreId={fyre.id} goal={goals && goals[0]} />
 
-              <CategorySelector
-                allCategories={allCategories}
-                selectedId={categoryId}
-                onChange={(id) => {
-                  setCategoryId(id);
-                  const newChanges = new Set(changes);
-                  newChanges.add("category_id");
-                  setChanges(newChanges);
-                }}
-              />
+              {fyre.bonfyre_total && (
+                <BonfyreCard
+                  total={fyre.bonfyre_total}
+                  members={bonfyreMembers}
+                />
+              )}
 
-              <Item className="justify-stretch">
-                <ItemContent className="flex-row justify-between">
-                  <ItemTitle>Private</ItemTitle>
-                  <ItemActions>
-                    <Checkbox
-                      checked={isPrivate}
-                      onCheckedChange={(value) => {
-                        setIsPrivate(!!value);
-                        changePrivate();
-                      }}
-                    />
-                  </ItemActions>
-                </ItemContent>
-              </Item>
+              <FyreEditField title="Category">
+                <CategorySelector
+                  allCategories={categories}
+                  selectedId={categoryId}
+                  onChange={(id) => {
+                    setCategoryId(id);
+                    const newChanges = new Set(changes);
+                    newChanges.add("category_id");
+                    setChanges(newChanges);
+                  }}
+                />
+              </FyreEditField>
+
+              <FyreEditField title="Private">
+                <Checkbox
+                  checked={isPrivate}
+                  onCheckedChange={(value) => {
+                    setIsPrivate(!!value);
+                    changePrivate();
+                  }}
+                />
+              </FyreEditField>
               <div className="grid grid-cols-2 justify-stretch gap-4">
                 <Button variant="destructive" size="lg">
                   Remove Fyre
@@ -281,22 +318,91 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   onChange,
 }) => {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-muted-foreground">
-        Category
-      </label>
-      <select
-        className="border rounded-md p-2"
-        value={selectedId ?? ""}
-        onChange={(e) => onChange(Number(e.target.value))}
-      >
-        <option value="">Select a category</option>
+    <Select value={`${selectedId}`} onValueChange={(e) => onChange(Number(e))}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select a category" />
+      </SelectTrigger>
+      <SelectContent>
         {allCategories.map((cat) => (
-          <option key={cat.id} value={cat.id}>
+          <SelectItem key={cat.id} value={`${cat.id}`}>
             {cat.name}
-          </option>
+          </SelectItem>
         ))}
-      </select>
+      </SelectContent>
+    </Select>
+  );
+};
+
+const FyreEditField: React.FC<{ title: string; children?: ReactNode }> = ({
+  title,
+  children,
+}) => {
+  return (
+    <Item className="justify-stretch">
+      <ItemContent className="flex flex-row justify-between">
+        <ItemTitle>{title}</ItemTitle>
+        <ItemActions>{children}</ItemActions>
+      </ItemContent>
+    </Item>
+  );
+};
+
+const BonfyreCard: React.FC<{ total: number; members: BonfyreMember[] }> = ({
+  total,
+  members,
+}) => {
+  return (
+    <Item variant="outline" className="mt-4">
+      <ItemContent>
+        <div className="flex flex-row justify-between">
+          <ItemTitle className="text-lg">Bonfyre Members</ItemTitle>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Rank</TableHead>
+              <TableHead>Username</TableHead>
+              <TableHead className="text-right">Total: {total} 🔥</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {members.map((m, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{m.username}</TableCell>
+                <TableCell className="text-right">
+                  {m.streak_count} 🔥
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </ItemContent>
+    </Item>
+  );
+};
+
+const FyreBadge: React.FC<{ children: ReactNode }> = ({ children }) => {
+  return <Badge className="rounded-full aspect-square">{children}</Badge>;
+};
+
+const FyreBadges: React.FC<{ fyre: Models.Fyre; goals?: Models.Goal[] }> = ({
+  fyre,
+  goals,
+}) => {
+  return (
+    <div className="flex gap-1 justify-start items-center">
+      {fyre.bonfyre_id && (
+        <FyreBadge key={fyre.bonfyre_id}>
+          <FlameKindling />
+        </FyreBadge>
+      )}
+      {goals &&
+        goals.map((goal) => (
+          <FyreBadge key={goal.goal_type_id}>
+            {goal.goal_type_id === 1 ? <Calendar /> : <Tally5 />}
+          </FyreBadge>
+        ))}
     </div>
   );
 };
@@ -319,53 +425,27 @@ function getDaysRemaining(goal: Models.Goal, streak: number): number {
     return Math.max(goalDays - streak, 0);
   }
 
-  console.log(goal.data);
-
   return 0;
 }
 
 interface DaysRemainingProps {
-  streak: number;
-  fyreId: number; 
+  fyre: Models.Fyre;
+  goal: Models.Goal;
   onOpen: () => void;
   onRemoveGoal: () => void;
 }
 
 const DaysRemaining: React.FC<DaysRemainingProps> = ({
-  streak,
-  fyreId,
+  fyre,
+  goal,
   onOpen,
   onRemoveGoal,
 }) => {
-  const [goal, setGoal] = useState<Models.Goal>();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const FyreBadge: React.FC<{ children: ReactNode }> = ({ children }) => {
-    return <Badge className="rounded-full aspect-square">{children}</Badge>;
-  };
-
-  useEffect(() => {
-    async function fetchGoal() {
-      const res = await Get<Models.Goal>(`/goal/${fyreId}`);
-      if (res.success) {
-        setGoal(res.data);
-      } else {
-        setError(res.error.message);
-      }
-
-      setLoading(false);
-    };
-    fetchGoal();
-  }, [fyreId]);
-
-  if (loading) return <div>Loading...</div>;
-  if (!goal) return <div>No goal found.</div>;
-  
-  const daysLeft = getDaysRemaining(goal, streak);
+  const daysLeft = getDaysRemaining(goal, fyre.streak_count);
   return (
     <div>
       {daysLeft !== 0 && (
-        <div>         
+        <div>
           <FyreBadge key={null}>
             <Hourglass /> {daysLeft} Days Left
           </FyreBadge>
@@ -377,17 +457,17 @@ const DaysRemaining: React.FC<DaysRemainingProps> = ({
           <FyreBadge key={null}>
             <Cake />
           </FyreBadge>
-          <FyreButton
+          <Button
             variant="link"
             onClick={() => {
-              onOpen()
-              onRemoveGoal()
+              onOpen();
+              onRemoveGoal();
             }}
           >
             Create a new goal?
-          </FyreButton>
+          </Button>
         </div>
       )}
-    </div> 
+    </div>
   );
 };

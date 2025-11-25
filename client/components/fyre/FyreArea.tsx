@@ -15,8 +15,8 @@ export const FyreArea: React.FC = () => {
       <FyreTotal />
       {fyres &&
         fyres.map((fyre) => (
-          <React.Fragment key={fyre.id}>
-            <FyreCard fyre={fyre} />
+          <React.Fragment key={fyre.fyre.id}>
+            <FyreCard fyre={fyre.fyre} goals={fyre.goals} />
           </React.Fragment>
         ))}
       <AddFyre />

@@ -21,7 +21,7 @@ export default function LandingPage() {
       </motion.h1>
 
       <motion.p
-        className="text-md max-w-md"
+        className="text-md max-w-md text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}

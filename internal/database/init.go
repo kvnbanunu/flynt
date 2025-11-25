@@ -69,7 +69,6 @@ func (db *DB) createTables() error {
 		user_id INTEGER NOT NULL REFERENCES user(id),
 		bonfyre_id INTEGER REFERENCES bonfyre(id),
 		active_days TEXT DEFAULT '1111111',
-		likes INTEGER DEFAULT 0,
 		is_private INTEGER DEFAULT 0,
 		is_checked INTEGER DEFAULT 0,
 		is_missed INTEGER DEFAULT 0,
@@ -101,7 +100,8 @@ func (db *DB) createTables() error {
 	);
 
 	CREATE TABLE IF NOT EXISTS bonfyre (
-		id INTEGER PRIMARY KEY AUTOINCREMENT
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		total INTEGER DEFAULT 0
 	);
 
 	CREATE TABLE IF NOT EXISTS friend (

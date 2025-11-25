@@ -9,12 +9,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { LoginRequest, RegisterRequest } from "@/types/req";
+import { FullFyre, LoginRequest, RegisterRequest } from "@/types/req";
 
 export interface AuthContextType {
   user?: Models.User | null;
   error?: string | null;
-  fyres: Models.Fyre[];
+  fyres: FullFyre[];
+  categories: Models.Category[];
   loading: boolean;
   checkUser: () => void;
   setUser: (user: Models.User) => void;
@@ -27,6 +28,7 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   fyres: [],
+  categories: [],
   loading: false,
   checkUser: function(): void {
     throw new Error("Function not implemented.");
@@ -56,7 +58,8 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Models.User | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [fyres, setFyres] = useState<Models.Fyre[]>([]);
+  const [fyres, setFyres] = useState<FullFyre[]>([]);
+  const [categories, setCategories] = useState<Models.Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
@@ -69,6 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (res.success) {
       setUser(res.data);
       fetchFyres();
+      fetchCategories();
     } else {
       setUser(null);
       setFyres([]);
@@ -86,6 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(res.data);
       await fetchFyres();
       // set other stuff here
+      await fetchCategories();
       router.push("/"); // send to home
     } else {
       setError(res.error.message);
@@ -103,6 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (res.success) {
       setUser(res.data);
       // set other stuff here
+      await fetchCategories();
       router.push("/"); // send to home
     } else {
       setError(res.error.message);
@@ -127,9 +133,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const fetchFyres = async () => {
-    const res = await Get<Models.Fyre[]>("/fyre");
+    const url = fyres.length === 0 ? "/fyre" : "/fyre/full";
+    const res = await Get<FullFyre[]>(url);
     if (res.success) {
       setFyres(res.data);
+    } else {
+      setError(res.error.message);
+    }
+  };
+  const fetchCategories = async () => {
+    const res = await Get<Models.Category[]>("/fyre/categories");
+    if (res.success) {
+      setCategories(res.data);
     } else {
       setError(res.error.message);
     }
@@ -139,6 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     error,
     fyres,
+    categories,
     loading,
     checkUser,
     setUser,
