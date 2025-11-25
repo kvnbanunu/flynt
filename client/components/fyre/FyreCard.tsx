@@ -41,7 +41,7 @@ export const FyreCard: React.FC<{
   fyre: Models.Fyre;
   goals?: Models.Goal[];
 }> = ({ fyre, goals }) => {
-  const { checkUser, categories } = useAuth();
+  const { fetchFyres, checkUser, categories } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
@@ -66,6 +66,9 @@ export const FyreCard: React.FC<{
         `/fyre/bonfyre/${fyre.bonfyre_id}`,
       );
       if (res.success) {
+        if (res.data === null) return;
+        // TODO inefficient change later
+        fetchFyres();
         setBonfyreMembers(res.data);
       } else {
         toast(res.error.message);
@@ -154,7 +157,7 @@ export const FyreCard: React.FC<{
     } else {
       toast(res.error.message);
     }
-  }
+  };
 
   const onOpen = async () => {
     if (isOpen) {
