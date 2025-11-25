@@ -27,17 +27,13 @@ import { FriendSearchCard } from "./FriendSearch";
 import { FriendCard } from "./FriendCard";
 
 export const FriendsComponent: React.FC = () => {
-  const { friends, users, loading, error, fetchFriends, fetchUsers } =
+  const { friends, users, loading, fetchFriends, fetchUsers } =
     useFriends();
   const [tab, setTab] = useState<string>("friendslist");
   const [search, setSearch] = useState<string>("");
 
   if (loading) {
     return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
   }
 
   const onFriendRequest = () => {
