@@ -13,10 +13,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { Calendar, ChevronsUpDown, FlameKindling, Tally5 } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
-import { ButtonGroup } from "../ui/button-group";
-import { Get, Put, Delete } from "@/lib/api";
+import { Get, Put } from "@/lib/api";
 import {
   BonfyreMember,
   CheckFyreRequest,
@@ -26,15 +25,6 @@ import { toast } from "sonner";
 import { GoalSection } from "../goals/GoalSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { Item, ItemActions, ItemContent, ItemTitle } from "../ui/item";
-import { Hourglass, Cake } from "lucide-react";
-import { Badge } from "../ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import {
   Table,
   TableBody,
@@ -43,12 +33,15 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { ActiveDays } from "./ActiveDays";
+import { FyreBadges } from "./FyreBadges";
+import { CategorySelector } from "./CategorySelector";
 
 export const FyreCard: React.FC<{
   fyre: Models.Fyre;
   goals?: Models.Goal[];
 }> = ({ fyre, goals }) => {
-  const { checkUser, categories } = useAuth();
+  const { fetchFyres, categories } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
@@ -108,7 +101,7 @@ export const FyreCard: React.FC<{
     setCurrentStreak(newStreak);
     const req: CheckFyreRequest = { id: fyre.id, increment: increment };
     await fetchFyre("/fyre/check", req);
-    checkUser();
+    fetchFyres();
   };
 
   const changePrivate = () => {
@@ -180,31 +173,16 @@ export const FyreCard: React.FC<{
           </CardAction>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex gap-4 items-center">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-wrap gap-4 items-center">
               <ActiveDays
                 active={activeDays}
                 isOpen={isOpen}
                 onChange={changeDays}
               />
-              <FyreBadges fyre={fyre} goals={goals} />
-              {goals && goals.length > 0 && (
-                <DaysRemaining
-                  fyre={fyre}
-                  goal={goals[0]}
-                  onOpen={() => setIsOpen(true)}
-                  onRemoveGoal={async () => {
-                    const res = await Delete(`/goal/${currentFyre.id}`);
-                    if (res.success) {
-                      toast.success("Goal removed");
-                    } else {
-                      toast.error(res.error.message);
-                    }
-                  }}
-                />
-              )}
+              <FyreBadges fyre={fyre} goals={goals} onOpen={onOpen} />
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-wrap gap-4 items-center">
               <h4>{currentStreak} 🔥</h4>
               <Checkbox
                 className="mr-2 size-8 rounded-md"
@@ -268,71 +246,6 @@ export const FyreCard: React.FC<{
   );
 };
 
-interface ActiveDaysProps {
-  active: string;
-  isOpen: boolean;
-  onChange: (index: number) => void;
-}
-
-export const ActiveDays: React.FC<ActiveDaysProps> = ({
-  active,
-  isOpen,
-  onChange,
-}) => {
-  const days = ["S", "M", "T", "W", "T", "F", "S"];
-
-  if (active === "1111111" && !isOpen) {
-    return (
-      <Button className="w-39 sm:w-46 md:w-60" disabled>
-        Everyday
-      </Button>
-    );
-  }
-
-  return (
-    <ButtonGroup>
-      {days.map((day, index) => (
-        <Button
-          key={index}
-          variant={active[index] === "0" ? "secondary" : "default"}
-          className="px-1.5 sm:px-2 md:px-3 border-1"
-          disabled={!isOpen}
-          onClick={() => onChange(index)}
-        >
-          {day}
-        </Button>
-      ))}
-    </ButtonGroup>
-  );
-};
-
-interface CategorySelectorProps {
-  allCategories: Models.Category[];
-  selectedId: number;
-  onChange: (id: number) => void;
-}
-
-const CategorySelector: React.FC<CategorySelectorProps> = ({
-  allCategories,
-  selectedId,
-  onChange,
-}) => {
-  return (
-    <Select value={`${selectedId}`} onValueChange={(e) => onChange(Number(e))}>
-      <SelectTrigger>
-        <SelectValue placeholder="Select a category" />
-      </SelectTrigger>
-      <SelectContent>
-        {allCategories.map((cat) => (
-          <SelectItem key={cat.id} value={`${cat.id}`}>
-            {cat.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-};
-
 const FyreEditField: React.FC<{ title: string; children?: ReactNode }> = ({
   title,
   children,
@@ -379,95 +292,5 @@ const BonfyreCard: React.FC<{ total: number; members: BonfyreMember[] }> = ({
         </Table>
       </ItemContent>
     </Item>
-  );
-};
-
-const FyreBadge: React.FC<{ children: ReactNode }> = ({ children }) => {
-  return <Badge className="rounded-full aspect-square">{children}</Badge>;
-};
-
-const FyreBadges: React.FC<{ fyre: Models.Fyre; goals?: Models.Goal[] }> = ({
-  fyre,
-  goals,
-}) => {
-  return (
-    <div className="flex gap-1 justify-start items-center">
-      {fyre.bonfyre_id && (
-        <FyreBadge key={fyre.bonfyre_id}>
-          <FlameKindling />
-        </FyreBadge>
-      )}
-      {goals &&
-        goals.map((goal) => (
-          <FyreBadge key={goal.goal_type_id}>
-            {goal.goal_type_id === 1 ? <Calendar /> : <Tally5 />}
-          </FyreBadge>
-        ))}
-    </div>
-  );
-};
-
-function getDaysRemaining(goal: Models.Goal, streak: number): number {
-  if (!goal || !goal.data) return 0;
-
-  // DATE GOAL
-  if (goal.goal_type_id === 1) {
-    const today = new Date();
-    const target = new Date(goal.data);
-
-    const diff = target.getTime() - today.getTime();
-    return Math.max(Math.ceil(diff / (1000 * 60 * 60 * 24)), 0);
-  }
-
-  // DAYS GOAL
-  if (goal.goal_type_id === 2) {
-    const goalDays = parseInt(goal.data, 10);
-    return Math.max(goalDays - streak, 0);
-  }
-
-  return 0;
-}
-
-interface DaysRemainingProps {
-  fyre: Models.Fyre;
-  goal: Models.Goal;
-  onOpen: () => void;
-  onRemoveGoal: () => void;
-}
-
-const DaysRemaining: React.FC<DaysRemainingProps> = ({
-  fyre,
-  goal,
-  onOpen,
-  onRemoveGoal,
-}) => {
-  const daysLeft = getDaysRemaining(goal, fyre.streak_count);
-  return (
-    <div>
-      {daysLeft !== 0 && (
-        <div>
-          <FyreBadge key={null}>
-            <Hourglass /> {daysLeft} Days Left
-          </FyreBadge>
-        </div>
-      )}
-
-      {daysLeft === 0 && (
-        <div className="mt-2 text-red-500 font-semibold">
-          <FyreBadge key={null}>
-            <Cake />
-          </FyreBadge>
-          <Button
-            variant="link"
-            onClick={() => {
-              onOpen();
-              onRemoveGoal();
-            }}
-          >
-            Create a new goal?
-          </Button>
-        </div>
-      )}
-    </div>
   );
 };
