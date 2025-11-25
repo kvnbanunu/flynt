@@ -15,7 +15,7 @@ import {
 } from "../ui/collapsible";
 import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
-import { Get, Put } from "@/lib/api";
+import { Delete, Get, Put } from "@/lib/api";
 import {
   BonfyreMember,
   CheckFyreRequest,
@@ -41,7 +41,7 @@ export const FyreCard: React.FC<{
   fyre: Models.Fyre;
   goals?: Models.Goal[];
 }> = ({ fyre, goals }) => {
-  const { fetchFyres, categories } = useAuth();
+  const { checkUser, categories } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(fyre.is_checked);
   const [currentFyre, setCurrentFyre] = useState<Models.Fyre>(fyre);
@@ -101,7 +101,7 @@ export const FyreCard: React.FC<{
     setCurrentStreak(newStreak);
     const req: CheckFyreRequest = { id: fyre.id, increment: increment };
     await fetchFyre("/fyre/check", req);
-    fetchFyres();
+    checkUser();
   };
 
   const changePrivate = () => {
@@ -148,6 +148,16 @@ export const FyreCard: React.FC<{
     setChanges(newChanges);
     await fetchFyre(`/fyre/${fyre.id}`, req);
   };
+
+  const removeFyre = async () => {
+    const res = await Delete(`/fyre/${fyre.id}`);
+    if (res.success) {
+      checkUser();
+      toast("Fyre removed");
+    } else {
+      toast(res.error.message);
+    }
+  }
 
   const onOpen = async () => {
     if (isOpen) {
@@ -200,9 +210,9 @@ export const FyreCard: React.FC<{
             <div className="flex flex-col mt-4">
               <GoalSection fyreId={fyre.id} goal={goals && goals[0]} />
 
-              {fyre.bonfyre_total && (
+              {fyre.bonfyre_id && (
                 <BonfyreCard
-                  total={fyre.bonfyre_total}
+                  total={fyre.bonfyre_total ?? 0}
                   members={bonfyreMembers}
                 />
               )}
@@ -230,7 +240,7 @@ export const FyreCard: React.FC<{
                 />
               </FyreEditField>
               <div className="grid grid-cols-2 justify-stretch gap-4">
-                <Button variant="destructive" size="lg">
+                <Button variant="destructive" size="lg" onClick={removeFyre}>
                   Remove Fyre
                 </Button>
                 <Button size="lg" onClick={saveChanges}>

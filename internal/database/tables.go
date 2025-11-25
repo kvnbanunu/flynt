@@ -36,6 +36,7 @@ type Fyre struct {
 	CreatedAt         time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time  `db:"updated_at" json:"updated_at"`
 	CategoryID        int        `db:"category_id" json:"category_id"`
+	LatestPostID      *int       `db:"latest_post_id" json:"latest_post_id"` // db only
 }
 
 // Represents category table in db
@@ -53,8 +54,8 @@ type GoalType struct {
 // Represents goal table in db
 type Goal struct {
 	FyreID      int     `db:"fyre_id" json:"fyre_id"`
-	Description string `db:"description" json:"description"`
-	GoalTypeID  int    `db:"goal_type_id" json:"goal_type_id"`
+	Description string  `db:"description" json:"description"`
+	GoalTypeID  int     `db:"goal_type_id" json:"goal_type_id"`
 	Data        *string `db:"data" json:"data"`
 }
 

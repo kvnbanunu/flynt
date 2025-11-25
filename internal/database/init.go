@@ -76,7 +76,8 @@ func (db *DB) createTables() error {
 		last_checked_at_prev DATETIME,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		category_id INTEGER DEFAULT 1 REFERENCES category(id) 
+		category_id INTEGER DEFAULT 1 REFERENCES category(id),
+		latest_post_id INTEGER REFERENCES social_post_id
 	);
 
 	

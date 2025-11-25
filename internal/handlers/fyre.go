@@ -185,7 +185,7 @@ func (h *FyreHandler) updateFyre(w http.ResponseWriter, r *http.Request, id int)
 	writeSuccess(w, http.StatusOK, "Fyre updated successfully", fyre)
 }
 
-// hanldes DELETE /api/fyre/{id}
+// hanldes DELETE /fyre/{id}
 func (h *FyreHandler) deleteFyre(w http.ResponseWriter, _ *http.Request, id int) {
 	err := h.db.DeleteFyre(id)
 	if err != nil {
@@ -193,8 +193,7 @@ func (h *FyreHandler) deleteFyre(w http.ResponseWriter, _ *http.Request, id int)
 			writeError(w, http.StatusNotFound, "Fyre not found")
 			return
 		}
-		log.Printf("Error deleting fyre: %v", err)
-		writeError(w, http.StatusInternalServerError, "Failed to delete Fyre")
+		writeError(w, http.StatusInternalServerError, "Failed to delete Fyre", err)
 		return
 	}
 	writeSuccess(w, http.StatusOK, "Fyre successfully deleted", nil)

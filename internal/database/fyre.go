@@ -281,19 +281,20 @@ func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 			// Create the post for daily check
 			query = `INSERT into social_post (user_id, fyre_id, type, content)
 			VALUES (?, ?, ?, ' just hit a streak of ')
+			RETURNING *
 			`
-			result, err := db.Exec(query, id, req.FyreID, DailyCheck)
+			var socialPost SocialPost
+			err := db.Get(&socialPost, query, id, req.FyreID, DailyCheck)
 			if err != nil {
-				return nil, fmt.Errorf("Failed to create post: %w", err)
+				return nil, err
 			}
 
-			rowsAffected, err := result.RowsAffected()
-			if err != nil {
-				return nil, fmt.Errorf("Failed to get rows affected: %w", err)
-			}
+			err = db.Get(&fyre,
+				"UPDATE fyre SET latest_post_id = ? WHERE id = ? RETURNING *",
+				socialPost.ID, req.FyreID)
 
-			if rowsAffected == 0 {
-				return nil, fmt.Errorf("No post created")
+			if err != nil {
+				return nil, err
 			}
 		}
 	} else {
@@ -302,10 +303,23 @@ func (db *DB) CheckFyre(req CheckFyreRequest, id int) (*Fyre, error) {
 		`
 		isChecked = false
 		query = fmt.Sprintf(query, updateLastChecked)
-		err = db.Get(&fyre, query, isChecked, req.FyreID)
-	}
-	if err != nil {
-		return nil, err
+		err := db.Get(&fyre, query, isChecked, req.FyreID)
+		if err != nil {
+			return nil, err
+		}
+
+		if fyre.LatestPostID != nil {
+			// Delete post
+			query := `
+			UPDATE fyre SET latest_post_id = null WHERE id = ?;
+			DELETE FROM social_post WHERE id = ?;
+			`
+
+			_, err = db.Exec(query, req.FyreID, *fyre.LatestPostID)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	_, err = db.UpdateFyreTotal(fyre.UserID, 1, req.Increment)
@@ -375,25 +389,26 @@ func (db *DB) UpdateFyreTotal(id, amount int, increment bool) (*FyreTotalRespons
 	return &total, err
 }
 
+// id = fyre_id
 func (db *DB) DeleteFyre(id int) error {
-	_, err := db.GetFyreByID(id)
+	existing, err := db.GetFyreByID(id)
 	if err != nil {
 		return err
 	}
 
-	query := `DELETE FROM fyre WHERE id = ?`
-	result, err := db.Exec(query, id)
+	bonfyreID := 0
+	if existing.BonfyreID != nil {
+		bonfyreID = *existing.BonfyreID
+	}
+
+	_, err = db.Exec(`
+		DELETE FROM goal WHERE fyre_id = ?;
+		UPDATE user SET fyre_total = fyre_total - ? WHERE id = ?;
+		UPDATE bonfyre SET total = total - ? WHERE id = ?;
+		DELETE FROM fyre WHERE id = ?;
+		`, id, existing.StreakCount, existing.UserID, existing.StreakCount, bonfyreID, id)
 	if err != nil {
 		return fmt.Errorf("Failed to delete fyre: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("Failed to get rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return fmt.Errorf("No fyre deleted")
 	}
 
 	return nil
