@@ -96,8 +96,7 @@ func (h *UserHandler) getAllUsers(w http.ResponseWriter, _ *http.Request, id int
 		users, err = h.db.GetAllUsers()
 	}
 	if err != nil {
-		log.Printf("Error getting users: %v", err)
-		writeError(w, http.StatusInternalServerError, "Failed to get users")
+		writeError(w, http.StatusInternalServerError, "Failed to get users", err)
 		return
 	}
 
@@ -112,8 +111,7 @@ func (h *UserHandler) getUserByID(w http.ResponseWriter, _ *http.Request, id int
 			writeError(w, http.StatusNotFound, "User not found")
 			return
 		}
-		log.Printf("Error getting user: %v", err)
-		writeError(w, http.StatusInternalServerError, "Failed to get user")
+		writeError(w, http.StatusInternalServerError, "Failed to get user", err)
 		return
 	}
 
@@ -136,10 +134,15 @@ func (h *UserHandler) updateUser(w http.ResponseWriter, r *http.Request, id int)
 			writeError(w, http.StatusNotFound, "User not found")
 			return
 		}
-		log.Printf("Error updating user: %v", err)
-		writeError(w, http.StatusInternalServerError, "Failed to update user")
+		if strings.Contains(err.Error(), "Incorrect password") || strings.Contains(err.Error(), "Both password") {
+			writeError(w, http.StatusBadRequest, err.Error(), err)
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "Failed to update user", err)
 		return
 	}
+
+	user.Password = ""
 
 	writeSuccess(w, http.StatusOK, "User updated successfully", user)
 }

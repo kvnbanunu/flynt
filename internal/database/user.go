@@ -150,7 +150,7 @@ func (db *DB) UpdateUser(id int, req UpdateUserRequest) (*User, error) {
 
 		match, err := utils.CompareHash(existingUser.Password, *req.CurrentPassword)
 		if err != nil {
-			return nil, fmt.Errorf("Error checking password")
+			return nil, fmt.Errorf("Incorrect password")
 		}
 
 		if !match {

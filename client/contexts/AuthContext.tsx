@@ -10,10 +10,10 @@ import {
   useState,
 } from "react";
 import { FullFyre, LoginRequest, RegisterRequest } from "@/types/req";
+import { toast } from "sonner";
 
 export interface AuthContextType {
   user?: Models.User | null;
-  error?: string | null;
   fyres: FullFyre[];
   categories: Models.Category[];
   loading: boolean;
@@ -57,7 +57,6 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Models.User | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [fyres, setFyres] = useState<FullFyre[]>([]);
   const [categories, setCategories] = useState<Models.Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -93,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await fetchCategories();
       router.push("/"); // send to home
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setLoading(false);
     return res.success;
@@ -111,7 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await fetchCategories();
       router.push("/"); // send to home
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setLoading(false);
     return res.success;
@@ -123,10 +122,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (res.success) {
       setUser(null);
       setFyres([]);
-      setError(null);
       router.push("/login");
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setLoading(false);
     return res.success;
@@ -138,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (res.success) {
       setFyres(res.data);
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
   };
   const fetchCategories = async () => {
@@ -146,13 +144,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (res.success) {
       setCategories(res.data);
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
   };
 
   const value: AuthContextType = {
     user,
-    error,
     fyres,
     categories,
     loading,

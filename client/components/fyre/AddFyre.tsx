@@ -21,6 +21,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { ButtonGroup } from "../ui/button-group";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const addSchema = z.object({
   title: z.string().trim().min(5).max(50),
@@ -33,7 +34,6 @@ export const AddFyre: React.FC = () => {
   const { checkUser, fetchFyres } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof addSchema>>({
     resolver: zodResolver(addSchema),
@@ -52,12 +52,11 @@ export const AddFyre: React.FC = () => {
       data,
     );
     if (res.success) {
-      setError(null);
       checkUser();
       fetchFyres();
       setOpen(false);
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setLoading(false);
   };
@@ -77,7 +76,6 @@ export const AddFyre: React.FC = () => {
               This is the start to your new streak!
             </DialogDescription>
           </DialogHeader>
-          {error && <div>error</div>}
           <FieldGroup>
             <Controller
               name="title"

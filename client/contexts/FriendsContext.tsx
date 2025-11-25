@@ -10,12 +10,12 @@ import {
   useState,
 } from "react";
 import { useAuth } from "./AuthContext";
+import { toast } from "sonner";
 
 export interface FriendsContextType {
   friends: FriendsListItem[];
   users: FriendsUserListItem[];
   loading: boolean;
-  error?: string | null;
   fetchFriends: () => void;
   fetchUsers: () => void;
 }
@@ -42,7 +42,6 @@ export const FriendsProvider: React.FC<FriendsProviderProps> = ({
   const [friends, setFriends] = useState<FriendsListItem[]>([]);
   const [users, setUsers] = useState<FriendsUserListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -72,9 +71,8 @@ export const FriendsProvider: React.FC<FriendsProviderProps> = ({
       if (res.data != null) {
         callback(res.data);
       }
-      setError(null);
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
   }
 
@@ -82,7 +80,6 @@ export const FriendsProvider: React.FC<FriendsProviderProps> = ({
     friends,
     users,
     loading,
-    error,
     fetchFriends,
     fetchUsers,
   };

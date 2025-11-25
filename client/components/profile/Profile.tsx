@@ -25,22 +25,35 @@ import { ScrollArea } from "../ui/scroll-area";
 import { TimezoneSelector } from "../timezone/TimezoneSelector";
 
 const editSchema = z.object({
-  name: z.string().min(5).max(50).optional(),
-  current_password: z.string().trim().min(8).max(50).optional(),
-  new_password: z.string().trim().min(8).max(50).optional(),
-  email: z.email().toLowerCase().optional(),
-  bio: z.string().min(0).max(500).optional(),
-  timezone: z.string().trim().min(5).max(50).optional(),
+  name: z.string().min(5).max(50).optional().or(z.literal("")),
+  current_password: z
+    .string()
+    .trim()
+    .min(8)
+    .max(50)
+    .optional()
+    .or(z.literal("")),
+  new_password: z.string().trim().min(8).max(50).optional().or(z.literal("")),
+  email: z.email().toLowerCase().optional().or(z.literal("")),
+  bio: z.string().min(0).max(500).optional().or(z.literal("")),
+  timezone: z.string().trim().min(5).max(50).optional().or(z.literal("")),
 });
 
 export const Profile: React.FC = () => {
   const { user, setUser, logout, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof editSchema>>({
     resolver: zodResolver(editSchema),
     mode: "onSubmit",
+    defaultValues: {
+      name: user?.name ?? "",
+      current_password: "",
+      new_password: "",
+      email: user?.email ?? "",
+      bio: user?.bio ?? "",
+      timezone: user?.timezone ?? "",
+    },
   });
 
   if (user === null || !isAuthenticated) {
@@ -48,16 +61,24 @@ export const Profile: React.FC = () => {
   }
 
   const onSubmit = async (data: z.infer<typeof editSchema>) => {
+    if (!user) return;
     setLoading(true);
     const req: UpdateUserRequest = data;
 
+    req.name = req.name === user.name ? undefined : req.name;
+    req.current_password =
+      req.current_password === "" ? undefined : req.current_password;
+    req.new_password = req.new_password === "" ? undefined : req.new_password;
+    req.email = req.email === user.email ? undefined : req.email;
+    req.bio = req.bio === user.bio ? undefined : req.bio;
+    req.timezone = req.timezone === user.timezone ? undefined : req.timezone;
+
     const res = await Put<Models.User, UpdateUserRequest>("/user", req);
     if (res.success) {
-      setError(null);
       setUser(res.data);
       toast("Successfully updated profile!");
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setLoading(false);
   };
@@ -216,7 +237,6 @@ export const Profile: React.FC = () => {
             </form>
           </CardContent>
           <CardFooter>
-            {error && <div>error</div>}
             <Field orientation="horizontal">
               <Button
                 type="reset"

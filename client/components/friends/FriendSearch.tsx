@@ -20,7 +20,6 @@ export const FriendSearchCard: React.FC<FriendSearchCardProps> = ({
   callback,
 }) => {
   const img_url = user.img_url || "/default_profile.jpg";
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const addFriend = async () => {
@@ -32,10 +31,9 @@ export const FriendSearchCard: React.FC<FriendSearchCardProps> = ({
     const res = await Post<null, FriendRequest>("/friend", req);
     if (res.success) {
       toast("Friend request sent!");
-      setError(null);
       if (callback) callback();
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setLoading(false);
   };
@@ -51,7 +49,6 @@ export const FriendSearchCard: React.FC<FriendSearchCardProps> = ({
       <ItemContent className="flex-row justify-between">
         <ItemTitle>{user.username}</ItemTitle>
         <Button onClick={addFriend}>
-          {error && error}
           {loading && <Spinner />}
           Add Friend
         </Button>

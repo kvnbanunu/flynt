@@ -49,7 +49,6 @@ export const FriendCard: React.FC<FriendCardProps> = ({ friend, callback }) => {
   const img_url = friend.img_url || "/default_profile.jpg";
   const addFlag = friend.status === "pending";
   const [fyres, setFyres] = useState<FriendFyre[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   const friendRequest = async (type: string) => {
     const req: FriendRequest = {
@@ -68,10 +67,9 @@ export const FriendCard: React.FC<FriendCardProps> = ({ friend, callback }) => {
       } else {
         toast(`You are now friends with ${friend.username}!`);
       }
-      setError(null);
       if (callback) callback();
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
   };
 
@@ -82,15 +80,10 @@ export const FriendCard: React.FC<FriendCardProps> = ({ friend, callback }) => {
     const res = await Get<FriendFyre[]>(`/fyre/user/${friend.id}`);
     if (res.success) {
       setFyres(res.data);
-      setError(null);
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
   };
-
-  if (error) {
-    return <div>{error}</div>;
-  }
 
   return (
     <Item className="bg-fcontainer2 rounded-xl mb-4">

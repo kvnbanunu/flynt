@@ -48,7 +48,6 @@ export const FyreCard: React.FC<{
   const [currentStreak, setCurrentStreak] = useState<number>(fyre.streak_count);
   const [activeDays, setActiveDays] = useState<string>(fyre.active_days);
   const [isPrivate, setIsPrivate] = useState<boolean>(fyre.is_private);
-  const [error, setError] = useState<string | null>(null);
   const [changes, setChanges] = useState<Set<string>>(new Set<string>());
   const [categoryId, setCategoryId] = useState<number>(fyre.category_id);
   const [bonfyreMembers, setBonfyreMembers] = useState<BonfyreMember[]>([]);
@@ -59,7 +58,6 @@ export const FyreCard: React.FC<{
     const temp = changes;
     temp.clear();
     setChanges(temp);
-    setError(null);
   };
 
   const fetchBonfyreMembers = async () => {
@@ -86,10 +84,9 @@ export const FyreCard: React.FC<{
     if (res.success) {
       setCurrentFyre(res.data);
       setCurrentStreak(res.data.streak_count); // set new count in case of inconsistency
-      setError(null);
       toast("Fyre updated");
     } else {
-      setError(res.error.message);
+      toast(res.error.message);
     }
     setIsOpen(false);
   };
@@ -247,7 +244,6 @@ export const FyreCard: React.FC<{
                   Save Changes
                 </Button>
               </div>
-              {error && <div>error</div>}
             </div>
           </CollapsibleContent>
         </CardContent>
