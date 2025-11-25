@@ -57,10 +57,15 @@ func (h *AccountHandler) register(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusNotAcceptable, "Failed to register new user")
 			return
 		}
-		log.Printf("Error register: %v", err)
-		writeError(w, http.StatusInternalServerError, "Failed to register new user")
+		writeError(w, http.StatusInternalServerError, "Failed to register new user", err)
 		return
 	}
+
+	err = setCookie(w, user.ID, user.Timezone)
+	if err != nil {
+		return
+	}
+
 	writeSuccess(w, http.StatusOK, "New user registered successfully", user)
 }
 
@@ -80,8 +85,7 @@ func (h *AccountHandler) login(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusNotAcceptable, "Email or Password incorrect")
 			return
 		}
-		log.Printf("Error validating login: %v", err)
-		writeError(w, http.StatusInternalServerError, "Failed to login")
+		writeError(w, http.StatusInternalServerError, "Failed to login", err)
 		return
 	}
 
