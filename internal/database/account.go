@@ -21,7 +21,7 @@ func (db *DB) ValidateLogin(req AccountLoginRequest) (*User, error) {
 	if req.LoginType == "username" {
 		qparam = req.Username
 	}
-	
+
 	var existingUser User
 	err := db.Get(&existingUser, query, qparam)
 	if err != nil { // user does not exist, but do not expose info

@@ -10,18 +10,18 @@ func TestDB_ValidateLogin(t *testing.T) {
 	// create user first
 	newUser := CreateUserRequest{
 		Username: "testusername",
-		Name: "testuser",
+		Name:     "testuser",
 		Password: "Password123!",
-		Email: "test@example.com",
+		Email:    "test@example.com",
 		Timezone: "America/Vancouver",
 	}
 
 	user, _ := db.CreateUser(newUser)
-	
+
 	req := AccountLoginRequest{
 		LoginType: "username",
-		Username: newUser.Username,
-		Password: newUser.Password,
+		Username:  newUser.Username,
+		Password:  newUser.Password,
 	}
 
 	result, err := db.ValidateLogin(req)
@@ -29,5 +29,5 @@ func TestDB_ValidateLogin(t *testing.T) {
 		t.Fatalf("Failed to login: %v", err)
 	}
 
-	validateTestField(t, "username", user.Username, result.Username)
+	assertField(t, "username", user.Username, result.Username)
 }

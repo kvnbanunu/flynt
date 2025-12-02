@@ -28,7 +28,7 @@ func teardownTestDB(db *DB) {
 	}
 }
 
-func validateTestField(t *testing.T, name string, expected, result any) {
+func assertField(t *testing.T, name string, expected, result any) {
 	if expected != result {
 		t.Errorf("Expected %s %v, got %v", name, expected, result)
 	}
