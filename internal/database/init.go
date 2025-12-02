@@ -14,24 +14,24 @@ type DB struct {
 }
 
 // initialize db and return connection
-func InitDB(path string) (*DB, error) {
-	db, err := sqlx.Open("sqlite3", path)
+func (db *DB) InitDB(path string) (error) {
+	database, err := sqlx.Open("sqlite3", path)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open database: %w", err)
+		return fmt.Errorf("Failed to open database: %w", err)
 	}
 
-	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("Failed to ping database: %w", err)
+	if err := database.Ping(); err != nil {
+		return fmt.Errorf("Failed to ping database: %w", err)
 	}
 
-	dbConn := &DB{db}
+	db.DB = database
 
-	if err := dbConn.createTables(); err != nil {
-		return nil, fmt.Errorf("Failed to create tables: %w", err)
+	if err := db.createTables(); err != nil {
+		return fmt.Errorf("Failed to create tables: %w", err)
 	}
 
 	log.Println("Database initialized successfully")
-	return dbConn, nil
+	return nil
 }
 
 // Creates all tables on init

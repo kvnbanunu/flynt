@@ -20,8 +20,9 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 	cfg := utils.GetConfig()
+	db := &database.DB{}
 
-	db, err := database.InitDB(cfg.DBPath)
+	err = db.InitDB(cfg.DBPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}

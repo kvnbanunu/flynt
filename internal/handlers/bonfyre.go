@@ -8,6 +8,18 @@ import (
 )
 
 func (h *FyreHandler) getBonfyre(w http.ResponseWriter, r *http.Request) {
+	var req database.BonfyreRequest
+
+	if err := parseBody(w, r, &req); err != nil {
+		return
+	}
+
+	bonfyre, err := h.db.GetFyreByID(req.BonfyreID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to get bonfyre", err)
+		return
+	}
+	writeSuccess(w, http.StatusOK, "Bonfyre retrieved successfully", bonfyre)
 }
 
 // POST /fyre/bonfyre

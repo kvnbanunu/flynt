@@ -11,10 +11,10 @@ import (
 
 // handles requests for user ops
 type UserHandler struct {
-	db *database.DB
+	db database.DBInterface
 }
 
-func NewUserHandler(db *database.DB) *UserHandler {
+func NewUserHandler(db database.DBInterface) *UserHandler {
 	return &UserHandler{db: db}
 }
 
@@ -37,12 +37,12 @@ func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.MethodDelete:
 			h.deleteUser(w, r, id)
 		default:
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 		}
 	case strings.HasPrefix(path, "/"):
 		path = strings.TrimPrefix(path, "/")
 		if r.Method != http.MethodGet {
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 			return
 		}
 		switch path {
@@ -51,10 +51,10 @@ func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case "redacted", "redacted/":
 			h.getAllUsers(w, r, id, true)
 		default:
-			writeError(w, http.StatusNotFound, "Endpoint not found")
+			notFound(w)
 		}
 	default:
-		writeError(w, http.StatusNotFound, "Endpoint not found")
+		notFound(w)
 	}
 }
 

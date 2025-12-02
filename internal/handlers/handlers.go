@@ -151,3 +151,13 @@ func parseBody(w http.ResponseWriter, r *http.Request, data any) error {
 	}
 	return nil
 }
+
+// endpoint not found
+func notFound(w http.ResponseWriter) {
+	writeError(w, http.StatusNotFound, "Endpoint not found")
+}
+
+// method not allowed
+func notAllowed(w http.ResponseWriter) {
+	writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+}

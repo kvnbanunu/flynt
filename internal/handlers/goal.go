@@ -11,10 +11,10 @@ import (
 )
 
 type GoalHandler struct {
-	db *database.DB
+	db database.DBInterface
 }
 
-func NewGoalHandler(db *database.DB) *GoalHandler {
+func NewGoalHandler(db database.DBInterface) *GoalHandler {
 	return &GoalHandler{db: db}
 }
 
@@ -24,11 +24,11 @@ func (h *GoalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/goal")
 	switch {
 	case path == "" || path == "/":
-		if r.Method == http.MethodPost {
-			h.createGoal(w, r)
+		if r.Method != http.MethodPost {
+			notAllowed(w)
 			return
 		}
-		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		h.createGoal(w, r)
 	case strings.HasPrefix(path, "/"):
 		idStr := strings.TrimPrefix(path, "/")
 		fyreID, err := strconv.Atoi(idStr)
@@ -44,10 +44,10 @@ func (h *GoalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.MethodDelete:
 			h.deleteGoal(w, r, fyreID)
 		default:
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 		}
 	default:
-		writeError(w, http.StatusNotFound, "Endpoint not found")
+		notFound(w)
 	}
 }
 

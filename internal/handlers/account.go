@@ -9,10 +9,10 @@ import (
 )
 
 type AccountHandler struct {
-	db *database.DB
+	db database.DBInterface
 }
 
-func NewAccountHandler(db *database.DB) *AccountHandler {
+func NewAccountHandler(db database.DBInterface) *AccountHandler {
 	return &AccountHandler{db: db}
 }
 
@@ -22,7 +22,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/account")
 
 	if r.Method != http.MethodPost {
-		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		notAllowed(w)
 	}
 
 	switch path { // add more later
@@ -33,7 +33,7 @@ func (h *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "/logout", "/logout/":
 		h.logout(w, r)
 	default:
-		writeError(w, http.StatusNotFound, "Endpoint not found")
+		notFound(w)
 	}
 }
 

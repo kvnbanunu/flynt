@@ -11,7 +11,7 @@ import (
 )
 
 type HealthHandler struct {
-	db *database.DB
+	db database.DBInterface
 }
 
 type HealthResponse struct {
@@ -20,7 +20,7 @@ type HealthResponse struct {
 	Checks    map[string]string `json:"checks"`
 }
 
-func NewHealthHandler(db *database.DB) *HealthHandler {
+func NewHealthHandler(db database.DBInterface) *HealthHandler {
 	return &HealthHandler{db: db}
 }
 
@@ -39,7 +39,7 @@ func (h *HealthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	status := "healthy"
 
 	// check db status
-	if err := h.db.Ping(); err != nil {
+	if err := h.db.CheckHealth(); err != nil {
 		checks["database"] = "unhealthy: " + err.Error()
 		status = "unhealthy"
 	} else {

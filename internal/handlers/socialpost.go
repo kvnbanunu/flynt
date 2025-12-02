@@ -10,10 +10,10 @@ import (
 )
 
 type SocialPostHandler struct {
-	db *database.DB
+	db database.DBInterface
 }
 
-func NewSocialPostHandler(db *database.DB) *SocialPostHandler {
+func NewSocialPostHandler(db database.DBInterface) *SocialPostHandler {
 	return &SocialPostHandler{db: db}
 }
 
@@ -24,7 +24,7 @@ func (h *SocialPostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// may change
 	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		notAllowed(w)
 		return
 	}
 
@@ -42,7 +42,7 @@ func (h *SocialPostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		h.LikePost(w, r, postID)
 	default:
-		writeError(w, http.StatusNotFound, "Endpoint not found")
+		notFound(w)
 	}
 }
 

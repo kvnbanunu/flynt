@@ -14,10 +14,10 @@ type FriendRequest struct {
 }
 
 type FriendHandler struct {
-	db *database.DB
+	db database.DBInterface
 }
 
-func NewFriendHandler(db *database.DB) *FriendHandler {
+func NewFriendHandler(db database.DBInterface) *FriendHandler {
 	return &FriendHandler{db: db}
 }
 
@@ -37,24 +37,24 @@ func (h *FriendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.MethodDelete:
 			h.deleteFriend(w, r, id)
 		default:
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 		}
 	case "/all", "/all/":
 		if r.Method != http.MethodGet {
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 			return
 		}
 		
 		h.getFriendsList(w, r, id)
 	case "/non", "/non/":
 		if r.Method != http.MethodGet {
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 			return
 		}
 
 		h.getNonFriendsList(w, r, id)
 	default:
-		writeError(w, http.StatusNotFound, "Endpoint not found")
+		notFound(w)
 	}
 }
 

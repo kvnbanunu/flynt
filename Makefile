@@ -14,6 +14,9 @@ environment:
 	cp .env.example .env
 	cp client/.env.example client/.env
 
+test:
+	go test -v ./...
+
 docker:
 	git pull origin main
 	docker compose down

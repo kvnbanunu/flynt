@@ -12,10 +12,10 @@ import (
 )
 
 type FyreHandler struct {
-	db *database.DB
+	db database.DBInterface
 }
 
-func NewFyreHandler(db *database.DB) *FyreHandler {
+func NewFyreHandler(db database.DBInterface) *FyreHandler {
 	return &FyreHandler{db: db}
 }
 
@@ -28,7 +28,7 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			h.getAllCategories(w, r)
 		} else {
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 		}
 		return
 	}
@@ -44,13 +44,13 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.MethodPost:
 			h.createFyre(w, r, userID)
 		default:
-			writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+			notAllowed(w)
 		}
 	case strings.HasPrefix(path, "/"):
 		switch {
 		case path == "/check" || path == "/check/":
 			if r.Method != http.MethodPut {
-				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				notAllowed(w)
 				return
 			}
 			h.checkFyre(w, r, userID)
@@ -71,11 +71,11 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			case http.MethodPost:
 				h.joinBonfyre(w, r, userID)
 			default:
-				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				notAllowed(w)
 			}
 		case path == "/full" || path == "full/":
 			if r.Method != http.MethodGet {
-				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				notAllowed(w)
 				return
 			}
 			h.getAllUserFullFyres(w, r, userID)
@@ -87,7 +87,7 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if r.Method != http.MethodGet {
-				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				notAllowed(w)
 				return
 			}
 			h.getAllFriendsFyres(w, r, id)
@@ -106,11 +106,11 @@ func (h *FyreHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			case http.MethodDelete:
 				h.deleteFyre(w, r, id)
 			default:
-				writeError(w, http.StatusMethodNotAllowed, "Method not allowed")
+				notAllowed(w)
 			}
 		}
 	default:
-		writeError(w, http.StatusNotFound, "Endpoint not found")
+		notFound(w)
 	}
 }
 
