@@ -40,16 +40,9 @@ func TestDB_AddFriend(t *testing.T) {
 		ID2: r2.ID,
 	}
 
-	acceptFriendRequest := UpdateFriendRequest{
-		ID1: r2.ID,
-		ID2: r1.ID,
-	}
-
 	db.AddFriend(newFriendRequest)
+	
+	res, err := db.GetFriendsList(r1.ID)
+	assertField(t, "username", r2.Username, res[0].Username)
 
-	// assertField(t, "username", newUser.Username, result.Username)
-	// assertField(t, "name", newUser.Name, result.Name)
-	// assertField(t, "password", "", result.Password) // security reasons
-	// assertField(t, "title", newUser.Email, result.Email)
-	// assertField(t, "title", newUser.Timezone, result.Timezone)
 }

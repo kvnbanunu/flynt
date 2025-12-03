@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -53,7 +52,6 @@ func TestDB_GetUserByID(t *testing.T) {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
 
-	fmt.Println(userResult)
 	assertField(t, "username", userResult.Username, result.Username)
 	assertField(t, "name", userResult.Name, result.Name)
 	assertField(t, "title", userResult.Email, result.Email)
@@ -101,7 +99,6 @@ func TestDB_UpdateUser(t *testing.T) {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
 
-	fmt.Println(userUpdated)
 	assertField(t, "name", userUpdated.Name, name)
 	assertField(t, "email", userUpdated.Email, email)
 	assertField(t, "timezone", userUpdated.Timezone, timezone)
